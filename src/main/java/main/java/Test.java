@@ -1,11 +1,12 @@
 package main.java;
-
 import static org.junit.jupiter.api.Assertions.*;
-
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.simple.JSONObject;
 
-import main.java.*;
+import lambdaFunctions.ClueLessHandler;
+
 
 class Test {
 
@@ -49,8 +50,8 @@ class Test {
 		PlayerStatus statusB = new PlayerStatus();
 		PlayerStatus statusC = new PlayerStatus();
 		statusA.setPlayerName("Miss Scarlett");
-		statusB.setPlayerName("Miss Scarlett");
-		statusC.setPlayerName("Miss Scarlett");
+		statusB.setPlayerName("Ms. White");
+		statusC.setPlayerName("Mr. Green");
 		
 		List<PlayerStatus> playerStatusList = new ArrayList<PlayerStatus>();
 		
@@ -65,6 +66,23 @@ class Test {
 		List<PlayerStatus> actualList = test.getActivePlayerList();
 		
 		assertEquals(actualList.get(0).getPlayerName(), playerStatusList.get(0).getPlayerName());
+	}
+	
+	@org.junit.jupiter.api.Test
+	public void testClientToDB() throws IOException {
+		JSONObject createGameJS = new JSONObject();
+		createGameJS.put("messageType", "CreateGame");
+		createGameJS.put("gameID", "1");
+		createGameJS.put("selectedPlayer", "Miss Scarlett");
+		createGameJS.put("numberOfPlayer", "3");
+		
+		InputStream in = new ByteArrayInputStream(createGameJS.toString().getBytes());
+		
+		ClueLessHandler test = new ClueLessHandler();
+		test.handleRequest(in, null,  null);
+		
+		//check db
+		
 	}
 }
 	
