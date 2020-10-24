@@ -1,4 +1,6 @@
-package main.java;
+package test;
+
+import main.java.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.*;
 import java.util.ArrayList;
