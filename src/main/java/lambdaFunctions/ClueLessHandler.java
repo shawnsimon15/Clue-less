@@ -23,115 +23,148 @@ public class ClueLessHandler implements RequestStreamHandler {
                               OutputStream outputStream,
                               Context context) throws IOException {
         JSONParser parser = new JSONParser();
+        System.out.println(inputStream);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
+        System.out.println(reader);
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDB dynamoDb = new DynamoDB(client);
 
         try {
             JSONObject event = (JSONObject) parser.parse(reader);
+            String gameUUID = event.get("gameID").toString();
+            Item game = null;
+            JSONObject response = new JSONObject();
 
-            System.out.println(event.get("messageType").toString());
+            switch (event.get("messageType").toString()){
+                case "CreateGame":
+                    String selectedPlayer = event.get("selectedPlayer").toString();
+                    int numOfPlayers = Integer.parseInt(event.get("numberOfPlayers").toString());
 
-            if (event.get("messageType").toString().equals("CreateGame")) {
-                String uuid = event.get("gameID").toString();
-                String playerName = event.get("selectedPlayer").toString();
-                int numOfPlayers = Integer.parseInt(event.get("numberOfPlayers").toString());
+                    String gameStatus = "New Game"; // Logic needed to determine gameStatus
+                    String winningSecret = "Person, Weapon, Location"; // Logic needed to randomly pick secret
 
-                String gameStatus = "New Game"; // Logic needed to determine gameStatus
-                String winningSecret = "Person, Weapon, Location"; // Logic needed to randomly pick secret
+                    dynamoDb.getTable(DYNAMODB_GAMEDATA)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", gameUUID)
+                                    .withString("Game Status", gameStatus)
+                                    .withString("Winning Secret", winningSecret)
+                                    .withString("Current Players", selectedPlayer)
+                                    .withInt("Max Players", numOfPlayers)));
+                    break;
+                case "MakeSuggestion":
+                    String playerWhoSuggested = event.get("playerWhoSuggested").toString();
+                    JSONObject cardsSuggested = (JSONObject) event.get("cardsSuggested");
 
-                dynamoDb.getTable(DYNAMODB_GAMEDATA)
-                        .putItem(new PutItemSpec().withItem(new Item().withString("UUID", uuid)
-                                .withString("Game Status", gameStatus)
-                                .withString("Winning Secret", winningSecret)
-                                .withString("Current Players", playerName)
-                                .withInt("Max Players", numOfPlayers)));
+                    String suspect = cardsSuggested.get("suspect").toString();
+                    String weapon = cardsSuggested.get("weapon").toString();
+                    String location = cardsSuggested.get("location").toString();
 
-            } else if(event.get("messageType").toString().equals("MakeSuggestion")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerWhoSuggested").toString();
-                JSONObject cardsSuggested = (JSONObject) event.get("cardsSuggested");
+                    // need way of generating UUID for msgs
+                    String susMsgUUID = "1234";
+                    String susMsg = "SuggestionMade: " + suspect +
+                            ", " + weapon + ", " + location;
 
-                String suspect = cardsSuggested.get("suspect").toString();
-                String weapon = cardsSuggested.get("weapon").toString();
-                String location = cardsSuggested.get("location").toString();
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", susMsgUUID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", playerWhoSuggested)
+                                    .withString("Message", susMsg)));
+                    break;
+                case "PassSuggestion":
+                    String playerName = event.get("playerWhoSuggested").toString();
+                    String nextPlayer = event.get("nextPlayer").toString();
 
-                // need way of generating UUID for msgs
-                String msgUUID = "1234";
-                String msg = "SuggestionMade: " + suspect +
-                        ", " + weapon + ", " + location;
+                    // need way of generating UUID for msgs
+                    String passMsgUUID = "1235";
+                    String passMsg = "PassSuggestion: " + nextPlayer;
 
-                dynamoDb.getTable(DYNAMODB_MESSAGES)
-                        .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgUUID)
-                                .withString("GameID", gameUUID)
-                                .withString("Player Name", playerName)
-                                .withString("Message", msg)));
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", passMsgUUID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", playerName)
+                                    .withString("Message", passMsg)));
+                    break;
+                case "EndTurn":
+                    String playerFinishedTurn = event.get("playerFinishedTurn").toString();
+                    String nPlayer = event.get("nextPlayer").toString();
 
-            } else if(event.get("messageType").toString().equals("PassSuggestion")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerWhoSuggested").toString();
-                String nextPlayer = event.get("nextPlayer").toString();
+                    // need way of generating UUID for msgs
+                    String msgUUID = "1236";
+                    String msg = "EndTurn: " + nPlayer;
 
-                // need way of generating UUID for msgs
-                String msgUUID = "1235";
-                String msg = "PassSuggestion: " + nextPlayer;
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgUUID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", playerFinishedTurn)
+                                    .withString("Message", msg)));
+                    break;
+                case "MovePlayer":
+                    String movePlayerName = event.get("playerName").toString();
+                    String newLocation = event.get("newLocation").toString();
 
-                dynamoDb.getTable(DYNAMODB_MESSAGES)
-                        .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgUUID)
-                                .withString("GameID", gameUUID)
-                                .withString("Player Name", playerName)
-                                .withString("Message", msg)));
+                    // need way of generating UUID for msgs
+                    String moveMsgUUID = "1238";
+                    String moveMsg = "MovePlayer: " + movePlayerName + " moved to " + newLocation;
 
-            } else if(event.get("messageType").toString().equals("EndTurn")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerFinishedTurn").toString();
-                String nextPlayer = event.get("nextPlayer").toString();
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", moveMsgUUID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", movePlayerName)
+                                    .withString("Message", moveMsg)));
+                    break;
+                case "DisproveSuggestion":
+                    String playerWhoDisprove = event.get("playerWhoSuggested").toString();
+                    String card = event.get("cardRevealed").toString();
 
-                // need way of generating UUID for msgs
-                String msgUUID = "1236";
-                String msg = "EndTurn: " + nextPlayer;
+                    // need way of generating UUID for msgs
+                    String disMsgUUID = "1239";
+                    String disMsg = "DisproveSuggestion: " + playerWhoDisprove + " revealed " + card;
 
-                dynamoDb.getTable(DYNAMODB_MESSAGES)
-                        .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgUUID)
-                                .withString("GameID", gameUUID)
-                                .withString("Player Name", playerName)
-                                .withString("Message", msg)));
-            } else if(event.get("messageType").toString().equals("MovePlayer")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerName").toString();
-                String location = event.get("newLocation").toString();
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", disMsgUUID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", playerWhoDisprove)
+                                    .withString("Message", disMsg)));
+                    break;
+                case "JoinGame":
+                    String newPlayerName = event.get("playerName").toString();
 
-                // need way of generating UUID for msgs
-                String msgUUID = "1238";
-                String msg = "MovePlayer: " + playerName + " moved to " + location;
+                    game = dynamoDb.getTable(DYNAMODB_GAMEDATA).getItem("UUID", gameUUID);
+                    System.out.println("IN THE GAME");
+                    if (game != null) {
+                        // TODO: should be an array or an object of GameStatus
+                        int maxPlayers = Integer.parseInt(game.get("Max Players").toString());
+                        if( maxPlayers >= (maxPlayers + 1)) {
+                            String currentPlayers = game.get("Current Players").toString() + ", " + newPlayerName;
 
-                dynamoDb.getTable(DYNAMODB_MESSAGES)
-                        .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgUUID)
-                                .withString("GameID", gameUUID)
-                                .withString("Player Name", playerName)
-                                .withString("Message", msg)));
-            } else if(event.get("messageType").toString().equals("DisproveSuggestion")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerWhoSuggested").toString();
-                String card = event.get("cardRevealed").toString();
+                            System.out.println("ADDING OUR BOY");
+                            dynamoDb.getTable(DYNAMODB_GAMEDATA)
+                                    .putItem(new PutItemSpec().withItem(new Item().withString("UUID", gameUUID)
+                                            .withString("Game Status", game.get("Game Status").toString())
+                                            .withString("Winning Secret", game.get("Winning Secret").toString())
+                                            .withString("Current Players", currentPlayers)
+                                            .withInt("Max Players",
+                                                    Integer.parseInt(game.get("Max Players").toString()))));
 
-                // need way of generating UUID for msgs
-                String msgUUID = "1239";
-                String msg = "DisproveSuggestion: " + playerName + " revealed " + card;
+                            // Do we respond with Welcome to the Game or write that to the db?
+                            response.put("messageType", "welcomeToGame");
+                        } else {
+                            response.put("messageType", "joinFailed");
+                        }
+                    } else {
+                        response.put("messageType", "joinFailed");
+                    }
+                    OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
+                    writer.write(response.toString());
+                    writer.close();
+                    break;
 
-                dynamoDb.getTable(DYNAMODB_MESSAGES)
-                        .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgUUID)
-                                .withString("GameID", gameUUID)
-                                .withString("Player Name", playerName)
-                                .withString("Message", msg)));
             }
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
 
-    public void handleGet(InputStream inputStream,
+    public String handleGet(InputStream inputStream,
                           OutputStream outputStream,
                           Context context) throws IOException {
 
@@ -146,33 +179,30 @@ public class ClueLessHandler implements RequestStreamHandler {
 
         try {
             JSONObject event = (JSONObject) parser.parse(reader);
+            JSONObject params = (JSONObject) event.get("params");
+            JSONObject path = (JSONObject) params.get("path");
+            String gameUUID = path.get("gameUUID").toString();
+            game = dynamoDb.getTable(DYNAMODB_GAMEDATA).getItem("UUID", gameUUID);
+            JSONObject queryString = (JSONObject) params.get("querystring");
+            String msgType = queryString.get("messageType").toString();
 
-            if (event.get("messageType").toString().equals("JoinGame")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerName").toString();
+            if(msgType.equals("MakeAccusation")) {
+                String winningString = game.get("Winning Secret").toString();
+                String[] list = winningString.split(", ");
+                response.put("suspect", list[0]);
+                response.put("weapon", list[1]);
+                response.put("location", list[2]);
 
-                game = dynamoDb.getTable(DYNAMODB_GAMEDATA).getItem("UUID", gameUUID);
+            } else if (msgType.equals("RequestMessage")) {
+                //TODO: need to think of way to get latest msgs from Message Table
+                // Certain msgs have certain UUID's?
+                // i.e. Suggestions start with 4, Turn msgs start with 1, etc.
+                game = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID", gameUUID);
+            } else {
+                response.put("messageType", "L");
+            }
 
-                if (game != null) {
-                    // TODO: should be an array or an object of GameStatus
-                    String currentPlayers = game.get("Current Players").toString() + ", " + playerName;
-
-                    dynamoDb.getTable(DYNAMODB_GAMEDATA)
-                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", gameUUID)
-                                    .withString("Game Status", game.get("Game Status").toString())
-                                    .withString("Winning Secret", game.get("Winning Secret").toString())
-                                    .withString("Current Players", currentPlayers)
-                                    .withInt("Max Players",
-                                            Integer.parseInt(game.get("Max Players").toString()))));
-
-                    // Do we respond with Welcome to the Game or write that to the db?
-                    response.put("messageType", "welcomeToGame");
-
-                } else {
-                    response.put("messageType", "joinFailed");
-                }
-            } else if (event.get("messageType").toString().equals("MakeAccusation")) {
-                String gameUUID = event.get("gameID").toString();
+            /*if (event.get("messageType").toString().equals("MakeAccusation")) {
                 String playerName = event.get("playerWhoAccused").toString();
                 JSONObject cardsSuggested = (JSONObject) event.get("cardsSuggested");
 
@@ -211,14 +241,15 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                 // Create response according to what msg player will receive
 
-            }
-
-            // Write response back to client
+            } else {
+                response.put("messageType", "YouLost");
+            } */
             OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
             writer.write(response.toString());
             writer.close();
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        return response.toString();
     }
 }
