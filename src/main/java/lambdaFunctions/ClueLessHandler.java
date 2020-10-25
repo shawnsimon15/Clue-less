@@ -133,9 +133,12 @@ public class ClueLessHandler implements RequestStreamHandler {
                     if (game != null) {
                         // TODO: should be an array or an object of GameStatus
                         int maxPlayers = Integer.parseInt(game.get("Max Players").toString());
-                        if( maxPlayers >= (maxPlayers + 1)) {
-                            String currentPlayers = game.get("Current Players").toString() + ", " + newPlayerName;
+                        String players = game.get("Current Players").toString();
+                        String[] list = players.split(", ");
+                        int listSize = list.length;
 
+                        if( maxPlayers >= (listSize + 1)) {
+                            String currentPlayers = players.toString() + ", " + newPlayerName;
                             System.out.println("ADDING OUR BOY");
                             dynamoDb.getTable(DYNAMODB_GAMEDATA)
                                     .putItem(new PutItemSpec().withItem(new Item().withString("UUID", gameUUID)
@@ -148,10 +151,13 @@ public class ClueLessHandler implements RequestStreamHandler {
                             // Do we respond with Welcome to the Game or write that to the db?
                             response.put("messageType", "welcomeToGame");
                         } else {
-                            response.put("messageType", "joinFailed");
+                            response.put("messageType", "MAX PLAYERS");
+                            response.put("gameID", gameUUID.toString());
+                            response.put("max players", maxPlayers);
                         }
                     } else {
-                        response.put("messageType", "joinFailed");
+                        response.put("messageType", "NO GAME");
+                        response.put("gameID", gameUUID.toString());
                     }
                     OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
                     writer.write(response.toString());
@@ -197,7 +203,80 @@ public class ClueLessHandler implements RequestStreamHandler {
                 //TODO: need to think of way to get latest msgs from Message Table
                 // Certain msgs have certain UUID's?
                 // i.e. Suggestions start with 4, Turn msgs start with 1, etc.
-                game = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID", gameUUID);
+                String type = queryString.get("Type").toString();
+                int maxPlayers = Integer.parseInt(game.get("Max Players").toString());
+                String players = game.get("Current Players").toString();
+                String[] list = players.split(", ");
+                int listSize = list.length;
+
+                if(type.equals("turnUpdate")){
+                    response.put("messageType", "playerTurnUpdate");
+                    // Need logic to determine whose turn it is
+                    response.put("currentTurn", list[0]);
+
+                } else if(type.equals("locationUpdate")){
+                    response.put("messageType", "playerTurnUpdate");
+                    JSONObject positionUpdate = new JSONObject();
+                    // Need logic to determine location
+                    String[] locations = {"location1", "location2", "location3", "location4"};
+                    int i = 0;
+                    for (String player : list) {
+                        positionUpdate.put(player, locations[i]);
+                        i++;
+                    }
+                    response.put("positionUpdates", positionUpdate);
+
+                } else if(type.equals("suggestion")){
+                    response.put("messageType", "suggestionMade");
+                    //Need way of getting msg UUID
+                    Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID", "1234");
+
+                    String playerWhoSuggested = msg.get("Player Name").toString();
+                    response.put("playerWhoSuggested", playerWhoSuggested);
+
+                    //Subject to change based on how format of msgs in DB
+                    String suggestion = msg.get("Message").toString();
+                    String[] suggestionTypeParse = suggestion.split(": ");
+                    String[] suggestionsParse = suggestionTypeParse[1].split(", ");
+
+                    JSONObject cardsSuggested = new JSONObject();
+                    cardsSuggested.put("suspect", suggestionsParse[0]);
+                    cardsSuggested.put("weapon", suggestionsParse[1]);
+                    cardsSuggested.put("location", suggestionsParse[2]);
+                    response.put("cardsSuggested", cardsSuggested);
+
+                    response.put("suggestionID", 1234);
+
+                } else if(type.equals("contradict")){
+                    response.put("messageType", "contradictSuggestion");
+                    //Need way of getting msg UUID
+                    Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID", "1234");
+
+                    String playerWhoSuggested = msg.get("Player Name").toString();
+                    response.put("playerWhoSuggested", playerWhoSuggested);
+
+                    response.put("suggestionID", 1234);
+
+                } else if(type.equals("startGame")){
+                    response.put("messageType", "Game is Starting");
+                    if (maxPlayers == listSize) {
+                         JSONObject activePlayers = new JSONObject();
+                         int i = 1;
+                         for (String player : list) {
+                             activePlayers.put("player" + i, player);
+                             i++;
+                         }
+                         response.put("activePlayers", activePlayers);
+
+                         JSONObject cardsAssigned = new JSONObject();
+                         cardsAssigned.put("cardName1", "Location");
+                         cardsAssigned.put("cardName2", "Who");
+                         cardsAssigned.put("cardName3", "Weapon");
+                         response.put("cardsAssigned", cardsAssigned);
+                     } else {
+                         response.put("messageType", "Game does not have enough players to start");
+                     }
+                }
             } else {
                 response.put("messageType", "L");
             }
