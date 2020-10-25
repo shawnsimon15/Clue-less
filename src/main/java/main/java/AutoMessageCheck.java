@@ -38,7 +38,7 @@ public class AutoMessageCheck {
         @Override
         public void run() {
             // periodically query game server for msgs
-            ClueLessUtils.makeGet("", "");
+            //ClueLessUtils.makeGet("");
         }
     }
 }
