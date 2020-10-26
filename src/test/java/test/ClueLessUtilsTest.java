@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import main.java.ClueLessUtils;
 
 class ClueLessUtilsTest {
-	private int gameUUID = 1234567;
+	private String gameUUID = "1234567";
 	/**
 	 * Test Case: Make Post - Create Game
 	 * Description: Create game for player Miss Scarlet by calling 
@@ -197,11 +197,11 @@ class ClueLessUtilsTest {
 		
 		StringBuilder result;
 		try {
-			ClueLessUtils.makePost(12345678, "Miss Scarlet", 3, 
+			ClueLessUtils.makePost("12345678", "Miss Scarlet", 3,
 					"createGame");
-			ClueLessUtils.makePost(12345678, "Mr. Green", 3, 
+			ClueLessUtils.makePost("12345678", "Mr. Green", 3,
 					"joinGame");
-			ClueLessUtils.makePost(12345678, "Mrs. White", 3, 
+			ClueLessUtils.makePost("12345678", "Mrs. White", 3,
 					"joinGame");
 			
 			result = ClueLessUtils.makeGet(String.valueOf(12345678), 

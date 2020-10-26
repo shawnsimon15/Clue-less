@@ -1,4 +1,5 @@
 package main.java;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class GameActions {
 
     // movePiece will be called by a player who wants to move their piece.
     public void movePiece(String gameID, String pName,
-                          String oldLocation, String newLocation) throws IOException {
+                          String oldLocation, String newLocation) throws IOException, JSONException {
         // called by main.userInterface
         StringBuilder response = ClueLessUtils.makeGet(gameID, "locationUpdate");
         JSONObject responseJSON = new JSONObject(response.toString());
