@@ -25,7 +25,8 @@ class ClueLessUtilsTest {
 					"createGame");
 
 			System.out.print("Create Game: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -45,7 +46,8 @@ class ClueLessUtilsTest {
 			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
 					"disproveSuggestion");
 			System.out.print("Disprove Suggestion: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -65,7 +67,8 @@ class ClueLessUtilsTest {
 			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
 					"endTurn");
 			System.out.print("End Turn: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -85,7 +88,8 @@ class ClueLessUtilsTest {
 			result = ClueLessUtils.makePost(gameUUID, "Mr. Green", 3, 
 					"joinGame");
 			System.out.print("Join Game: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -105,7 +109,8 @@ class ClueLessUtilsTest {
 			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
 					"movePlayer");
 			System.out.print("Move Player: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -125,7 +130,8 @@ class ClueLessUtilsTest {
 			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
 					"passSuggestion");
 			System.out.print("Pass Suggestion: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -145,7 +151,8 @@ class ClueLessUtilsTest {
 			result = ClueLessUtils.makePost(gameUUID, "Mr. Green", 3, 
 					"suggestion");
 			System.out.print("Pass Suggestion: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			assertEquals(200, result);
 		} catch (IOException e) {
 			fail(e);
@@ -167,7 +174,8 @@ class ClueLessUtilsTest {
 					"makeAccusation"); 
 					
 			System.out.print("Make Accusation: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			
@@ -200,7 +208,8 @@ class ClueLessUtilsTest {
 					"startGame"); 
 					
 			System.out.print("Start Game: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			
@@ -227,7 +236,8 @@ class ClueLessUtilsTest {
 					"turnUpdate"); 
 					
 			System.out.print("Turn Update: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			
@@ -256,7 +266,8 @@ class ClueLessUtilsTest {
 					"locationUpdate"); 
 					
 			System.out.print("Turn Update: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			
@@ -284,7 +295,8 @@ class ClueLessUtilsTest {
 					"suggestion"); 
 					
 			System.out.print("Suggestion Made: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			
@@ -312,7 +324,8 @@ class ClueLessUtilsTest {
 					"contradict"); 
 					
 			System.out.print("Contradict Suggestion: ");
-			System.out.println(result + "\n");
+			System.out.println(result);
+			System.out.println("---------------------------------------------");
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			assertEquals("contradictSuggestion", 
