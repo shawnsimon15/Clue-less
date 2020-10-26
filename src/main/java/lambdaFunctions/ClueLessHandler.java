@@ -150,6 +150,9 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                             // Do we respond with Welcome to the Game or write that to the db?
                             response.put("messageType", "welcomeToGame");
+                            if (maxPlayers == (listSize + 1)) {
+                                response.put("gameStarting", "The game will now start");
+                            }
                         } else {
                             response.put("messageType", "MAX PLAYERS");
                             response.put("gameID", gameUUID.toString());
@@ -163,7 +166,6 @@ public class ClueLessHandler implements RequestStreamHandler {
                     writer.write(response.toString());
                     writer.close();
                     break;
-
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -199,6 +201,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                 response.put("weapon", list[1]);
                 response.put("location", list[2]);
 
+
+
             } else if (msgType.equals("RequestMessage")) {
                 //TODO: need to think of way to get latest msgs from Message Table
                 // Certain msgs have certain UUID's?
@@ -217,8 +221,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                 } else if(type.equals("locationUpdate")){
                     response.put("messageType", "playerTurnUpdate");
                     JSONObject positionUpdate = new JSONObject();
-                    // Need logic to determine location
-                    String[] locations = {"location1", "location2", "location3", "location4"};
+                    // Need logic to determine location and whose turn it is
+                    String[] locations = {"location1", "hallway", "location3", "location4"};
                     int i = 0;
                     for (String player : list) {
                         positionUpdate.put(player, locations[i]);
@@ -281,48 +285,6 @@ public class ClueLessHandler implements RequestStreamHandler {
                 response.put("messageType", "L");
             }
 
-            /*if (event.get("messageType").toString().equals("MakeAccusation")) {
-                String playerName = event.get("playerWhoAccused").toString();
-                JSONObject cardsSuggested = (JSONObject) event.get("cardsSuggested");
-
-                String suspect = cardsSuggested.get("suspect").toString();
-                String weapon = cardsSuggested.get("weapon").toString();
-                String location = cardsSuggested.get("location").toString();
-
-                game = dynamoDb.getTable(DYNAMODB_GAMEDATA).getItem("UUID", gameUUID);
-
-                if(game != null) {
-                    String[] secret = game.get("Winning Secret").toString().split(", ");
-                    String realSus = secret[0];
-                    String realWeapon = secret[1];
-                    String realLocation = secret[2];
-
-                    if (suspect.equals(realSus) && weapon.equals(realWeapon) && location.equals(realLocation)) {
-                        response.put("messageType", "accusationResult");
-                        response.put("playerWhoAccused", playerName);
-                        response.put("accusationTrue", "True");
-                    } else {
-                        response.put("messageType", "accusationResult");
-                        response.put("playerWhoAccused", playerName);
-                        response.put("accusationTrue", "False");
-                    }
-                }
-
-            } else if (event.get("messageType").toString().equals("RequestMessage")) {
-                String gameUUID = event.get("gameID").toString();
-                String playerName = event.get("playerName").toString();
-                String lastRequest = event.get("lastSuccessfulRequest").toString();
-
-                //TODO: need to think of way to get latest msgs from Message Table
-                    // Certain msgs have certain UUID's?
-                        // i.e. Suggestions start with 4, Turn msgs start with 1, etc.
-                game = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID", gameUUID);
-
-                // Create response according to what msg player will receive
-
-            } else {
-                response.put("messageType", "YouLost");
-            } */
             OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
             writer.write(response.toString());
             writer.close();

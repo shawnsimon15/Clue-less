@@ -27,26 +27,33 @@ public class Main {
         System.out.println("Starting ClueLess!");
         URL myUrl = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game");
 
-        /*ClueLessUtils.makePost(555555, "JakeFromStateFarm", 5);
+        //ClueLessUtils.makePost(555555, "JakeFromStateFarm", 5);
         //autoMessageCheck = new AutoMessageCheck();
-        gameStatus = new GameStatus();
+        //gameStatus = new GameStatus();
+        GameActions gActions = new GameActions();
 
-        //userInterface();*/
+        //userInterface();
         /********** Create Game **********/
         ClueLessUtils.makePost(444444, "Rick", 5, "createGame");
         ClueLessUtils.makePost(444444, "Rick", 5, "disproveSuggestion");
         ClueLessUtils.makePost(444444, "Rick", 5, "endTurn");
         ClueLessUtils.makePost(444444, "Steve", 5, "joinGame");
+        ClueLessUtils.makePost(123458, "Steve", 5, "joinGame");
         ClueLessUtils.makePost(444444, "Rick", 5, "movePlayer");
         ClueLessUtils.makePost(444444, "Rick", 5, "passSuggestion");
         ClueLessUtils.makePost(444444, "Rick", 5, "suggestion");
 
-        ClueLessUtils.makeGet("", "makeAccusation");
-        ClueLessUtils.makeGet("", "startGame");
-        ClueLessUtils.makeGet("", "turnUpdate");
-        ClueLessUtils.makeGet("", "locationUpdate");
-        ClueLessUtils.makeGet("", "suggestion");
-        ClueLessUtils.makeGet("", "contradict");
+        System.out.println(ClueLessUtils.makeGet("123458", "makeAccusation"));
+        System.out.println(ClueLessUtils.makeGet("123458", "startGame"));
+        System.out.println(ClueLessUtils.makeGet("123458", "turnUpdate"));
+        //ClueLessUtils.makeGet("", "locationUpdate");
+        gActions.movePiece("123458", "Luke", "location1", "Room1");
+        gActions.makeGuess("123458","Luke", "feather", "location1");
+        gActions.makeAccusation("123458","Luke", "feather", "location1");
+        gActions.makeAccusation("123458","Person", "Weapon", "Location");
+
+        System.out.println(ClueLessUtils.makeGet("123458", "suggestion"));
+        System.out.println(ClueLessUtils.makeGet("123458", "contradict"));
     }
 
     public void userInterface() throws IOException {
@@ -69,30 +76,6 @@ public class Main {
             UUID uuid = UUID.fromString(uuidString);
             gameActions.joinGame(uuid, playerName);
         }
-
-        String playerName = "Bob";
-        String oldLocation = "Room1";
-        String newLocation = "Room2";
-        gameActions.movePiece(playerName, oldLocation, newLocation);
-
-        String susName1 = "sus";
-        String weaponName1 = "paper";
-        String locationName1 = "Room3";
-        gameActions.makeGuess(susName1, weaponName1, locationName1);
-
-        String susName2 = "Eh";
-        String weaponName2 = "leaf";
-        String locationName2 = "Room4";
-        gameActions.makeAccusation(susName2, weaponName2, locationName2);
-
-        String nextPlayer = "Linda";
-        gameActions.endTurn(nextPlayer);
-
-        String susName3 = "verySus";
-        String weaponName3 = "air";
-        String locationName3 = "Room5";
-        gameActions.respondToAccusation(Optional.of(susName3),
-                Optional.of(weaponName3), Optional.of(locationName3));
 
     }
 

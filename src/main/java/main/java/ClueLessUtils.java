@@ -14,7 +14,7 @@ import com.google.gson.JsonParser;
 import org.json.simple.JSONObject;
 
 public class ClueLessUtils {
-    private static String url = "https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game";
+    private static String url = "https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/";
 
     public static HttpURLConnection setUpHttpConnection(String requstMethod) throws IOException {
         URL myUrl = new URL(url);
@@ -27,7 +27,7 @@ public class ClueLessUtils {
         return con;
     }
 
-    public static String makePost(int gameUUID, String playerName, int numberOfPlayers, String typeOfPost) throws IOException {
+    public static int makePost(int gameUUID, String playerName, int numberOfPlayers, String typeOfPost) throws IOException {
         // make http request
         HttpURLConnection con = setUpHttpConnection("POST");
         JSONObject jsonObject = new JSONObject();
@@ -86,47 +86,54 @@ public class ClueLessUtils {
             }
             System.out.println(response.toString());
         }
-        return "";
+        return code;
     }
 
-    public static String makePut(String jsonMessage) {
+    public static int makePut(String jsonMessage) {
         // make http request
-        return "";
+        return 200;
     }
 
-    public static String makeGet(String jsonMessage, String typeOfGet) throws IOException {
+    public static StringBuilder makeGet(String gameID, String typeOfGet) throws IOException {
         // make http request
         HttpURLConnection con = null;
         StringBuilder response;
+        String newUrl = url + gameID;
         switch (typeOfGet){
             case "makeAccusation":
-                URL accusationURL = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/123458?messageType=MakeAccusation");
+                newUrl = newUrl + "?messageType=MakeAccusation";
+                URL accusationURL = new URL(newUrl);
                 con= (HttpURLConnection) accusationURL.openConnection();
                 con.setRequestMethod("GET");
                 // compare Winning secret to player's accusation
                 break;
             case "startGame":
-                URL startGameURL = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/123458?messageType=RequestMessage&Type=startGame");
+                newUrl = newUrl + "?messageType=RequestMessage&Type=startGame";
+                URL startGameURL = new URL(newUrl);
                 con= (HttpURLConnection) startGameURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
             case "turnUpdate":
-                URL turnUpdateURL = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/123458?messageType=RequestMessage&Type=turnUpdate");
+                newUrl = newUrl + "?messageType=RequestMessage&Type=turnUpdate";
+                URL turnUpdateURL = new URL(newUrl);
                 con = (HttpURLConnection) turnUpdateURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
             case "locationUpdate":
-                URL locationUpdateURL = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/123458?messageType=RequestMessage&Type=locationUpdate");
+                newUrl = newUrl + "?messageType=RequestMessage&Type=locationUpdate";
+                URL locationUpdateURL = new URL(newUrl);
                 con = (HttpURLConnection) locationUpdateURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
             case "suggestion":
-                URL suggestionURL = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/123458?messageType=RequestMessage&Type=suggestion");
+                newUrl = newUrl + "?messageType=RequestMessage&Type=suggestion";
+                URL suggestionURL = new URL(newUrl);
                 con = (HttpURLConnection) suggestionURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
             case "contradict":
-                URL contradictURL = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/123458?messageType=RequestMessage&Type=contradict");
+                newUrl = newUrl + "?messageType=RequestMessage&Type=contradict";
+                URL contradictURL = new URL(newUrl);
                 con = (HttpURLConnection) contradictURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
@@ -146,9 +153,7 @@ public class ClueLessUtils {
                 response.append(System.lineSeparator());
             }
         }
-        System.out.println(response.toString());
-
-        return "";
+        return response;
     }
 
     public static String parseMessages(String jsonMessage) {
