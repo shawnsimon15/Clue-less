@@ -12,6 +12,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.util.UUID;
 
 public class ClueLessHandler implements RequestStreamHandler {
     private static final String DYNAMODB_GAMEDATA = "GameData";
@@ -59,7 +60,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String location = cardsSuggested.get("location").toString();
 
                     // need way of generating UUID for msgs
-                    String susMsgUUID = "1234";
+                    //String susMsgUUID = "1234";
+                    String susMsgUUID = UUID.randomUUID().toString();
                     String susMsg = "SuggestionMade: " + suspect +
                             ", " + weapon + ", " + location;
 
@@ -74,7 +76,9 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String nextPlayer = event.get("nextPlayer").toString();
 
                     // need way of generating UUID for msgs
-                    String passMsgUUID = "1235";
+                    //String passMsgUUID = "1235";
+                    String passMsgUUID = UUID.randomUUID().toString();
+
                     String passMsg = "PassSuggestion: " + nextPlayer;
 
                     dynamoDb.getTable(DYNAMODB_MESSAGES)
@@ -88,7 +92,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String nPlayer = event.get("nextPlayer").toString();
 
                     // need way of generating UUID for msgs
-                    String msgUUID = "1236";
+                    //String msgUUID = "1236";
+                    String msgUUID = UUID.randomUUID().toString();
                     String msg = "EndTurn: " + nPlayer;
 
                     dynamoDb.getTable(DYNAMODB_MESSAGES)
@@ -102,7 +107,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String newLocation = event.get("newLocation").toString();
 
                     // need way of generating UUID for msgs
-                    String moveMsgUUID = "1238";
+                    //String moveMsgUUID = "1238";
+                    String moveMsgUUID = UUID.randomUUID().toString();
                     String moveMsg = "MovePlayer: " + movePlayerName + " moved to " + newLocation;
 
                     dynamoDb.getTable(DYNAMODB_MESSAGES)
@@ -116,7 +122,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String card = event.get("cardRevealed").toString();
 
                     // need way of generating UUID for msgs
-                    String disMsgUUID = "1239";
+                    //String disMsgUUID = "1239";
+                    String disMsgUUID = UUID.randomUUID().toString();
                     String disMsg = "DisproveSuggestion: " + playerWhoDisprove + " revealed " + card;
 
                     dynamoDb.getTable(DYNAMODB_MESSAGES)
@@ -165,6 +172,36 @@ public class ClueLessHandler implements RequestStreamHandler {
                     OutputStreamWriter writer = new OutputStreamWriter(outputStream, "UTF-8");
                     writer.write(response.toString());
                     writer.close();
+                    break;
+                case "GameOver":
+                    String playerWhoWon = event.get("playerWhoWon").toString();
+
+                    // need way of generating UUID for msgs
+                    //String msgID = "1236";
+                    String msgID = UUID.randomUUID().toString();
+
+                    String message = playerWhoWon + " has WON the game on a correct accusation";
+
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", msgID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", playerWhoWon)
+                                    .withString("Message", message)));
+                    break;
+                case "PlayerLost":
+                    String playerWhoLost = event.get("playerWhoWon").toString();
+
+                    // need way of generating UUID for msgs
+                    //String lostMsgID = "1236";
+                    String lostMsgID = UUID.randomUUID().toString();
+
+                    String lostMessage = playerWhoLost + " has lost the game on a wrong accusation";
+
+                    dynamoDb.getTable(DYNAMODB_MESSAGES)
+                            .putItem(new PutItemSpec().withItem(new Item().withString("UUID", lostMsgID)
+                                    .withString("GameID", gameUUID)
+                                    .withString("Player Name", playerWhoLost)
+                                    .withString("Message", lostMessage)));
                     break;
             }
         } catch (ParseException e) {
@@ -219,7 +256,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     response.put("currentTurn", list[0]);
 
                 } else if(type.equals("locationUpdate")){
-                    response.put("messageType", "playerTurnUpdate");
+                    response.put("messageType", "locationUpdate");
                     JSONObject positionUpdate = new JSONObject();
                     // Need logic to determine location and whose turn it is
                     String[] locations = {"location1", "hallway", "location3", "location4"};
@@ -262,7 +299,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     response.put("suggestionID", 1234);
 
                 } else if(type.equals("startGame")){
-                    response.put("messageType", "Game is Starting");
+                    response.put("messageType", "startGame");
                     if (maxPlayers == listSize) {
                          JSONObject activePlayers = new JSONObject();
                          int i = 1;

@@ -23,6 +23,7 @@ public class Main {
     private String playerName;
 
 
+    // main will run be the application run by a player
     public static void main(String[] args) throws IOException, URISyntaxException {
         System.out.println("Starting ClueLess!");
         URL myUrl = new URL("https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game");
@@ -34,14 +35,15 @@ public class Main {
 
         //userInterface();
         /********** Create Game **********/
-        ClueLessUtils.makePost(444444, "Rick", 5, "createGame");
-        ClueLessUtils.makePost(444444, "Rick", 5, "disproveSuggestion");
-        ClueLessUtils.makePost(444444, "Rick", 5, "endTurn");
-        ClueLessUtils.makePost(444444, "Steve", 5, "joinGame");
-        ClueLessUtils.makePost(123458, "Steve", 5, "joinGame");
-        ClueLessUtils.makePost(444444, "Rick", 5, "movePlayer");
-        ClueLessUtils.makePost(444444, "Rick", 5, "passSuggestion");
-        ClueLessUtils.makePost(444444, "Rick", 5, "suggestion");
+        ClueLessUtils.makePost("444444", "Rick", 5, "disproveSuggestion");
+        ClueLessUtils.makePost("444444", "Rick", 5, "endTurn");
+
+        ClueLessUtils.makePost("444444", "Rick", 5, "passSuggestion");
+        ClueLessUtils.makePost("444444", "Rick", 5, "suggestion");
+
+        gActions.createGame("Steve", 4);
+        gActions.joinGame("444444", "Rock");
+        gActions.joinGame("123458", "Rock");
 
         System.out.println(ClueLessUtils.makeGet("123458", "makeAccusation"));
         System.out.println(ClueLessUtils.makeGet("123458", "startGame"));
@@ -74,7 +76,7 @@ public class Main {
             System.out.println("What is the game UUID? ");
             String uuidString = input.nextLine();
             UUID uuid = UUID.fromString(uuidString);
-            gameActions.joinGame(uuid, playerName);
+            gameActions.joinGame(uuid.toString(), playerName);
         }
 
     }

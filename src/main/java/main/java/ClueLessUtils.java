@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,6 +13,7 @@ import org.json.simple.JSONObject;
 public class ClueLessUtils {
     private static String url = "https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/";
 
+    // setUpHttpConnection is called each time the a GET, PUT or POST request need to be made
     public static HttpURLConnection setUpHttpConnection(String requstMethod) throws IOException {
         URL myUrl = new URL(url);
         HttpURLConnection con = (HttpURLConnection) myUrl.openConnection();
@@ -27,7 +25,9 @@ public class ClueLessUtils {
         return con;
     }
 
-    public static int makePost(int gameUUID, String playerName, int numberOfPlayers, String typeOfPost) throws IOException {
+    // makeGet will be called when POST HTTP Request method is needed
+    public static int makePost(String gameUUID, String playerName,
+                               int numberOfPlayers, String typeOfPost) throws IOException {
         // make http request
         HttpURLConnection con = setUpHttpConnection("POST");
         JSONObject jsonObject = new JSONObject();
@@ -69,6 +69,14 @@ public class ClueLessUtils {
             cardsSuggested.put("weapon", "What");
             cardsSuggested.put("location", "Where");
             jsonObject.put("cardsSuggested", cardsSuggested);
+        } else if (typeOfPost.equals("gameOver")) {
+            jsonObject.put("messageType", "GameOver");
+            jsonObject.put("gameID", gameUUID);
+            jsonObject.put("playerWhoWon", playerName);
+        } else if (typeOfPost.equals("playerLost")) {
+            jsonObject.put("messageType", "PlayerLost");
+            jsonObject.put("gameID", gameUUID);
+            jsonObject.put("playerWhoWon", playerName);
         }
         String requestString = jsonObject.toString();
 
@@ -89,11 +97,13 @@ public class ClueLessUtils {
         return code;
     }
 
+    // makeGet will be called when PUT HTTP Request method is needed
     public static int makePut(String jsonMessage) {
         // make http request
         return 200;
     }
 
+    // makeGet will be called when GET HTTP Request method is needed
     public static StringBuilder makeGet(String gameID, String typeOfGet) throws IOException {
         // make http request
         HttpURLConnection con = null;
