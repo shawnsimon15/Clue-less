@@ -204,7 +204,7 @@ class ClueLessUtilsTest {
 			
 			JSONObject resultJson = new JSONObject(result.toString());
 			
-			assertEquals("welcomeToGame", resultJson.get("messageType").toString());
+			assertEquals("startGame", resultJson.get("messageType").toString());
 			
 		} catch (IOException e) {
 			fail(e);
