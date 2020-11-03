@@ -108,6 +108,7 @@ public class Main {
         ArrayList<String> players = new ArrayList<String>();
         JSONObject startGameJSON = null;
 
+        System.out.println("Waiting for players to join....");
         while(!msg.equals("startGame")) {
             startGameResponse = autoMessageCheck.getResponse();
             if (startGameResponse != null) {
@@ -132,6 +133,17 @@ public class Main {
             }
         }
 
+        System.out.println("All players have joined!");
+        System.out.print("Lobby includes: ");
+        for (int j=0; j < players.size(); ++j){
+            if (j != (players.size() - 1) ){
+                System.out.print(players.get(j) + ", ");
+            } else {
+                System.out.print(players.get(j));
+            }
+        }
+
+
         JSONObject cardsAssigned = (JSONObject) startGameJSON.get("cardsAssigned");
         ArrayList<String> cards = new ArrayList<String>();
 
@@ -139,6 +151,17 @@ public class Main {
             String key = (String) iterator.next();
             cards.add(cardsAssigned.get(key).toString()); // cards for player
         }
+
+        System.out.print("\nYour cards are: ");
+        for (int j=0; j < cards.size(); ++j){
+            if (j != (cards.size() -1) ){
+                System.out.print(cards.get(j) + ", ");
+            } else {
+                System.out.print(cards.get(j));
+            }
+        }
+
+        System.out.println();
 
         /*PlayerStatus playerStatus = new PlayerStatus();
         playerStatus.setPlayerName(playerName);

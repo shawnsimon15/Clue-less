@@ -84,7 +84,7 @@ public class ClueLessUtils {
             outStream.write(requestString.getBytes("UTF-8"));
         }
         int code = con.getResponseCode();
-        System.out.println("Reponse for " + typeOfPost + ": " + code);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
 
         try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))){
             StringBuilder response = new StringBuilder();
@@ -92,7 +92,7 @@ public class ClueLessUtils {
             while ((responseLine = br.readLine()) != null) {
                 response.append(responseLine.trim());
             }
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
         }
         return code;
     }
@@ -153,7 +153,7 @@ public class ClueLessUtils {
         }
 
         int code = con.getResponseCode();
-        System.out.println(typeOfGet +": " + code);
+        //System.out.println(typeOfGet +": " + code);
         try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()))) {
             String line;
