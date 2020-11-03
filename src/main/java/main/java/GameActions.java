@@ -1,5 +1,4 @@
 package main.java;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -9,48 +8,64 @@ public class GameActions {
     private String gameUUID;
     private String playerName;
 
-    // createGame will create a game for a player
+
+    /**
+     * Function: createGame(String, int)
+     * Description: Calls API function for creating game to send HTTP request
+     *              Called by main.userInterface
+     * Does not return
+     **/
     public void createGame(String pName, int numberOfPlayers) throws IOException {
-        // called by main.userInterface
         gameUUID = (UUID.randomUUID()).toString();
         playerName = pName;
         ClueLessUtils.makePost(gameUUID, pName, numberOfPlayers, "createGame");
     }
 
-    // joinGame will allow a player to join a game
+    public String getGameUUID() {
+        return gameUUID;
+    }
+
+    /**
+     * Function: joinGame(String, String)
+     * Description: Calls API function for joining game to send HTTP request
+     *              Called by main.userInterface
+     * Does not return
+     **/
     public void joinGame(String gUUID, String pName) throws IOException {
-        // called by main.userInterface
         playerName = pName;
         ClueLessUtils.makePost(gUUID, pName, 5, "joinGame");
-        //ClueLessUtils.makeGet("");
     }
 
     // movePiece will be called by a player who wants to move their piece.
     public void movePiece(String gameID, String pName,
-                          String oldLocation, String newLocation) throws IOException, JSONException {
-        // called by main.userInterface
+                          String oldLocation, String newLocation) throws IOException {
+        /********* Get location of each player on the board *********/
         StringBuilder response = ClueLessUtils.makeGet(gameID, "locationUpdate");
         JSONObject responseJSON = new JSONObject(response.toString());
         JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
 
         ArrayList<String> locations =new ArrayList<String>();
-        Iterator<String> keys = locationUpdate.keys();
+        //Iterator<String> keys = locationUpdate.keys();
 
         for(Iterator iterator = locationUpdate.keySet().iterator(); iterator.hasNext();) {
             String key = (String) iterator.next();
             locations.add(locationUpdate.get(key).toString());
         }
+        /********* Get location of each player on the board *********/
 
         boolean goodToMove = true;
         for(int i = 0; i < locations.size(); i++) {
             if (newLocation.equals(locations.get(i))) {
+                goodToMove = false;
+            } else if (newLocation.contains(newLocation + "Door")) {
+                //check if door is blocked; TODO: is this necessary?
                 goodToMove = false;
             }
         }
 
         if (goodToMove) {
             System.out.println(pName + " has moved to " + newLocation);
-            ClueLessUtils.makePost("12348", pName, 4, "movePlayer");
+            ClueLessUtils.makePost(gameID, pName, 4, "movePlayer");
 
         } else {
             System.out.println(pName + " cannot move to " + newLocation);
@@ -65,36 +80,35 @@ public class GameActions {
         JSONObject responseJSON = new JSONObject(response.toString());
         JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
 
-        // need to set playerName
-        playerName = "Nuke";
         String currentLocation = locationUpdate.get(playerName).toString();
 
-        String badLocations = "hallway";
+        String badLocations = "hallway"; // TODO: update the locations where you cannot make suggestion
         if (currentLocation.equals(badLocations)) {
             System.out.println("You cannot make a suggestion from the " + badLocations);
             return;
         } else {
-            ClueLessUtils.makePost("12348", playerName,5,"suggestion");
+            ClueLessUtils.makePost(gameID, playerName,5,"suggestion");
         }
     }
 
     //makeAccusation will be called when a player wants to make an accusation
     public void makeAccusation(String gameID, String suspectName,
                                String weaponName, String locationName) throws IOException {
+
+        /********* Get location of user on the board *********/
         StringBuilder response = ClueLessUtils.makeGet(gameID, "locationUpdate");
         JSONObject responseJSON = new JSONObject(response.toString());
         JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
 
-        // need to set playerName
-        playerName = "Sane";
         String currentLocation = locationUpdate.get(playerName).toString();
+        /********* Get location of user on the board *********/
 
         String badLocations = "hallway";
         if (currentLocation.equals(badLocations)) {
             System.out.println("You cannot make an accusation from the " + badLocations);
             return;
         } else {
-            StringBuilder winningTriad = ClueLessUtils.makeGet("123458","makeAccusation");
+            StringBuilder winningTriad = ClueLessUtils.makeGet(gameID,"makeAccusation");
             JSONObject triad = new JSONObject(winningTriad.toString());
             String suspect = triad.get("suspect").toString();
             String weapon = triad.get("weapon").toString();
@@ -105,12 +119,12 @@ public class GameActions {
                 location.equals(locationName)) {
                 System.out.println("You made the correct accusation!");
                 System.out.println("The game is over");
-                // send msg to db that game is over
+                //Send msg to db that game is over
                 ClueLessUtils.makePost(gameID, playerName, 5, "gameOver");
             } else {
                 System.out.println("You made the WRONG accusation");
                 System.out.println("Your game is over");
-                // send msg to db that this player lost
+                //Send msg to db that this player lost
                 ClueLessUtils.makePost(gameID, playerName, 5, "playerLost");
 
             }
