@@ -1,11 +1,12 @@
 package main.java;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerStatus {
     private String playerName;
     private String playerLocation;
-    List<String> playerHand;
+    ArrayList<String> playerHand;
 
     public void setPlayerName(String name) {
         playerName = name;
@@ -23,8 +24,11 @@ public class PlayerStatus {
         return playerLocation;
     }
 
-    public void setPlayerHand(List<String> hand) {
-        playerHand.addAll(hand);
+    public void setPlayerHand(ArrayList<String> hand) {
+        playerHand = new ArrayList<String>();
+        if (hand.size() != 0) {
+            playerHand.addAll(hand);
+        }
     }
 
     public List<String> getPlayerHand() {

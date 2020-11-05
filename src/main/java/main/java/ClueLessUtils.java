@@ -26,6 +26,7 @@ public class ClueLessUtils {
     }
 
     // makeGet will be called when POST HTTP Request method is needed
+    // TODO: Make function for each to pass needed info
     public static int makePost(String gameUUID, String playerName,
                                int numberOfPlayers, String typeOfPost) throws IOException {
         // make http request
@@ -40,12 +41,12 @@ public class ClueLessUtils {
             jsonObject.put("messageType", "DisproveSuggestion");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerWhoSuggested", playerName);
-            jsonObject.put("cardRevealed", "Blanket");
+            jsonObject.put("cardRevealed", "Blanket"); // TODO: STOP HARDCODING
         } else if (typeOfPost.equals("endTurn")) {
             jsonObject.put("messageType", "EndTurn");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerFinishedTurn", playerName);
-            jsonObject.put("nextPlayer", "TOK");
+            jsonObject.put("nextPlayer", "TOK"); // TODO: STOP HARDCODING
         } else if (typeOfPost.equals("joinGame")) {
             jsonObject.put("messageType", "JoinGame");
             jsonObject.put("gameID", gameUUID);
@@ -54,20 +55,20 @@ public class ClueLessUtils {
             jsonObject.put("messageType", "MovePlayer");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerName", playerName);
-            jsonObject.put("newLocation", "Place");
+            jsonObject.put("newLocation", "Place"); // TODO: STOP HARDCODING
         } else if (typeOfPost.equals("passSuggestion")) {
             jsonObject.put("messageType", "PassSuggestion");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerWhoSuggested", playerName);
-            jsonObject.put("nextPlayer", "Billy");
+            jsonObject.put("nextPlayer", "Billy"); // TODO: STOP HARDCODING
         } else if (typeOfPost.equals("suggestion")) {
             jsonObject.put("messageType", "MakeSuggestion");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerWhoSuggested", playerName);
             JSONObject cardsSuggested = new JSONObject();
-            cardsSuggested.put("suspect", "Who");
-            cardsSuggested.put("weapon", "What");
-            cardsSuggested.put("location", "Where");
+            cardsSuggested.put("suspect", "Who"); // TODO: STOP HARDCODING
+            cardsSuggested.put("weapon", "What"); // TODO: STOP HARDCODING
+            cardsSuggested.put("location", "Where"); // TODO: STOP HARDCODING
             jsonObject.put("cardsSuggested", cardsSuggested);
         } else if (typeOfPost.equals("gameOver")) {
             jsonObject.put("messageType", "GameOver");

@@ -37,39 +37,9 @@ public class GameActions {
     }
 
     // movePiece will be called by a player who wants to move their piece.
-    public void movePiece(String gameID, String pName,
-                          String oldLocation, String newLocation) throws IOException {
-        /********* Get location of each player on the board *********/
-        StringBuilder response = ClueLessUtils.makeGet(gameID, "locationUpdate");
-        JSONObject responseJSON = new JSONObject(response.toString());
-        JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
-
-        ArrayList<String> locations =new ArrayList<String>();
-        //Iterator<String> keys = locationUpdate.keys();
-
-        for(Iterator iterator = locationUpdate.keySet().iterator(); iterator.hasNext();) {
-            String key = (String) iterator.next();
-            locations.add(locationUpdate.get(key).toString());
-        }
-        /********* Get location of each player on the board *********/
-
-        boolean goodToMove = true;
-        for(int i = 0; i < locations.size(); i++) {
-            if (newLocation.equals(locations.get(i))) {
-                goodToMove = false;
-            } else if (newLocation.contains(newLocation + "Door")) {
-                //check if door is blocked; TODO: is this necessary?
-                goodToMove = false;
-            }
-        }
-
-        if (goodToMove) {
-            System.out.println(pName + " has moved to " + newLocation);
-            ClueLessUtils.makePost(gameID, pName, 4, "movePlayer");
-
-        } else {
-            System.out.println(pName + " cannot move to " + newLocation);
-        }
+    public void movePiece(String gameID, String pName, String newLocation) throws IOException {
+        System.out.println(pName + " has moved to " + newLocation);
+        ClueLessUtils.makePost(gameID, pName, 4, "movePlayer");
     }
 
     // makeGuess will be called by a player when they want to make a guess

@@ -7,6 +7,7 @@ public class GameStatus {
     private ArrayList<PlayerStatus> activePlayerList;
 
     public void setActivePlayerList(ArrayList<PlayerStatus> aPL) {
+        activePlayerList = new ArrayList<PlayerStatus>();
         activePlayerList.addAll(aPL);
     }
 
