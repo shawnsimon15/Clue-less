@@ -3,6 +3,7 @@ package test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +12,8 @@ import org.junit.jupiter.api.Test;
 import main.java.ClueLessUtils;
 
 class ClueLessUtilsTest {
-	private String gameUUID = "1234567";
+	private UUID gameUUID = UUID.randomUUID();
+	
 	/**
 	 * Test Case: Make Post - Create Game
 	 * Description: Create game for player Miss Scarlet by calling 
@@ -21,7 +23,7 @@ class ClueLessUtilsTest {
 	public void makePostTestCreateGame() {	
 		int result;
 		try {
-			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
+			result = ClueLessUtils.makePost(gameUUID.toString(), "Miss Scarlet", 3, 
 					"createGame");
 
 			System.out.print("Create Game: ");
@@ -32,161 +34,192 @@ class ClueLessUtilsTest {
 			fail(e);
 		}
 	}
+	
+	/**
+ 	 * Test Case: Make Put - Move Player
+ 	 * Description: Move Player Miss Scarlet to Ballroom 
+ 	 * Expected to return 200 if successfully moved player
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makePutTestMovePlayer() {	
+ 		JSONObject movePlayer = new JSONObject();
+ 		movePlayer.put("gameID", gameUUID);
+ 		movePlayer.put("playerName", "Miss Scarlet");
+ 		movePlayer.put("newLocation", "Ballroom");
 
-	/**
-	 * Test Case: Make Post - Disprove Suggestion
-	 * Description: Miss Scarlet disproves suggestion 
-	 * Expected to return 200 if message successfully sent to server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makePostTestDisproveSuggestion() {	
-		
-		int result;
+ 		int result = ClueLessUtils.makePut(movePlayer.toString(), 
+ 				"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+ 				+ "/Test/game");
+
+ 		System.out.print("Make Put - Move Player: ");
+ 		System.out.println(result);
+		System.out.println("---------------------------------------------");
+ 		assertEquals("200", result);
+ 	}
+
+ 	/**
+ 	 * Test Case: Make Put - Make Suggestion
+ 	 * Description: Mr. Green making suggestion 
+ 	 * Expected to return 200 if suggestion successfully sent to server
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makePutTestMakeSuggestion()
+ 	{
+ 		JSONObject makeSuggestion = new JSONObject();
+ 		makeSuggestion.put("gameID", gameUUID);
+ 		makeSuggestion.put("playerWhoSuggested", "Mr. Green");
+ 		JSONObject suggestions = new JSONObject();
+ 		suggestions.put("suspect", "Miss Scarlet");
+ 		suggestions.put("weapon", "Knife");
+ 		suggestions.put("location", "Kitchen");
+ 		makeSuggestion.put("cardsSuggested", suggestions);
+
+ 		int result = ClueLessUtils.makePut(makeSuggestion.toString(), 
+ 				"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+ 				+ "/Test/game");
+
+ 		System.out.print("Make Put - Make Suggestion: ");
+ 		System.out.println(result);
+		System.out.println("---------------------------------------------");
+ 		assertEquals("200", result);
+ 	}
+ 	
+ 	/**
+ 	 * Test Case: Make Put - Pass Suggestion
+ 	 * Description: Mr. Green passing suggestion 
+ 	 * Expected to return 200 if message successfully sent to server
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makePutTestPassSuggestion()
+ 	{
+ 		JSONObject passSuggestion = new JSONObject();
+ 		passSuggestion.put("messageType", "PassSuggestion");
+ 		passSuggestion.put("gameID", gameUUID);
+ 		passSuggestion.put("playerWhoSuggested", "Mr. Green");
+ 		passSuggestion.put("nextPlayer", "Miss Scarlet");
+
+ 		int result = ClueLessUtils.makePut(passSuggestion.toString(), 
+ 				"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+ 				+ "/Test/game");
+
+ 		System.out.print("Make Put - Pass Suggestion: ");
+ 		System.out.println(result);
+		System.out.println("---------------------------------------------");
+ 		assertEquals("200", result);
+ 	}
+ 	
+ 	/**
+ 	 * Test Case: Make Put - End Turn
+ 	 * Description: Miss Scarlet ending her turn 
+ 	 * Expected to return 200 if message successfully sent to server
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makePutTestEndTurn()
+ 	{
+ 		JSONObject endTurn = new JSONObject();
+ 		endTurn.put("gameID", gameUUID);
+ 		endTurn.put("playerFinishedTurn", "Miss Scarlet");
+ 		endTurn.put("newLocation", "Mr.Green");
+
+ 		int result = ClueLessUtils.makePut(endTurn.toString(), 
+ 				"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+ 				+ "/Test/game");
+
+ 		System.out.print("Make Put - End Turn: ");
+ 		System.out.println(result);
+		System.out.println("---------------------------------------------");
+ 		assertEquals("200", result);
+ 	}
+ 	
+ 	/**
+ 	 * Test Case: Make Put - Disprove Suggestion
+ 	 * Description: Disproving Mr. Green's suggestion
+ 	 * Expected to return 200 if message successfully sent to server
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makePutTestDisproveSuggestion()
+ 	{
+ 		JSONObject disproveSuggestion = new JSONObject();
+ 		disproveSuggestion.put("messageType", "disporveSuggestion");
+ 		disproveSuggestion.put("gameID", gameUUID);
+ 		disproveSuggestion.put("playerWhoSuggested", "Mr. Green");
+ 		disproveSuggestion.put("cardReveled", "Kitchen");
+
+ 		int result = ClueLessUtils.makePut(disproveSuggestion.toString(), 
+ 				"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+ 				+ "/Test/game");
+
+ 		System.out.print("Make Put - Disprove Suggestion: ");
+		System.out.println("---------------------------------------------");
+ 		System.out.println(result);
+ 		assertEquals("200", result);
+ 	}
+ 	
+ 	/**
+ 	 * Test Case: Make Get - Join Game
+ 	 * Description: Let Mr. Green to Join Game 
+ 	 * Expected to return "welcomeToGame" if successfully moved player
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makeGetTestJoinGame() {	
+ 		JSONObject joinGame = new JSONObject();
+ 		joinGame.put("gameID", gameUUID);
+ 		joinGame.put("playerName", "Mr. Green");
+
+ 		StringBuilder result;
 		try {
-			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
-					"disproveSuggestion");
-			System.out.print("Disprove Suggestion: ");
-			System.out.println(result);
+			result = ClueLessUtils.makeGet(joinGame.toString(), 
+					"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+					+ "/Test/game/" + gameUUID);
+	 		JSONObject resultJson = new JSONObject(result.toString());
+	 		System.out.print("Make Get - Join Game: ");
+	 		System.out.println(result);
 			System.out.println("---------------------------------------------");
-			assertEquals(200, result);
+	 		
+	 		assertEquals("welcomeToGame", resultJson.get("messageType"));
 		} catch (IOException e) {
 			fail(e);
 		}
-	}
-	
-	/**
-	 * Test Case: Make Post - End Turn
-	 * Description: Miss Scarlet ends her turn 
-	 * Expected to return 200 if message successfully sent to server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makePostTestEndTurn() {	
-		
-		int result;
+ 	}
+ 	
+ 	/**
+ 	 * Test Case: Make Get - Make Accusation
+ 	 * Description: Mr. Green making accusation
+ 	 * Expected to return accusationResult for messageType if message 
+ 	 * successfully sent to server
+ 	 */
+ 	@org.junit.jupiter.api.Test
+ 	public void makeGetTestMakeAccusation()
+ 	{
+ 		JSONObject makeAccusation = new JSONObject();
+ 		makeAccusation.put("gameID", gameUUID);
+ 		makeAccusation.put("playerWhoAccused", "Mr. Green");
+ 		JSONObject suggestions = new JSONObject();
+ 		suggestions.put("suspect", "Miss Scarlet");
+ 		suggestions.put("weapon", "Knife");
+ 		suggestions.put("location", "Ballroom");
+ 		makeAccusation.put("cardsSuggested", suggestions);
+
+ 		StringBuilder result;
 		try {
-			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
-					"endTurn");
-			System.out.print("End Turn: ");
-			System.out.println(result);
+			result = ClueLessUtils.makeGet(makeAccusation.toString(), 
+					"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+					+ "/Test/game/" + gameUUID);
+
+	 		JSONObject resultJson = new JSONObject(result.toString());
+	 		
+	 		System.out.print("Make Get - Make Accusation: ");
+	 		System.out.println(result);
 			System.out.println("---------------------------------------------");
-			assertEquals(200, result);
+	 		assertEquals("accusationResult", resultJson.get("messageType"));
 		} catch (IOException e) {
-			fail(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * Test Case: Make Post - Join Game
-	 * Description: Mr. Green joins the game 
-	 * Expected to return 200 if message successfully sent to server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makePostTestJoinGame() {	
-		
-		int result;
-		try {
-			result = ClueLessUtils.makePost(gameUUID, "Mr. Green", 3, 
-					"joinGame");
-			System.out.print("Join Game: ");
-			System.out.println(result);
-			System.out.println("---------------------------------------------");
-			assertEquals(200, result);
-		} catch (IOException e) {
-			fail(e);
-		}
-	}
-	
-	/**
-	 * Test Case: Make Post - Move Player
-	 * Description: Miss Scarlet moves 
-	 * Expected to return 200 if message successfully sent to server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makePostTestMovePlayer() {	
-		
-		int result;
-		try {
-			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
-					"movePlayer");
-			System.out.print("Move Player: ");
-			System.out.println(result);
-			System.out.println("---------------------------------------------");
-			assertEquals(200, result);
-		} catch (IOException e) {
-			fail(e);
-		}
-	}
-	
-	/**
-	 * Test Case: Make Post - Pass Suggestion
-	 * Description: Miss Scarlet passes suggestion 
-	 * Expected to return 200 if message successfully sent to server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makePostTestPassSuggestion() {	
-		
-		int result;
-		try {
-			result = ClueLessUtils.makePost(gameUUID, "Miss Scarlet", 3, 
-					"passSuggestion");
-			System.out.print("Pass Suggestion: ");
-			System.out.println(result);
-			System.out.println("---------------------------------------------");
-			assertEquals(200, result);
-		} catch (IOException e) {
-			fail(e);
-		}
-	}
-	
-	/**
-	 * Test Case: Make Post - Make Suggestion
-	 * Description: Mr. Green makes suggestion 
-	 * Expected to return 200 if message successfully sent to server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makePostTestMakeSuggestion() {	
-		
-		int result;
-		try {
-			result = ClueLessUtils.makePost(gameUUID, "Mr. Green", 3, 
-					"suggestion");
-			System.out.print("Pass Suggestion: ");
-			System.out.println(result);
-			System.out.println("---------------------------------------------");
-			assertEquals(200, result);
-		} catch (IOException e) {
-			fail(e);
-		}
-	}
-	
-	/**
-	 * Test Case: Make Get - Make Accusation
-	 * Description: A player makes accusation
-	 * Expected to return Weapon if message successfully sent to Server
-	 */
-	@org.junit.jupiter.api.Test
-	public void makeGetTestMakeAccusation() throws JSONException {	
-		
-		StringBuilder result;
-		try {
-			
-			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), 
-					"makeAccusation"); 
-					
-			System.out.print("Make Accusation: ");
-			System.out.println(result);
-			System.out.println("---------------------------------------------");
-			
-			JSONObject resultJson = new JSONObject(result.toString());
-			
-			assertEquals("Weapon", resultJson.get("weapon").toString());
-			
-		} catch (IOException e) {
-			fail(e);
-		}
-	}
-	
-	/**
+
+ 	}
+ 	
+ 	/**
 	 * Test Case: Make Get - Start Game
 	 * Description: When a game starts
 	 * Expected to return startGame for messageType if message successfully 
@@ -196,15 +229,35 @@ class ClueLessUtilsTest {
 	public void makeGetTestStarGame() throws JSONException {	
 		
 		StringBuilder result;
+		UUID startGameUUID = UUID.randomUUID();
+		
+		//Create Mr Green
+		JSONObject greenJoinGame = new JSONObject();
+		greenJoinGame.put("gameID", gameUUID);
+		greenJoinGame.put("playerName", "Mr. Green");
+		
+		//Create Mrs. White
+ 		JSONObject whiteJoinGame = new JSONObject();
+ 		whiteJoinGame.put("gameID", gameUUID);
+ 		whiteJoinGame.put("playerName", "Mrs. White");
+		
 		try {
-			ClueLessUtils.makePost("12345678", "Miss Scarlet", 3,
+			//Miss Scarlet creates game
+			ClueLessUtils.makePost(startGameUUID.toString(), "Miss Scarlet", 3,
 					"createGame");
-			ClueLessUtils.makePost("12345678", "Mr. Green", 3,
-					"joinGame");
-			ClueLessUtils.makePost("12345678", "Mrs. White", 3,
-					"joinGame");
 			
-			result = ClueLessUtils.makeGet(String.valueOf(12345678), 
+			//Mr. Green joins game
+			ClueLessUtils.makeGet(greenJoinGame.toString(), 
+					"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+					+ "/Test/game/" + startGameUUID);
+			
+			//Mrs. White joins game
+			ClueLessUtils.makeGet(whiteJoinGame.toString(), 
+					"https://jroe630mfb.execute-api.us-east-2.amazonaws.com"
+					+ "/Test/game/" + startGameUUID);
+			
+			
+			result = ClueLessUtils.makeGet(startGameUUID.toString(), 
 					"startGame"); 
 					
 			System.out.print("Start Game: ");
@@ -248,7 +301,6 @@ class ClueLessUtilsTest {
 			fail(e);
 		}
 	}
-	
 	
 	/**
 	 * Test Case: Make Get - Location Update
@@ -314,7 +366,7 @@ class ClueLessUtilsTest {
 	 * Expected to return contradictSuggestion for messageType if message 
 	 * successfully sent to Server
 	 */
-	@Test
+	@org.junit.jupiter.api.Test
 	public void makeGetTestContradictSuggestion() throws JSONException {	
 		
 		StringBuilder result;
