@@ -170,8 +170,8 @@ class ClueLessUtilsTest {
 		StringBuilder result;
 		try {
 			
-			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), 
-					"makeAccusation"); 
+			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), "whoCares",
+					"makeAccusation");
 					
 			System.out.print("Make Accusation: ");
 			System.out.println(result);
@@ -204,8 +204,8 @@ class ClueLessUtilsTest {
 			ClueLessUtils.makePost("12345678", "Mrs. White", 3,
 					"joinGame");
 			
-			result = ClueLessUtils.makeGet(String.valueOf(12345678), 
-					"startGame"); 
+			result = ClueLessUtils.makeGet(String.valueOf(12345678), "whoCares",
+					"startGame");
 					
 			System.out.print("Start Game: ");
 			System.out.println(result);
@@ -232,8 +232,8 @@ class ClueLessUtilsTest {
 		StringBuilder result;
 		try {
 			
-			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), 
-					"turnUpdate"); 
+			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), "whoCares",
+					"turnUpdate");
 					
 			System.out.print("Turn Update: ");
 			System.out.println(result);
@@ -262,8 +262,8 @@ class ClueLessUtilsTest {
 		StringBuilder result;
 		try {
 			
-			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), 
-					"locationUpdate"); 
+			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), "whoCares",
+					"locationUpdate");
 					
 			System.out.print("Turn Update: ");
 			System.out.println(result);
@@ -291,8 +291,8 @@ class ClueLessUtilsTest {
 		StringBuilder result;
 		try {
 			
-			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), 
-					"suggestion"); 
+			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), "Mrs.White",
+					"suggestion");
 					
 			System.out.print("Suggestion Made: ");
 			System.out.println(result);
@@ -320,8 +320,8 @@ class ClueLessUtilsTest {
 		StringBuilder result;
 		try {
 			
-			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), 
-					"contradict"); 
+			result = ClueLessUtils.makeGet(String.valueOf(gameUUID), "whoCares",
+					"contradict");
 					
 			System.out.print("Contradict Suggestion: ");
 			System.out.println(result);
