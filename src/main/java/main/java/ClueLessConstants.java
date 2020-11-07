@@ -20,9 +20,9 @@ public class ClueLessConstants {
 
     public ClueLessConstants() {
         SUSPECT_LIST = new ArrayList<String>();
-        SUSPECT_LIST.add("Colonel Mustard");
-        SUSPECT_LIST.add("Miss Scarlet");
-        SUSPECT_LIST.add("Professor Plum");
+        SUSPECT_LIST.add("ColonelMustard");
+        SUSPECT_LIST.add("MissScarlet");
+        SUSPECT_LIST.add("ProfessorPlum");
         SUSPECT_LIST.add("Mr.Green");
         SUSPECT_LIST.add("Mrs.White");
         SUSPECT_LIST.add("Mrs.Peacock");

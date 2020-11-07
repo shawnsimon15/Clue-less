@@ -39,73 +39,47 @@ public class GameActions {
     // movePiece will be called by a player who wants to move their piece.
     public void movePiece(String gameID, String pName, String newLocation) throws IOException {
         System.out.println(pName + " has moved to " + newLocation);
-        ClueLessUtils.makePost(gameID, pName, 4, "movePlayer");
+        ClueLessUtils.movePlayerPost(gameID, pName, newLocation);
     }
 
     // makeGuess will be called by a player when they want to make a guess
-    public void makeGuess(String gameID, String suspectName,
+    public void makeGuess(String gameID, String pName, String suspectName,
                           String weaponName, String locationName) throws IOException {
         // called by main.userInterface
-        StringBuilder response = ClueLessUtils.makeGet(gameID, "locationUpdate");
-        JSONObject responseJSON = new JSONObject(response.toString());
-        JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
-
-        String currentLocation = locationUpdate.get(playerName).toString();
-
-        String badLocations = "hallway"; // TODO: update the locations where you cannot make suggestion
-        if (currentLocation.equals(badLocations)) {
-            System.out.println("You cannot make a suggestion from the " + badLocations);
-            return;
-        } else {
-            ClueLessUtils.makePost(gameID, playerName,5,"suggestion");
-        }
+        ClueLessUtils.suggestionPost(gameID, pName, suspectName, weaponName, locationName);
     }
 
     //makeAccusation will be called when a player wants to make an accusation
-    public void makeAccusation(String gameID, String suspectName,
+    public String makeAccusation(String gameID, String pName, String suspectName,
                                String weaponName, String locationName) throws IOException {
 
-        /********* Get location of user on the board *********/
-        StringBuilder response = ClueLessUtils.makeGet(gameID, "locationUpdate");
-        JSONObject responseJSON = new JSONObject(response.toString());
-        JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
+        StringBuilder winningTriad = ClueLessUtils.makeGet(gameID, playerName, "makeAccusation");
+        JSONObject triad = new JSONObject(winningTriad.toString());
+        String suspect = triad.get("suspect").toString();
+        String weapon = triad.get("weapon").toString();
+        String location = triad.get("location").toString();
 
-        String currentLocation = locationUpdate.get(playerName).toString();
-        /********* Get location of user on the board *********/
-
-        String badLocations = "hallway";
-        if (currentLocation.equals(badLocations)) {
-            System.out.println("You cannot make an accusation from the " + badLocations);
-            return;
-        } else {
-            StringBuilder winningTriad = ClueLessUtils.makeGet(gameID,"makeAccusation");
-            JSONObject triad = new JSONObject(winningTriad.toString());
-            String suspect = triad.get("suspect").toString();
-            String weapon = triad.get("weapon").toString();
-            String location = triad.get("location").toString();
-
-            if (suspect.equals(suspectName) &&
-                weapon.equals(weaponName)   &&
+        if (suspect.equals(suspectName) &&
+                weapon.equals(weaponName) &&
                 location.equals(locationName)) {
-                System.out.println("You made the correct accusation!");
-                System.out.println("The game is over");
-                //Send msg to db that game is over
-                ClueLessUtils.makePost(gameID, playerName, 5, "gameOver");
-            } else {
-                System.out.println("You made the WRONG accusation");
-                System.out.println("Your game is over");
-                //Send msg to db that this player lost
-                ClueLessUtils.makePost(gameID, playerName, 5, "playerLost");
-
-            }
-
+            System.out.println("You made the correct accusation!");
+            System.out.println("The game is over");
+            //Send msg to db that game is over
+            ClueLessUtils.makePost(gameID, pName, 5, "gameOver");
+            return "gameOver";
         }
+        System.out.println("You made the WRONG accusation");
+        System.out.println("Your game is over");
+        //Send msg to db that this player lost
+        ClueLessUtils.makePost(gameID, pName, 5, "playerLost");
+        return "playerLost";
+
     }
 
     // endTurn will be called when the player wants to end their turn
-    public void endTurn(String nextPlayer) {
+    public void endTurn(String nextPlayer) throws IOException {
         // called by main.userInterface
-        ClueLessUtils.makePut("");
+        ClueLessUtils.endTurnPost(gameUUID, playerName, nextPlayer);
     }
 
     // respondToAccusation will be called when a player tries to respond to an accusation

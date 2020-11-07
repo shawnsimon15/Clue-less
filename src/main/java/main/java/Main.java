@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class Main {
@@ -23,12 +24,17 @@ public class Main {
     private static String playerName;
 
     public static final ArrayList<String> turnOrder = new ArrayList<String>(Arrays
-            .asList("Miss Scarlet", "Colonel Mustard", "Mrs.White",
-            "Mr.Green", "Mrs.Peacock", "Professor Plum")); // Clockwise from Miss Scarlet
+            .asList("MissScarlet", "ColonelMustard", "Mrs.White",
+            "Mr.Green", "Mrs.Peacock", "ProfessorPlum")); // Clockwise from Miss Scarlet
+    public static final ArrayList<String> locations = new ArrayList<String>(Arrays
+            .asList("Kitchen", "Hall", "Ballroom", "Conservatory",
+                    "Dining Room", "Study", "Billiard Room", "Library", "Lounge"));
+    public static final ArrayList<String> weapons = new ArrayList<String>(Arrays
+            .asList("Candlestick", "Revolver", "Knife", "Lead Pipe", "Rope", "Wrench"));
 
 
     // main will run be the application run by a player
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Welcome to ClueLess!");
 
         autoMessageCheck = new AutoMessageCheck();
@@ -67,7 +73,7 @@ public class Main {
      * Description: Interacts with user for gameplay experience (test-based or GUI)
      * Does not return
      **/
-    public static void userInterface() throws IOException {
+    public static void userInterface() throws IOException, InterruptedException {
         // Create GUI
         Scanner input = new Scanner(System.in);
         System.out.println("Would you like to Create or Join a game? ");
@@ -108,7 +114,7 @@ public class Main {
 
         //Check db to see if start game has happened
         //Use AutoMessageCheck to make get request for start game
-        autoMessageCheck.startAutoMessageCheck(gameActions.getGameUUID());
+        autoMessageCheck.startGameAutoMessageCheck(gameActions.getGameUUID());
 
         //after you get all player info from startGame GET, then enter
         //  while loop that will end when it gets strings gameOver or youLost
@@ -120,7 +126,7 @@ public class Main {
 
         System.out.println("Waiting for players to join....");
         while(!msg.equals("startGame")) {
-            startGameResponse = autoMessageCheck.getResponse();
+            startGameResponse = autoMessageCheck.getStartGameResponse();
             if (startGameResponse != null) {
                 // TODO: Take this out; only for testing
                 if (i == 0) {
@@ -199,7 +205,7 @@ public class Main {
                 ArrayList<String> emptyList = new ArrayList<>();
                 playerStatus.setPlayerHand(emptyList);
             }
-            playerStatus.setPlayerLocation(plyr + "Start"); // TODO: define locations
+            playerStatus.setPlayerLocation(plyr + "Start");
             gameStatusPL.add(playerStatus);
         }
         /********* Determine order for the game *********/
@@ -209,64 +215,313 @@ public class Main {
         startGame(gameStatus.getActivePlayerList());
     }
 
-    public static void startGame(List<PlayerStatus> playerList) throws IOException {
+    public static void startGame(List<PlayerStatus> playerList) throws IOException, InterruptedException {
         // Start the game
         String endOfGame = " ";
         int whoseTurn = 0;
-        while (!endOfGame.equals("playerLost") || !endOfGame.equals("gameOver")) {
+        int i = 0;
+
+        //Check db to see if start game has happened
+        //Use AutoMessageCheck to make get request for start game
+        autoMessageCheck.suggestionAutoMessageCheck(gameActions.getGameUUID(), playerName);
+        autoMessageCheck.contradictAutoMessageCheck(gameActions.getGameUUID(), playerName);
+        autoMessageCheck.locationUpdateAutoMessageCheck(gameActions.getGameUUID(), playerName);
+
+        // start suggestion thread
+
+        boolean playerMadeSuggestion = false;
+        while (!endOfGame.equals("playerLost") && !endOfGame.equals("gameOver")) {
             // TODO: print board on screen
 
-            if (playerList.get(whoseTurn).getPlayerName().equals(playerName)) {
-                Scanner input = new Scanner(System.in);
-                System.out.println("What would you like to do? ");
-                System.out.println("    a) Move Player");
-                System.out.println("    b) Make a Suggestion");
-                System.out.println("    c) Make an Accusation");
-                System.out.println("    d) Make a Contradiction");
-                System.out.println("    e) Disprove a Suggestion");
-                System.out.println("    f) Pass Suggestion");
+            StringBuilder suggestionThreadResponse = autoMessageCheck.getSuggestionResponse();
+            String suggestionResponse = " ";
+            JSONObject suggestionJSON = null;
+            if (suggestionThreadResponse != null) {
+                suggestionJSON = new JSONObject(suggestionThreadResponse.toString());
+                suggestionResponse = suggestionJSON.get("messageType").toString();
+            }
 
-                String choice = input.nextLine();
+            // Check if anyone has disproved/passed a suggestion
+            StringBuilder contradictThreadResponse = autoMessageCheck.getContradictResponse();
+            String contradictResponse = " ";
+            JSONObject contradictJSON = null;
+            if (contradictThreadResponse != null) {
+                contradictJSON = new JSONObject(contradictThreadResponse.toString());
+                contradictResponse = contradictJSON.get("messageType").toString();
+            }
 
-                switch (choice.toLowerCase()) {
-                    case "a":
-                        String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
-                        Scanner moveTo = new Scanner(System.in);
-                        System.out.println("Where would you like to move?");
-                        String newLocation = moveTo.nextLine();
-                        // TODO: take input and convert to accepted string in validMove()
-                        boolean validMove = validMove(currentLocation, newLocation);
-                        if (validMove) {
-                            gameActions.movePiece(gameActions.getGameUUID(), playerName, newLocation);
-                        }
-                        break;
-                    case "b":
-                        break;
-                    case "c":
-                        break;
-                    case "d":
-                        break;
-                    case "e":
-                        break;
-                    case "f":
-                        break;
+            // Check if anyone has moved
+            StringBuilder locationUpdateThreadResponse = autoMessageCheck.getLocationUpdateResponse();
+            String locationUpdateResponse = " ";
+            JSONObject locationUpdateJSON = null;
+            if (contradictThreadResponse != null) {
+                locationUpdateJSON = new JSONObject(locationUpdateThreadResponse.toString());
+                locationUpdateResponse = locationUpdateJSON.get("messageType").toString();
+            }
+
+            // A player has moved, so update their location on map
+            if (locationUpdateResponse.equals("playerLocation")) {
+                String player = locationUpdateJSON.get("playerWhoMoved").toString();
+                String playerNewLocation = locationUpdateJSON.get("location").toString();
+
+                for (PlayerStatus ps : playerList) {
+                    if(ps.getPlayerName().equals(player)) {
+                        ps.setPlayerLocation(playerNewLocation);
+                    }
+                }
+            }
+
+            StringBuilder turnUpdate = ClueLessUtils.makeGet(gameActions.getGameUUID(), playerName, "turnUpdate");
+            JSONObject turnUpdateJSON = new JSONObject(turnUpdate.toString());
+            String turnUpdateResponse = turnUpdateJSON.get("currentTurn").toString();
+
+            if (playerList.get(whoseTurn).getPlayerName().equals(playerName) && turnUpdateResponse.equals(playerName)) {
+
+                // Delete the suggestion msgs in db after everyone has contradicted
+                if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion) {
+                    if (playerMadeSuggestion) {
+                        ClueLessUtils.deletePost(gameActions.getGameUUID(), playerName, "makeSus_");
+                        playerMadeSuggestion = false;
+                    }
+                    Scanner input = new Scanner(System.in);
+                    System.out.println("What would you like to do? ");
+                    System.out.println("    a) Move Player");
+                    System.out.println("    b) Make a Suggestion");
+                    System.out.println("    c) Make an Accusation");
+                    System.out.println("    d) Make a Contradiction");
+                    System.out.println("    e) Disprove a Suggestion");
+                    System.out.println("    f) Pass Suggestion");
+                    String choice = input.nextLine();
+
+                    switch (choice.toLowerCase()) {
+                        case "a":
+                            String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
+                            boolean validMove = false;
+                            while (!validMove) {
+                                System.out.println("Where would you like to move?");
+                                String newLocation = input.nextLine();
+                                validMove = validMove(currentLocation, newLocation);
+                                if (validMove) {
+                                    gameActions.movePiece(gameActions.getGameUUID(), playerName, newLocation);
+                                    TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg
+                                    playerList.get(whoseTurn).setPlayerLocation(newLocation);
+                                } else {
+                                    System.out.println("Please choose another location");
+                                }
+                            }
+                            break;
+                        case "b":
+                            if (locations.contains(playerList.get(whoseTurn).getPlayerLocation())) {
+                                String suspect = " ";
+                                while (!turnOrder.contains(suspect)) {
+                                    System.out.println("Who do you think is the suspect?");
+                                    suspect = input.nextLine();
+                                    if (!turnOrder.contains(suspect)) {
+                                        System.out.println(suspect + " is not a valid suspect.");
+                                    }
+                                }
+                                String location = " ";
+                                while (!locations.contains(location)) {
+                                    System.out.println("Where do you think " + suspect + " did it?");
+                                    location = input.nextLine();
+                                    if (!locations.contains(location)) {
+                                        System.out.println(location + " is not a valid location.");
+                                    }
+                                }
+                                String weapon = " ";
+                                while (!weapons.contains(weapon)) {
+                                    System.out.println("How do you think " + suspect + " did it?");
+                                    weapon = input.nextLine();
+                                    if (!weapons.contains(weapon)) {
+                                        System.out.println(weapon + " is not a valid weapon.");
+                                    }
+                                }
+                                gameActions.makeGuess(gameActions.getGameUUID(), playerName, suspect, weapon, location);
+                                System.out.println("You have made a suggestion");
+                                // Need to move player in suggestion to location of current player
+                                gameActions.movePiece(gameActions.getGameUUID(), suspect, location);
+                                ArrayList<PlayerStatus> gameStatusList = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+                                for (PlayerStatus ps : gameStatusList) {
+                                    if(ps.getPlayerName().equals(suspect)) {
+                                        ps.setPlayerLocation(location);
+                                    }
+                                }
+                                playerMadeSuggestion = true;
+                                TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
+                                                                   // just written to db
+                            } else {
+                                System.out.println("You cannot make a suggestion because you are not in a room.");
+                            }
+                            break;
+                        case "c":
+                            if (locations.contains(playerList.get(whoseTurn).getPlayerLocation())) {
+                                String suspect = " ";
+                                while (!turnOrder.contains(suspect)) {
+                                    System.out.println("Who do you think is the suspect?");
+                                    suspect = input.nextLine();
+                                    if (!turnOrder.contains(suspect)) {
+                                        System.out.println(suspect + " is not a valid suspect.");
+                                    }
+                                }
+                                String location = " ";
+                                while (!location.equals(playerList.get(whoseTurn).getPlayerLocation())) {
+                                    System.out.println("Where do you think " + suspect + " did it?");
+                                    location = input.nextLine();
+                                    if (!locations.contains(location)) {
+                                        System.out.println(location + " is not where you are currently.");
+                                    }
+                                }
+                                String weapon = " ";
+                                while (!weapons.contains(weapon)) {
+                                    System.out.println("How do you think " + suspect + " did it?");
+                                    weapon = input.nextLine();
+                                    if (!weapons.contains(weapon)) {
+                                        System.out.println(weapon + " is not a valid weapon.");
+                                    }
+                                }
+                                // update string endOfGame when needed
+                                endOfGame = gameActions.makeAccusation(gameActions.getGameUUID(),
+                                        playerName, suspect, weapon, location);
+                                TimeUnit.SECONDS.sleep(2);
+                            } else {
+                                System.out.println("You must be in a room to make an accusation.");
+                            }
+                            break;
+                        case "d":
+                            break;
+                        case "e":
+                            System.out.println("Which card do you want to reveal?");
+                            String card = input.nextLine();
+
+                            ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, card);
+                            TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
+                            break;
+                        case "f":
+                            int currentPlayer = whoseTurn;
+                            if (currentPlayer == (playerList.size() - 1)) {
+                                currentPlayer = 0;
+                            } else {
+                                currentPlayer++;
+                            }
+                            ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
+                                    playerList.get(currentPlayer).getPlayerName());
+                            TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
+                            break;
+                    }
+                } else {
+                    // suggestion has been made, so player needs to act accordingly
+                    // need to get a response from each player, then delete sus msgs in db
+                    String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
+                    System.out.println(playerWhoSuggested + " has made the following suggestion: ");
+                    JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
+
+                    System.out.print(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") + ", " +
+                            cardsSuggested.get("location"));
+                    System.out.println();
+                    Scanner input = new Scanner(System.in);
+                    System.out.println("What would you like to do? ");
+                    System.out.println("    a) Disprove a Suggestion");
+                    System.out.println("    b) Pass Suggestion");
+                    String choice = input.nextLine();
+
+                    switch (choice.toLowerCase()) {
+                        case "a":
+                            System.out.println("Which card do you want to reveal?");
+                            String card = input.nextLine();
+
+                            ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, card);
+                            break;
+                        case "b":
+                            int currentPlayer = whoseTurn;
+                            if (currentPlayer == (playerList.size() - 1)) {
+                                currentPlayer = 0;
+                            } else {
+                                currentPlayer++;
+                            }
+                            ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
+                                    playerList.get(currentPlayer).getPlayerName());
+                            break;
+                    }
                 }
 
-                // TODO: send endTurn msg
-                // TODO: start threads to receive GETs
-                // TODO: update string endOfGame when needed
+                // Send endTurn msg to signal player is done
+                if (whoseTurn == (playerList.size() - 1)) {
+                    whoseTurn = 0;
+                } else {
+                    whoseTurn++;
+                }
+                // send msg to db updating location
+
+                gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
             } else {
                 System.out.println("It is not your turn. Please Wait.");
-            }
-            /********* Keeping track of whose turn it is *********/
-            if (whoseTurn == (playerList.size() - 1)) {
-                whoseTurn = 0;
-            } else {
-                whoseTurn++;
-            }
-            /********* Determine order for the game *********/
+                i++;
+                if (playerMadeSuggestion) {
+                    if (contradictResponse.equals("disproveMade")){
+                        String playerWhoDisproved = contradictJSON.get("playerWhoDisproved").toString();
+                        ClueLessUtils.deletePost(gameActions.getGameUUID(), playerWhoDisproved, "makeSus_");
+                        String cardRevealed = contradictJSON.get("cardRevealed").toString();
+                        // add card to player who disproved
+                        ArrayList<PlayerStatus> gameStatusList = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+                        for (PlayerStatus ps : gameStatusList) {
+                            if(ps.getPlayerName().equals(playerWhoDisproved)) {
+                                ps.addPlayerHand(cardRevealed);
+                            }
+                        }
+                        System.out.println(playerWhoDisproved + " revealed " + cardRevealed + "!");
 
-            gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
+
+                    } else if (contradictResponse.equals("passMade")) {
+                        String playerWhoPassed = contradictJSON.get("playerWhoPassed").toString();
+                        ClueLessUtils.deletePost(gameActions.getGameUUID(), playerWhoPassed, "makeSus_");
+                        String nextPlayer = contradictJSON.get("nextPlayer").toString();
+                        System.out.println(playerWhoPassed + " passed suggestion!");
+
+                    }
+                }
+                /************ For testing ************
+                if (i == 0) {
+                    gameActions.movePiece(gameActions.getGameUUID(), "Mrs.White", "Hallway:KB");
+                    StringBuilder playerMoved = ClueLessUtils.makeGet(gameActions.getGameUUID(),
+                            playerList.get(whoseTurn).getPlayerName(), "playerLocation");
+                    JSONObject playerMovedGETJSON = new JSONObject(playerMoved.toString());
+                    String playerLocation = playerMovedGETJSON.get("location").toString();
+                    playerList.get(whoseTurn).setPlayerLocation(playerLocation);
+                    System.out.println(playerList.get(whoseTurn).getPlayerLocation());
+                } else if (i == 3) {
+                    StringBuilder suggestionGET = ClueLessUtils.makeGet(gameActions.getGameUUID(),
+                            playerList.get(whoseTurn).getPlayerName(), "suggestion");
+                    JSONObject suggestionGETJSON = new JSONObject(suggestionGET.toString());
+                    String playerWhoSuggested = suggestionGETJSON.get("playerWhoSuggested").toString();
+                    System.out.println(playerWhoSuggested + " made a suggestion");
+                    System.out.println("This was " + playerWhoSuggested + " suggestion:");
+                    JSONObject cardsSuggested = (JSONObject) suggestionGETJSON.get("cardsSuggested");
+                    System.out.print(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") +
+                            ", " + cardsSuggested.get("location"));
+                    System.out.println();
+                }
+                i++;
+                 */
+                if (whoseTurn == (playerList.size() - 1)) {
+                    whoseTurn = 0;
+                } else {
+                    whoseTurn++;
+                }
+                gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
+                /************ For testing ************/
+
+                /*String waitingForPlayerToFinish = turnUpdateResponse;
+                while (waitingForPlayerToFinish.equals(turnUpdateResponse)) {
+                    TimeUnit.SECONDS.sleep(30);
+                    StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(), "turnUpdate");
+                    JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
+                    waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
+                }*/
+            }
+            System.out.println("****************************************************");
+            /********* Keeping track of whose turn it is *********/
+
+            /********* Determine order for the game *********/
         }
     }
 
@@ -281,7 +536,7 @@ public class Main {
         boolean validMove = false;
 
         /********* Get location of each player on the board *********/
-        StringBuilder response = ClueLessUtils.makeGet(gameActions.getGameUUID(), "locationUpdate");
+        StringBuilder response = ClueLessUtils.makeGet(gameActions.getGameUUID(), playerName, "locationUpdate");
         JSONObject responseJSON = new JSONObject(response.toString());
         JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
 
@@ -293,96 +548,133 @@ public class Main {
         /********* Get location of each player on the board *********/
 
         switch (desiredLocation) {
-            case "Hall:CB": // Hallway between Conservatory and Ballroom
-                if (!locations.contains("Hall:CB") || currentLocation.equals("Mr.GreenStart")) {
+            case "Hallway:CB": // Hallway between Conservatory and Ballroom
+                System.out.println("");
+                if (locations.contains("Hallway:CB")) {
+                    validMove = false;
+                } else if (currentLocation.equals("Mr.GreenStart") ||
+                           currentLocation.equals("Conservatory") ||
+                           currentLocation.equals("Ballroom")) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Conservatory" +
                             " and Ballroom"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:CL": // Hallway between Conservatory and Library
-                if (!locations.contains("Hall:CL") || currentLocation.equals("Mrs.PeacockStart")) {
+            case "Hallway:CL": // Hallway between Conservatory and Library
+                if (locations.contains("Hallway:CL")) {
+                    validMove = false;
+                } else if (currentLocation.equals("Mrs.PeacockStart") ||
+                           currentLocation.equals("Conservatory") ||
+                           currentLocation.equals("Library")) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Conservatory" +
                             " and Library"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:LS": // Hallway between Library and Study
-                if (!locations.contains("Hall:LS") || currentLocation.equals("Professor PlumStart")) {
+            case "Hallway:LS": // Hallway between Library and Study
+                if (locations.contains("Hallway:LS")) {
+                    validMove = false;
+                } else if (currentLocation.equals("ProfessorPlumStart")  ||
+                           currentLocation.equals("Library") ||
+                           currentLocation.equals("Study")) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Library" +
                             " and Study"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:LBR": // Hallway between Library and Billiard Room
-                if (!locations.contains("Hall:LBR")) {
+            case "Hallway:LBR": // Hallway between Library and Billiard Room
+                if (!locations.contains("Hallway:LBR") &&
+                        (currentLocation.equals("Library") ||
+                        currentLocation.equals("Billiard Room"))) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Library" +
-                            " and Billiary Room"); //TODO: maybe find way to add who is in the hallway currently
+                            " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:SH": // Hallway between Study and Hall
-                if (!locations.contains("Hall:SH")) {
+            case "Hallway:SH": // Hallway between Study and Hall
+                if (!locations.contains("Hallway:SH") &&
+                        (currentLocation.equals("Study") ||
+                        currentLocation.equals("Hall"))) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Study" +
                             " and Hall"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:HBR": // Hallway between Hall and Billiard Room
-                if (!locations.contains("Hall:HBR")) {
+            case "Hallway:HBR": // Hallway between Hall and Billiard Room
+                if (!locations.contains("Hallway:HBR") &&
+                        (currentLocation.equals("Hall") ||
+                        currentLocation.equals("Billiard Room"))) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Hall" +
                             " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:HL": // Hallway between Hall and Lounge
-                if (!locations.contains("Hall:HL") || currentLocation.equals("Miss ScarletStart")) {
+            case "Hallway:HL": // Hallway between Hall and Lounge
+                if (locations.contains("Hallway:HL")) {
+                    validMove = false;
+                } else if (currentLocation.equals("MissScarletStart")  ||
+                        currentLocation.equals("Hall") ||
+                        currentLocation.equals("Lounge")) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Hall" +
                             " and Lounge"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:LDR": // Hallway between Lounge and Dining Room
-                if (!locations.contains("Hall:LDR") || currentLocation.equals("Colonel MustardStart")) {
+            case "Hallway:LDR": // Hallway between Lounge and Dining Room
+                if (locations.contains("Hallway:LDR")) {
+                    validMove = false;
+                } else if (currentLocation.equals("ColonelMustardStart")  ||
+                        currentLocation.equals("Lounge") ||
+                        currentLocation.equals("Dining Room")) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Lounge" +
                             " and Dining Room"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:DRBR": // Hallway between Dining Room and Billiard Room
-                if (!locations.contains("Hall:DRBR")) {
+            case "Hallway:DRBR": // Hallway between Dining Room and Billiard Room
+                if (!locations.contains("Hallway:DRBR") &&
+                        (currentLocation.equals("Dining Room") ||
+                        currentLocation.equals("Billiard Room"))) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Dining Room" +
                             " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:DRK": // Hallway between Dining Room and Kitchen
-                if (!locations.contains("Hall:DRK")) {
+            case "Hallway:DRK": // Hallway between Dining Room and Kitchen
+                if (!locations.contains("Hallway:DRK") &&
+                        (currentLocation.equals("Dining Room") ||
+                        currentLocation.equals("Kitchen"))) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Dining Room" +
                             " and Kitchen"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:KB": // Hallway between Kitchen and Ballroom
-                if (!locations.contains("Hall:KB") || currentLocation.equals("Mrs.WhiteStart")) {
+            case "Hallway:KB": // Hallway between Kitchen and Ballroom
+                if (locations.contains("Hallway:KB")) {
+                    validMove = false;
+                } else if (currentLocation.equals("Mrs.WhiteStart")  ||
+                        currentLocation.equals("Kitchen") ||
+                        currentLocation.equals("Ballroom")) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Kitchen" +
                             " and Ballroom"); //TODO: maybe find way to add who is in the hallway currently
                 }
                 break;
-            case "Hall:BBR": // Hallway between Ballroom and Billiard Room
-                if (!locations.contains("Hall:BBR")) {
+            case "Hallway:BBR": // Hallway between Ballroom and Billiard Room
+                if (!locations.contains("Hallway:BBR") &&
+                        (currentLocation.equals("Ballroom") ||
+                                currentLocation.equals("Billiard Room"))) {
                     validMove = true;
                 } else {
                     System.out.println(playerName + " cannot move to the hallway between Ballroom" +
@@ -390,68 +682,72 @@ public class Main {
                 }
                 break;
             case "Conservatory":
-                if (currentLocation.equals("Hall:CB") || currentLocation.equals("Hall:CL")){
+                if (currentLocation.equals("Hallway:CB") || currentLocation.equals("Hallway:CL") ||
+                currentLocation.equals("Lounge")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Library":
-                if (currentLocation.equals("Hall:CL") || currentLocation.equals("Hall:LS")
-                        || currentLocation.equals("Hall:LBR")){
+                if (currentLocation.equals("Hallway:CL") || currentLocation.equals("Hallway:LS")
+                        || currentLocation.equals("Hallway:LBR")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Study":
-                if (currentLocation.equals("Hall:LS") || currentLocation.equals("Hall:SH")){
+                if (currentLocation.equals("Hallway:LS") || currentLocation.equals("Hallway:SH") ||
+                currentLocation.equals("Kitchen")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Hall":
-                if (currentLocation.equals("Hall:SH") || currentLocation.equals("Hall:HBR")
-                        || currentLocation.equals("Hall:HL")){
+                if (currentLocation.equals("Hallway:SH") || currentLocation.equals("Hallway:HBR")
+                        || currentLocation.equals("Hallway:HL")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Lounge":
-                if (currentLocation.equals("Hall:HL") || currentLocation.equals("Hall:LDR")){
+                if (currentLocation.equals("Hallway:HL") || currentLocation.equals("Hallway:LDR") ||
+                currentLocation.equals("Conservatory")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Dining Room":
-                if (currentLocation.equals("Hall:LDR") || currentLocation.equals("Hall:DRBR")
-                        || currentLocation.equals("Hall:DRK")){
+                if (currentLocation.equals("Hallway:LDR") || currentLocation.equals("Hallway:DRBR")
+                        || currentLocation.equals("Hallway:DRK")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Kitchen":
-                if (currentLocation.equals("Hall:DRK") || currentLocation.equals("Hall:KB")){
+                if (currentLocation.equals("Hallway:DRK") || currentLocation.equals("Hallway:KB") ||
+                currentLocation.equals("Study")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Ballroom":
-                if (currentLocation.equals("Hall:CB") || currentLocation.equals("Hall:KB")
-                        || currentLocation.equals("Hall:BBR")){
+                if (currentLocation.equals("Hallway:CB") || currentLocation.equals("Hallway:KB")
+                        || currentLocation.equals("Hallway:BBR")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
                 }
                 break;
             case "Billiard Room":
-                if (currentLocation.equals("Hall:BBR") || currentLocation.equals("Hall:LBR")
-                        || currentLocation.equals("Hall:HBR") || currentLocation.equals("Hall:DRBR")){
+                if (currentLocation.equals("Hallway:BBR") || currentLocation.equals("Hallway:LBR")
+                        || currentLocation.equals("Hallway:HBR") || currentLocation.equals("Hallway:DRBR")){
                     validMove = true;
                 } else {
                     System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string

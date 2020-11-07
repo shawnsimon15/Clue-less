@@ -25,8 +25,125 @@ public class ClueLessUtils {
         return con;
     }
 
-    // makeGet will be called when POST HTTP Request method is needed
-    // TODO: Make function for each to pass needed info
+    public static int sendPost(JSONObject jO, HttpURLConnection connection) throws IOException {
+        String requestString = jO.toString();
+
+        try(OutputStream outStream = connection.getOutputStream()) {
+            outStream.write(requestString.getBytes("UTF-8"));
+        }
+        int code = connection.getResponseCode();
+        return code;
+    }
+
+    public static StringBuilder readPostReturn(HttpURLConnection connection) {
+        StringBuilder response = new StringBuilder();
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"))){
+            String responseLine = null;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+
+    public static int movePlayerPost(String gameUUID, String playerName, String newLocation) throws IOException {
+        HttpURLConnection con = setUpHttpConnection("POST");
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("messageType", "MovePlayer");
+        jsonObject.put("gameID", gameUUID);
+        jsonObject.put("playerName", playerName);
+        jsonObject.put("newLocation", newLocation);
+
+        int code = sendPost(jsonObject, con);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
+        StringBuilder response = readPostReturn(con);
+        return code;
+    }
+
+    public static int endTurnPost(String gameUUID, String playerName, String nextPlayer) throws IOException {
+        HttpURLConnection con = setUpHttpConnection("POST");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("messageType", "EndTurn");
+        jsonObject.put("gameID", gameUUID);
+        jsonObject.put("playerFinishedTurn", playerName);
+        jsonObject.put("nextPlayer", nextPlayer);
+
+        int code = sendPost(jsonObject, con);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
+        StringBuilder response = readPostReturn(con);
+        return code;
+    }
+
+    public static int suggestionPost(String gameUUID, String playerName,
+                                     String suspect, String weapon, String location) throws IOException {
+        HttpURLConnection con = setUpHttpConnection("POST");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("messageType", "MakeSuggestion");
+        jsonObject.put("gameID", gameUUID);
+        jsonObject.put("playerWhoSuggested", playerName);
+        JSONObject cardsSuggested = new JSONObject();
+        cardsSuggested.put("suspect", suspect);
+        cardsSuggested.put("weapon",  weapon);
+        cardsSuggested.put("location", location);
+        jsonObject.put("cardsSuggested", cardsSuggested);
+
+        int code = sendPost(jsonObject, con);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
+        StringBuilder response = readPostReturn(con);
+        return code;
+    }
+
+    public static int disproveSuggestionPost(String gameUUID, String playerName,
+                                             String cardRevealed) throws IOException {
+        HttpURLConnection con = setUpHttpConnection("POST");
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("messageType", "DisproveSuggestion");
+        jsonObject.put("gameID", gameUUID);
+        jsonObject.put("playerWhoSuggested", playerName);
+        jsonObject.put("cardRevealed",  cardRevealed);
+
+        int code = sendPost(jsonObject, con);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
+        StringBuilder response = readPostReturn(con);
+        return code;
+    }
+
+    public static int passSuggestionPost(String gameUUID, String playerName,
+                                         String nextPlayer) throws IOException {
+        HttpURLConnection con = setUpHttpConnection("POST");
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("messageType", "PassSuggestion");
+        jsonObject.put("gameID", gameUUID);
+        jsonObject.put("playerWhoSuggested", playerName);
+        jsonObject.put("nextPlayer", nextPlayer);
+
+        int code = sendPost(jsonObject, con);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
+        StringBuilder response = readPostReturn(con);
+        return code;
+    }
+
+    public static int deletePost(String gameUUID, String playerName,
+                                         String msgID) throws IOException {
+        HttpURLConnection con = setUpHttpConnection("POST");
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("messageType", "Delete");
+        jsonObject.put("gameID", gameUUID);
+        jsonObject.put("playerToDelete", playerName);
+        jsonObject.put("msgID", msgID);
+
+        int code = sendPost(jsonObject, con);
+        //System.out.println("Reponse for " + typeOfPost + ": " + code);
+        StringBuilder response = readPostReturn(con);
+        return code;
+    }
+
     public static int makePost(String gameUUID, String playerName,
                                int numberOfPlayers, String typeOfPost) throws IOException {
         // make http request
@@ -37,39 +154,12 @@ public class ClueLessUtils {
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("selectedPlayer", playerName);
             jsonObject.put("numberOfPlayers", numberOfPlayers);
-        } else if (typeOfPost.equals("disproveSuggestion")) {
-            jsonObject.put("messageType", "DisproveSuggestion");
-            jsonObject.put("gameID", gameUUID);
-            jsonObject.put("playerWhoSuggested", playerName);
-            jsonObject.put("cardRevealed", "Blanket"); // TODO: STOP HARDCODING
-        } else if (typeOfPost.equals("endTurn")) {
-            jsonObject.put("messageType", "EndTurn");
-            jsonObject.put("gameID", gameUUID);
-            jsonObject.put("playerFinishedTurn", playerName);
-            jsonObject.put("nextPlayer", "TOK"); // TODO: STOP HARDCODING
-        } else if (typeOfPost.equals("joinGame")) {
+        }else if (typeOfPost.equals("joinGame")) {
             jsonObject.put("messageType", "JoinGame");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerName", playerName);
-        } else if (typeOfPost.equals("movePlayer")) {
-            jsonObject.put("messageType", "MovePlayer");
-            jsonObject.put("gameID", gameUUID);
-            jsonObject.put("playerName", playerName);
-            jsonObject.put("newLocation", "Place"); // TODO: STOP HARDCODING
         } else if (typeOfPost.equals("passSuggestion")) {
-            jsonObject.put("messageType", "PassSuggestion");
-            jsonObject.put("gameID", gameUUID);
-            jsonObject.put("playerWhoSuggested", playerName);
-            jsonObject.put("nextPlayer", "Billy"); // TODO: STOP HARDCODING
-        } else if (typeOfPost.equals("suggestion")) {
-            jsonObject.put("messageType", "MakeSuggestion");
-            jsonObject.put("gameID", gameUUID);
-            jsonObject.put("playerWhoSuggested", playerName);
-            JSONObject cardsSuggested = new JSONObject();
-            cardsSuggested.put("suspect", "Who"); // TODO: STOP HARDCODING
-            cardsSuggested.put("weapon", "What"); // TODO: STOP HARDCODING
-            cardsSuggested.put("location", "Where"); // TODO: STOP HARDCODING
-            jsonObject.put("cardsSuggested", cardsSuggested);
+
         } else if (typeOfPost.equals("gameOver")) {
             jsonObject.put("messageType", "GameOver");
             jsonObject.put("gameID", gameUUID);
@@ -86,15 +176,7 @@ public class ClueLessUtils {
         }
         int code = con.getResponseCode();
         //System.out.println("Reponse for " + typeOfPost + ": " + code);
-
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))){
-            StringBuilder response = new StringBuilder();
-            String responseLine = null;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
-            //System.out.println(response.toString());
-        }
+        StringBuilder response = readPostReturn(con);
         return code;
     }
 
@@ -105,7 +187,7 @@ public class ClueLessUtils {
     }
 
     // makeGet will be called when GET HTTP Request method is needed
-    public static StringBuilder makeGet(String gameID, String typeOfGet) throws IOException {
+    public static StringBuilder makeGet(String gameID, String player, String typeOfGet) throws IOException {
         // make http request
         HttpURLConnection con = null;
         StringBuilder response;
@@ -136,8 +218,14 @@ public class ClueLessUtils {
                 con = (HttpURLConnection) locationUpdateURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
+            case "playerLocation":
+                newUrl = newUrl + "?messageType=RequestMessage&Type=playerLocation&Player=" + player;
+                URL playerLocURL = new URL(newUrl);
+                con = (HttpURLConnection) playerLocURL.openConnection();
+                con.setRequestMethod("GET");
+                break;
             case "suggestion":
-                newUrl = newUrl + "?messageType=RequestMessage&Type=suggestion";
+                newUrl = newUrl + "?messageType=RequestMessage&Type=suggestion&Player=" + player;
                 URL suggestionURL = new URL(newUrl);
                 con = (HttpURLConnection) suggestionURL.openConnection();
                 con.setRequestMethod("GET");
@@ -146,6 +234,12 @@ public class ClueLessUtils {
                 newUrl = newUrl + "?messageType=RequestMessage&Type=contradict";
                 URL contradictURL = new URL(newUrl);
                 con = (HttpURLConnection) contradictURL.openConnection();
+                con.setRequestMethod("GET");
+                break;
+            case "disprove":
+                newUrl = newUrl + "?messageType=RequestMessage&Type=disprove&Player=" + player;
+                URL disproveURL = new URL(newUrl);
+                con = (HttpURLConnection) disproveURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
             default:
