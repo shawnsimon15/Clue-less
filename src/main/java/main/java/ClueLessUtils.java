@@ -128,7 +128,7 @@ public class ClueLessUtils {
         return code;
     }
 
-    public static int deletePost(String gameUUID, String playerName,
+    public static int deleteItem(String gameUUID, String playerName,
                                          String msgID) throws IOException {
         HttpURLConnection con = setUpHttpConnection("POST");
         JSONObject jsonObject = new JSONObject();

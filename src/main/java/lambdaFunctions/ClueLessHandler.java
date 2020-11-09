@@ -330,10 +330,44 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String playerToDelete = event.get("playerToDelete").toString();
                     String ID = event.get("msgID").toString();
 
-                    String deleteMsgID = ID + playerToDelete;
+                    if (ID.equals("makeSus_")) {
+                        String deleteMsgID = ID + playerToDelete;
 
-                    dynamoDb.getTable(DYNAMODB_MESSAGES).deleteItem(
-                            new PrimaryKey("UUID", deleteMsgID));
+                        dynamoDb.getTable(DYNAMODB_MESSAGES).deleteItem(
+                                new PrimaryKey("UUID", deleteMsgID));
+                    } else {
+                        // Want to delete player
+                        ArrayList<String> oneLessPlayer = new ArrayList<>();
+                        for (String plyr : listOfPlayers) {
+                            if (!plyr.equals(playerToDelete)){
+                                oneLessPlayer.add(plyr);
+                            }
+                        }
+                        String newPlayers = "";
+                        for (int i=0; i < oneLessPlayer.size(); ++i) {
+                            newPlayers = newPlayers + oneLessPlayer.get(i);
+                            if (i != (oneLessPlayer.size() - 1)) {
+                                newPlayers = newPlayers + ", ";
+                            }
+                        }
+                        dynamoDb.getTable(DYNAMODB_GAMEDATA)
+                                .putItem(new PutItemSpec().withItem(new Item()
+                                        .withString("UUID", gameID)
+                                        .withString("Game Status",
+                                                game.get("Game Status").toString())
+                                        .withString("Winning Secret",
+                                                game.get("Winning Secret").toString())
+                                        .withString("Current Players", newPlayers)
+                                        .withInt("Max Players",
+                                                Integer.parseInt(game.get("Max Players")
+                                                        .toString()))
+                                        .withList("Remaining Suspect Cards",
+                                                game.get("Remaining Suspect Cards"))
+                                        .withList("Remaining Weapon Cards",
+                                                game.get("Remaining Weapon Cards"))
+                                        .withList("Remaining Location Cards",
+                                                game.get("Remaining Location Cards"))));
+                    }
                     break;
             }
         } catch (ParseException e) {
@@ -421,6 +455,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                             response.put("location", moreParsedMsg[3] + " " + moreParsedMsg[4]);
                         }
                     } else {
+                        response.put("playerWhoMoved", player);
                         response.put("location", player + "Start");
                     }
 
@@ -700,13 +735,13 @@ public class ClueLessHandler implements RequestStreamHandler {
         return randomList;
     }
 
-    public ArrayList<String> addCard(ArrayList<Integer> suspectIndices, int susIndicesIndex,
+    public ArrayList<String> addCard(ArrayList<Integer> cardIndices, int cardIndicesIndex,
                                      JSONObject cardsAssigned, int cardNumber,
-                                     ArrayList<String> suspectList, ArrayList<String> removeArray) {
-        int suspectIndex = suspectIndices.get(susIndicesIndex);
+                                     ArrayList<String> cardList, ArrayList<String> removeArray) {
+        int cardIndex = cardIndices.get(cardIndicesIndex);
         cardsAssigned.put("cardName" + cardNumber,
-                suspectList.get(suspectIndex));
-        removeArray.add(suspectList.get(suspectIndex));
+                cardList.get(cardIndex));
+        removeArray.add(cardList.get(cardIndex));
 
         return removeArray;
     }
