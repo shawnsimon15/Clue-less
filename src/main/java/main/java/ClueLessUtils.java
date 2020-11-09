@@ -242,6 +242,12 @@ public class ClueLessUtils {
                 con = (HttpURLConnection) disproveURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
+            case "gOPL":
+                newUrl = newUrl + "?messageType=RequestMessage&Type=gOPL&Player=" + player;
+                URL gOPLURL = new URL(newUrl);
+                con = (HttpURLConnection) gOPLURL.openConnection();
+                con.setRequestMethod("GET");
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + typeOfGet);
 

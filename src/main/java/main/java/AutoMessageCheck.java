@@ -12,14 +12,15 @@ public class AutoMessageCheck {
     private LocationUpdateTask locationUpdateTask;
     private SuggestionTask suggestionTask;
     private ContradictTask contradictTask;
+    private GameOver_PlayerLostTask gOPLTask;
 
     public static Timer startGameTimer;
     public static Timer suggestionTimer;
     public static Timer contradictTimer;
     public static Timer locationUpdateTimer;
+    public static Timer gOPLTimer;
 
     private String gameUUID;
-    private String playerName;
 
     /**
      * Function: AutoMessageCheck()
@@ -39,35 +40,42 @@ public class AutoMessageCheck {
 
     public void suggestionAutoMessageCheck(String gameUUId, String pName) {
         gameUUID = gameUUId;
-        playerName = pName;
         suggestionTask = new SuggestionTask(gameUUID, pName); // when someone makes a suggestion,
                                                               // everyone needs to be alerted and game
                                                               // shifts to a state where player either disproves or passes
         suggestionTimer = new Timer();
-        suggestionTimer.schedule(suggestionTask, 1000, 2000); // Run every 5 minutes (300000)
-
+        // delay start of thread for 10 seconds and then query every 2 seconds
+        suggestionTimer.schedule(suggestionTask, 10000, 2000);
     }
+
     public void contradictAutoMessageCheck(String gameUUId, String pName) {
         gameUUID = gameUUId;
-        playerName = pName;
         contradictTask = new ContradictTask(gameUUID, pName); // when someone makes a suggestion,
         // everyone needs to be alerted and game
         // shifts to a state where player either disproves or passes
         contradictTimer = new Timer();
-        contradictTimer.schedule(contradictTask, 1000, 2000); // Run every 5 minutes (300000)
-
+        // delay start of thread for 10 seconds and then query every 2 seconds
+        contradictTimer.schedule(contradictTask, 10000, 2000); // Run every 5 minutes (300000)
     }
 
     public void locationUpdateAutoMessageCheck(String gameUUId, String pName) {
         gameUUID = gameUUId;
-        playerName = pName;
         locationUpdateTask = new LocationUpdateTask(gameUUID, pName); // when someone makes a suggestion,
-        // everyone needs to be alerted and game
-        // shifts to a state where player either disproves or passes
+        // Keep track of where players are
         locationUpdateTimer = new Timer();
+        // delay start of thread for 1 second and then query every 2 seconds
         locationUpdateTimer.schedule(locationUpdateTask, 1000, 2000); // Run every 5 minutes (300000)
-
     }
+
+    public void gOPLAutoMessageCheck(String gameUUId, String pName) {
+        gameUUID = gameUUId;
+        gOPLTask = new GameOver_PlayerLostTask(gameUUID, pName); // when someone makes a suggestion,
+        // Keep track of where players are
+        gOPLTimer = new Timer();
+        // delay start of thread for 1 second and then query every 2 seconds
+        gOPLTimer.schedule(gOPLTask, 1000, 2000); // Run every 5 minutes (300000)
+    }
+
 
     public StringBuilder getStartGameResponse() {
         StringBuilder startGame = startGameTask.getStartGameResponse();
@@ -88,19 +96,33 @@ public class AutoMessageCheck {
         StringBuilder locationUpdate = locationUpdateTask.getLocationUpdateResponse();
         return locationUpdate;
     }
+
+    public StringBuilder getGOPLResponse() {
+        StringBuilder gOPL = gOPLTask.getGOPLResponse();
+        return gOPL;
+    }
+
+    public void setStopThreads() {
+        suggestionTask.setStopThreads();
+        contradictTask.setStopThreads();
+        locationUpdateTask.setStopThreads();
+        gOPLTask.setStopThreads();
+    }
 }
 
-
-class LocationUpdateTask extends TimerTask {
+class GameOver_PlayerLostTask extends TimerTask {
     private String gameID;
     private String playerName;
-    private volatile StringBuilder locationUpdateResponse;
+    private String stopThreads;
+    private volatile StringBuilder gOPLResponse;
 
-    public LocationUpdateTask(String gameID, String pName) {
+    public GameOver_PlayerLostTask(String gameID, String pName) {
         // Constructor for subclass
+        stopThreads = " ";
         this.gameID = gameID;
         this.playerName = pName;
-        locationUpdateResponse = null;    }
+        gOPLResponse = null;
+    }
 
     /**
      * Function: run()
@@ -111,11 +133,57 @@ class LocationUpdateTask extends TimerTask {
     public void run() {
         // periodically query game server for msgs
         try {
-            locationUpdateResponse = ClueLessUtils.makeGet(gameID, playerName, "playerLocation");
-            //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
-            //String msg = suggestionJSON.get("messageType").toString();
-            //TODO: should this ever stop?
+            if(!stopThreads.equals("stop")) {
+                gOPLResponse = ClueLessUtils.makeGet(gameID, playerName, "gOPL");
+                //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
+                //String msg = suggestionJSON.get("messageType").toString();
+            } else {
+                AutoMessageCheck.gOPLTimer.cancel();
+                AutoMessageCheck.gOPLTimer.purge();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public StringBuilder getGOPLResponse() {
+        return gOPLResponse;
+    }
+    public void setStopThreads() {this.stopThreads = "stop";}
+
+}
+
+class LocationUpdateTask extends TimerTask {
+    private String gameID;
+    private String playerName;
+    private String stopThreads;
+    private volatile StringBuilder locationUpdateResponse;
+
+    public LocationUpdateTask(String gameID, String pName) {
+        // Constructor for subclass
+        stopThreads = " ";
+        this.gameID = gameID;
+        this.playerName = pName;
+        locationUpdateResponse = null;
+    }
+
+    /**
+     * Function: run()
+     * Description: Will run every X minutes querying GET messages in database
+     * Does not return
+     **/
+    @Override
+    public void run() {
+        // periodically query game server for msgs
+        try {
+            if(!stopThreads.equals("stop")) {
+                locationUpdateResponse = ClueLessUtils.makeGet(gameID, playerName, "playerLocation");
+                //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
+                //String msg = suggestionJSON.get("messageType").toString();
+            } else {
+                AutoMessageCheck.locationUpdateTimer.cancel();
+                AutoMessageCheck.locationUpdateTimer.purge();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,15 +192,18 @@ class LocationUpdateTask extends TimerTask {
     public StringBuilder getLocationUpdateResponse() {
         return locationUpdateResponse;
     }
+    public void setStopThreads() {this.stopThreads = "stop";}
 }
 
 class ContradictTask extends TimerTask {
     private String gameID;
     private String playerName;
+    private String stopThreads;
     private volatile StringBuilder contradictResponse;
 
     public ContradictTask(String gameID, String pName) {
         // Constructor for subclass
+        stopThreads = " ";
         this.gameID = gameID;
         this.playerName = pName;
         contradictResponse = null;
@@ -147,11 +218,14 @@ class ContradictTask extends TimerTask {
     public void run() {
         // periodically query game server for msgs
         try {
-            contradictResponse = ClueLessUtils.makeGet(gameID, playerName, "disprove");
-            //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
-            //String msg = suggestionJSON.get("messageType").toString();
-            //TODO: should this ever stop?
-
+            if(!stopThreads.equals("stop")) {
+                contradictResponse = ClueLessUtils.makeGet(gameID, playerName, "disprove");
+                //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
+                //String msg = suggestionJSON.get("messageType").toString();
+            } else {
+                AutoMessageCheck.contradictTimer.cancel();
+                AutoMessageCheck.contradictTimer.purge();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -160,17 +234,20 @@ class ContradictTask extends TimerTask {
     public StringBuilder getContradictResponse() {
         return contradictResponse;
     }
+    public void setStopThreads() {this.stopThreads = "stop";}
 }
 
 class SuggestionTask extends TimerTask {
     private String gameID;
     private String playerName;
+    private String stopThreads;
     private volatile StringBuilder suggestionResponse;
 
     public SuggestionTask(String gameID, String pName) {
         // Constructor for subclass
         this.gameID = gameID;
         this.playerName = pName;
+        stopThreads = " ";
         suggestionResponse = null;
     }
 
@@ -183,10 +260,14 @@ class SuggestionTask extends TimerTask {
     public void run() {
         // periodically query game server for msgs
         try {
-            suggestionResponse = ClueLessUtils.makeGet(gameID, playerName, "suggestion");
-            //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
-            //String msg = suggestionJSON.get("messageType").toString();
-            //TODO: should this ever stop?
+            if(!stopThreads.equals("stop")) {
+                suggestionResponse = ClueLessUtils.makeGet(gameID, playerName, "suggestion");
+                //JSONObject suggestionJSON = new JSONObject(suggestionResponse.toString());
+                //String msg = suggestionJSON.get("messageType").toString();
+            } else {
+                AutoMessageCheck.suggestionTimer.cancel();
+                AutoMessageCheck.suggestionTimer.purge();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -196,6 +277,7 @@ class SuggestionTask extends TimerTask {
     public StringBuilder getSuggestionResponse() {
         return suggestionResponse;
     }
+    public void setStopThreads() {this.stopThreads = "stop";}
 }
 
 /********** Class StartGameTask **********/
@@ -221,8 +303,6 @@ class StartGameTask extends TimerTask {
             msg = startGameJSON.get("messageType").toString();
             if (msg.equals("startGame")) {
                 // Kills thread when game has started
-                //TODO: Take this out; for peace of mind
-                System.out.println("Killing Thread");
                 AutoMessageCheck.startGameTimer.cancel();
                 AutoMessageCheck.startGameTimer.purge();
             }
