@@ -52,7 +52,7 @@ public class Game {
         }
     }
 
-    public void preGamePrep() throws IOException {
+    public ArrayList<String> preGamePrep() throws IOException {
         int i = 0;
         StringBuilder startGameResponse;
         String msg = " ";
@@ -82,25 +82,18 @@ public class Game {
             }
         }
         printListContents(players, "players");
-
-        ArrayList<String> cards = getPlayerCards(startGameJSON);
-        ArrayList<String> turnOrderForGame = obtainTurnOrder(players);
-
-        loadPlayerInfoIntoGameStatus(cards, turnOrderForGame);
-
+        return players;
     }
 
-    public void loadPlayerInfoIntoGameStatus (ArrayList<String> cards, ArrayList<String> turnOrderForGame) {
+    public void loadPlayerInfoIntoGameStatus(ArrayList<String> turnOrderForGame) {
         ArrayList<PlayerStatus> gameStatusPL = new ArrayList<>();
         for (String plyr : turnOrderForGame) {
             PlayerStatus playerStatus = new PlayerStatus();
             playerStatus.setPlayerName(plyr);
-            if (plyr.equals(playerName)) {
-                playerStatus.setPlayerHand(cards);
-            } else {
-                ArrayList<String> emptyList = new ArrayList<>();
-                playerStatus.setPlayerHand(emptyList);
-            }
+
+            ArrayList<String> emptyList = new ArrayList<>();
+            playerStatus.setPlayerHand(emptyList);
+
             playerStatus.setPlayerLocation(plyr + "Start");
             gameStatusPL.add(playerStatus);
         }
@@ -177,8 +170,12 @@ public class Game {
 
         // After you get all player info from startGame GET, then enter
         // while loop that will end when it gets strings gameOver or youLost
-        preGamePrep();
+        ArrayList<String> playersInGame = preGamePrep();
+        ArrayList<String> turnOrderForGame = obtainTurnOrder(playersInGame);
+        loadPlayerInfoIntoGameStatus(turnOrderForGame);
+
         startGame((ArrayList<PlayerStatus>) gameStatus.getActivePlayerList());
+
     }
 
     public void updateLocation(String locationUpdateResponse, JSONObject locationUpdateJSON,
@@ -233,7 +230,6 @@ public class Game {
         String gOPLResponse = " ";
         JSONObject gOPLJSON = null;
         int whoseTurn = 0;
-        int i = 0;
 
         // Thread to check if suggestion has been made
         autoMessageCheck.suggestionAutoMessageCheck(gameActions.getGameUUID(), playerName);
@@ -244,7 +240,7 @@ public class Game {
         // Thread to check endOfGame msg
         autoMessageCheck.gOPLAutoMessageCheck(gameActions.getGameUUID(), playerName);
 
-        // TODO: call GET for card assignment
+
         boolean playerMadeSuggestion = false;
         while (!endOfGame.equals("playerLost") && !endOfGame.equals("gameOver") &&
                 !gOPLResponse.equals("gameOver") && !gOPLResponse.equals("playerLost")) {
@@ -298,7 +294,7 @@ public class Game {
                 // Check if anyone has moved
                 String locationUpdateResponse = " ";
                 JSONObject locationUpdateJSON = null;
-                if (contradictThreadResponse != null) {
+                if (locationUpdateThreadResponse != null) {
                     locationUpdateJSON = new JSONObject(locationUpdateThreadResponse.toString());
                     locationUpdateResponse = locationUpdateJSON.get("messageType").toString();
                 }
@@ -309,7 +305,19 @@ public class Game {
                 JSONObject turnUpdateJSON = new JSONObject(turnUpdate.toString());
                 String turnUpdateResponse = turnUpdateJSON.get("currentTurn").toString();
 
-                if (playerList.get(whoseTurn).getPlayerName().equals(playerName) && turnUpdateResponse.equals(playerName)) {
+                if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
+                        turnUpdateResponse.equals(playerName)) {
+
+                    // When it is the player's first turn, assign them cards
+                    if (playerList.get(whoseTurn).getPlayerHand().isEmpty()) {
+                        // Assign cards to player
+                        StringBuilder cardAssignGET = ClueLessUtils
+                                .makeGet(gameActions.getGameUUID(), "whoCards","assignCards");
+                        JSONObject cardAssignJSON = new JSONObject(cardAssignGET.toString());
+                        ArrayList<String> cards = getPlayerCards(cardAssignJSON); // TODO: change function o getListFromJSON
+                        playerList.get(whoseTurn).setPlayerHand(cards);
+                    }
+
                     // Delete the suggestion msgs in db after everyone has contradicted
                     if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion) {
                         if (playerMadeSuggestion) {
@@ -448,7 +456,6 @@ public class Game {
 
                 } else {
                     System.out.println("It is not your turn. Please Wait.");
-                    i++;
                     if (playerMadeSuggestion) {
                         if (contradictResponse.equals("disproveMade")) {
                             // If a player has contradicted a suggestion, delete suggestion post for each player
@@ -457,7 +464,8 @@ public class Game {
                             String cardRevealed = contradictJSON.get("cardRevealed").toString();
 
                             // Add card to player who disproved
-                            ArrayList<PlayerStatus> gameStatusList = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+                            ArrayList<PlayerStatus> gameStatusList
+                                    = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
                             for (PlayerStatus ps : gameStatusList) {
                                 if (ps.getPlayerName().equals(playerWhoDisproved)) {
                                     ps.addPlayerHand(cardRevealed);
@@ -472,29 +480,7 @@ public class Game {
                             System.out.println(playerWhoPassed + " passed suggestion!");
                         }
                     }
-                    /************ For testing ************
-                     if (i == 0) {
-                     gameActions.movePiece(gameActions.getGameUUID(), "Mrs.White", "Hallway:KB");
-                     StringBuilder playerMoved = ClueLessUtils.makeGet(gameActions.getGameUUID(),
-                     playerList.get(whoseTurn).getPlayerName(), "playerLocation");
-                     JSONObject playerMovedGETJSON = new JSONObject(playerMoved.toString());
-                     String playerLocation = playerMovedGETJSON.get("location").toString();
-                     playerList.get(whoseTurn).setPlayerLocation(playerLocation);
-                     System.out.println(playerList.get(whoseTurn).getPlayerLocation());
-                     } else if (i == 3) {
-                     StringBuilder suggestionGET = ClueLessUtils.makeGet(gameActions.getGameUUID(),
-                     playerList.get(whoseTurn).getPlayerName(), "suggestion");
-                     JSONObject suggestionGETJSON = new JSONObject(suggestionGET.toString());
-                     String playerWhoSuggested = suggestionGETJSON.get("playerWhoSuggested").toString();
-                     System.out.println(playerWhoSuggested + " made a suggestion");
-                     System.out.println("This was " + playerWhoSuggested + " suggestion:");
-                     JSONObject cardsSuggested = (JSONObject) suggestionGETJSON.get("cardsSuggested");
-                     System.out.print(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") +
-                     ", " + cardsSuggested.get("location"));
-                     System.out.println();
-                     }
-                     i++;
-                     */
+                    /************ For testing ************/
                     if (whoseTurn == (playerList.size() - 1)) {
                         whoseTurn = 0;
                     } else {
@@ -504,24 +490,30 @@ public class Game {
                     /************ For testing ************/
 
 
-                /*String waitingForPlayerToFinish = turnUpdateResponse;
-                while (waitingForPlayerToFinish.equals(turnUpdateResponse)) {
-                    TimeUnit.SECONDS.sleep(30);
-                    StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(), "turnUpdate");
-                    JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
-                    waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
-                }*/
+                    /*String waitingForPlayerToFinish = turnUpdateResponse;
+                    while (waitingForPlayerToFinish.equals(turnUpdateResponse)) {
+                        TimeUnit.SECONDS.sleep(10);
+                        StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(), "turnUpdate");
+                        JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
+                        waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
+                        // TODO: put lines 459-482 within this loop
+                    }
+                    if (whoseTurn == (playerList.size() - 1)) {
+                        whoseTurn = 0;
+                    } else {
+                        whoseTurn++;
+                    }*/
                 }
             }
             System.out.println("****************************************************");
         }
     }
 
-   /* public void updateGameStatus(ArrayList<Pair<String, String>> playerPositionUpdates,
+    /*public void updateGameStatus(ArrayList<Pair<String, String>> playerPositionUpdates,
                                  String currentPlayerTurn,
                                  Optional<String> notificationType,
                                  Optional<String> notificationMessage) {
-    } */
+    }*/
 
     public boolean validMove(String currentLocation, String desiredLocation) throws IOException {
         boolean validMove = false;

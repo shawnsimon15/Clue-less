@@ -409,8 +409,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String player = queryString.get("Player").toString();
                     Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
                             "movePlayer_" + player);
-                    response.put("playerWhoMoved", msg.get("Player Name").toString());
                     if (msg != null) {
+                        response.put("playerWhoMoved", msg.get("Player Name").toString());
                         String receivedMsg = msg.get("Message").toString();
                         String[] parseMsg = receivedMsg.split(": ");
                         String[] moreParsedMsg = parseMsg[1].split(" ");
@@ -471,75 +471,6 @@ public class ClueLessHandler implements RequestStreamHandler {
                          }
                          response.put("activePlayers", activePlayers);
 
-                        ArrayList<String> suspectList
-                                = (ArrayList<String>) game.get("Remaining Suspect Cards");
-                        ArrayList<String> weaponList
-                                = (ArrayList<String>) game.get("Remaining Weapon Cards");
-                        ArrayList<String> locationList
-                                = (ArrayList<String>) game.get("Remaining Location Cards");
-
-                        ArrayList<String> toRemoveSus = new ArrayList<>();
-                        ArrayList<String> toRemoveWeap = new ArrayList<>();
-                        ArrayList<String> toRemoveLoc = new ArrayList<>();
-
-                        int totalSize = suspectList.size() +
-                                weaponList.size() + locationList.size();
-
-                        JSONObject cardsAssigned = new JSONObject();
-
-                        if (listSize == 2) {
-                            // Give player 9 cards
-                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 9);
-                        } else if (listSize == 3) {
-                            // Give player 6 cards
-                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 6);
-                        } else if (listSize == 4) {
-                            // Give player 4 cards (two players get 5 cards)
-                            if (totalSize == 18 || totalSize == 13) {
-                                assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                        toRemoveSus, toRemoveWeap, toRemoveLoc, 5);
-                            } else {
-                                assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                        toRemoveSus, toRemoveWeap, toRemoveLoc, 4);
-                            }
-                        } else if (listSize == 5) {
-                            // Give player 3 cards (three players get 4 cards)
-                            if (totalSize == 18 || totalSize == 14 || totalSize == 10) {
-                                assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                        toRemoveSus, toRemoveWeap, toRemoveLoc, 4);
-                            } else {
-                                assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                        toRemoveSus, toRemoveWeap, toRemoveLoc, 3);
-                            }
-                        } else if (listSize == 6) {
-                            // Give player 3 cards
-                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
-                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 3);
-                        }
-                        response.put("cardsAssigned", cardsAssigned);
-
-                        suspectList.removeAll(toRemoveSus);
-                        weaponList.removeAll(toRemoveWeap);
-                        locationList.removeAll(toRemoveLoc);
-
-                        dynamoDb.getTable(DYNAMODB_GAMEDATA)
-                                .putItem(new PutItemSpec().withItem(new Item()
-                                        .withString("UUID", gameUUID)
-                                        .withString("Game Status",
-                                                game.get("Game Status").toString())
-                                        .withString("Winning Secret",
-                                                game.get("Winning Secret").toString())
-                                        .withString("Current Players",
-                                                game.get("Current Players").toString())
-                                        .withInt("Max Players",
-                                                Integer.parseInt(game.get("Max Players")
-                                                        .toString()))
-                                        .withList("Remaining Suspect Cards", suspectList)
-                                        .withList("Remaining Weapon Cards", weaponList)
-                                        .withList("Remaining Location Cards", locationList)));
-
                      } else {
                          response.put("messageType", "Game does not have enough players to start");
                      }
@@ -599,7 +530,79 @@ public class ClueLessHandler implements RequestStreamHandler {
                     } else {
                         response.put("messageType", "nothing");
                     }
-                 }
+                 } else if (type.equals("assignCards")) {
+                    response.put("messageType", "assignCards");
+                    ArrayList<String> suspectList
+                            = (ArrayList<String>) game.get("Remaining Suspect Cards");
+                    ArrayList<String> weaponList
+                            = (ArrayList<String>) game.get("Remaining Weapon Cards");
+                    ArrayList<String> locationList
+                            = (ArrayList<String>) game.get("Remaining Location Cards");
+
+                    ArrayList<String> toRemoveSus = new ArrayList<>();
+                    ArrayList<String> toRemoveWeap = new ArrayList<>();
+                    ArrayList<String> toRemoveLoc = new ArrayList<>();
+
+                    int totalSize = suspectList.size() +
+                            weaponList.size() + locationList.size();
+
+                    JSONObject cardsAssigned = new JSONObject();
+
+                    if (listSize == 2) {
+                        // Give player 9 cards
+                        assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                toRemoveSus, toRemoveWeap, toRemoveLoc, 9);
+                    } else if (listSize == 3) {
+                        // Give player 6 cards
+                        assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                toRemoveSus, toRemoveWeap, toRemoveLoc, 6);
+                    } else if (listSize == 4) {
+                        // Give player 4 cards (two players get 5 cards)
+                        if (totalSize == 18 || totalSize == 13) {
+                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 5);
+                        } else {
+                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 4);
+                        }
+                    } else if (listSize == 5) {
+                        // Give player 3 cards (three players get 4 cards)
+                        if (totalSize == 18 || totalSize == 14 || totalSize == 10) {
+                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 4);
+                        } else {
+                            assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                    toRemoveSus, toRemoveWeap, toRemoveLoc, 3);
+                        }
+                    } else if (listSize == 6) {
+                        // Give player 3 cards
+                        assignCards(cardsAssigned, suspectList, weaponList, locationList,
+                                toRemoveSus, toRemoveWeap, toRemoveLoc, 3);
+                    }
+                    response.put("cardsAssigned", cardsAssigned);
+
+                    suspectList.removeAll(toRemoveSus);
+                    weaponList.removeAll(toRemoveWeap);
+                    locationList.removeAll(toRemoveLoc);
+
+                    dynamoDb.getTable(DYNAMODB_GAMEDATA)
+                            .putItem(new PutItemSpec().withItem(new Item()
+                                    .withString("UUID", gameUUID)
+                                    .withString("Game Status",
+                                            game.get("Game Status").toString())
+                                    .withString("Winning Secret",
+                                            game.get("Winning Secret").toString())
+                                    .withString("Current Players",
+                                            game.get("Current Players").toString())
+                                    .withInt("Max Players",
+                                            Integer.parseInt(game.get("Max Players")
+                                                    .toString()))
+                                    .withList("Remaining Suspect Cards", suspectList)
+                                    .withList("Remaining Weapon Cards", weaponList)
+                                    .withList("Remaining Location Cards", locationList)));
+
+
+                }
             } else {
                 response.put("messageType", "L");
             }

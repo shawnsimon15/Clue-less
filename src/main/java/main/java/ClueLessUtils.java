@@ -248,6 +248,12 @@ public class ClueLessUtils {
                 con = (HttpURLConnection) gOPLURL.openConnection();
                 con.setRequestMethod("GET");
                 break;
+            case "assignCards":
+                newUrl = newUrl + "?messageType=RequestMessage&Type=assignCards";
+                URL assignCardsURL = new URL(newUrl);
+                con = (HttpURLConnection) assignCardsURL.openConnection();
+                con.setRequestMethod("GET");
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + typeOfGet);
 
