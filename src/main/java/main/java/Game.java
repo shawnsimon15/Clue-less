@@ -1,6 +1,6 @@
 package main.java;
 
-import javafx.util.Pair;
+//import javafx.util.Pair;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -517,12 +517,11 @@ public class Game {
         }
     }
 
-    public void updateGameStatus(ArrayList<Pair<String, String>> playerPositionUpdates,
+   /* public void updateGameStatus(ArrayList<Pair<String, String>> playerPositionUpdates,
                                  String currentPlayerTurn,
                                  Optional<String> notificationType,
                                  Optional<String> notificationMessage) {
-
-    }
+    } */
 
     public boolean validMove(String currentLocation, String desiredLocation) throws IOException {
         boolean validMove = false;
