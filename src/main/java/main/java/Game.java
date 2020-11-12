@@ -30,6 +30,11 @@ public class Game {
             if (gameType.toLowerCase().equals("create game") ||
                     gameType.toLowerCase().equals("creategame") ||
                     gameType.toLowerCase().equals("cg")) {
+                // TODO: Ensure two players can't get same player
+                int suspectIndex = (int) ((Math.random() * (5)));
+                playerName = ClueLessConstants.SUSPECT_LIST.get(suspectIndex);
+                System.out.println("You will be: " + playerName);
+
                 System.out.println("How many players will be in the game (including you)? ");
                 String numberOfPlayers = input.nextLine();
 
@@ -42,8 +47,14 @@ public class Game {
                 // Joining a Game
                 System.out.println("What is the game UUID? ");
                 String uuidString = input.nextLine();
-                UUID uuid = UUID.fromString(uuidString);
-                gameActions.joinGame(uuid.toString(), playerName);
+                System.out.println("You are now joining the game...");
+                gameActions.joinGame(uuidString, playerName);
+                if (ClueLessUtils.response != null){
+                    StringBuilder joinGameReponse = ClueLessUtils.response;
+                    JSONObject joinGameJSON = new JSONObject(joinGameReponse.toString());
+                    playerName = joinGameJSON.get("yourPlayer").toString();
+                    System.out.println("You will be: " + playerName);
+                }
                 invalidInput = "VALID";
             } else {
                 System.out.println("Please enter a valid statement. (i.e. Create Game, Join Game");
@@ -62,15 +73,11 @@ public class Game {
         System.out.println("Waiting for players to join....");
         while(!msg.equals("startGame")) {
             startGameResponse = autoMessageCheck.getStartGameResponse();
-            if (startGameResponse != null) {
-                // TODO: Take this out; only for testing
-                if (i == 0) {
-                    gameActions.joinGame(gameActions.getGameUUID(), "Mrs.White");
-                    i++;
+            if (startGameResponse != null && startGameResponse.length() != 0) {
+                if (startGameResponse != null && startGameResponse.length() != 0) {
+                    startGameJSON = new JSONObject(startGameResponse.toString());
+                    msg = startGameJSON.get("messageType").toString();
                 }
-
-                startGameJSON = new JSONObject(startGameResponse.toString());
-                msg = startGameJSON.get("messageType").toString();
                 if (msg.equals("startGame")) {
                     JSONObject responseJSON = new JSONObject(startGameResponse.toString());
                     JSONObject activePlayers = (JSONObject) responseJSON.get("activePlayers");
@@ -141,6 +148,7 @@ public class Game {
                 System.out.print(list.get(i));
             }
         }
+        System.out.println();
     }
 
     /**
@@ -154,11 +162,6 @@ public class Game {
         System.out.println("Would you like to Create or Join a game? ");
 
         String gameType = input.nextLine();
-
-        // TODO: Ensure two players can't get same player
-        int suspectIndex = (int) ((Math.random() * (5)));
-        playerName = ClueLessConstants.SUSPECT_LIST.get(suspectIndex);
-        System.out.println("You will be: " + playerName);
 
         /********* Creating/Joining Game *********/
         createOrJoinGame(gameType, input);
@@ -240,7 +243,7 @@ public class Game {
         // Thread to check endOfGame msg
         autoMessageCheck.gOPLAutoMessageCheck(gameActions.getGameUUID(), playerName);
 
-
+        boolean movedPlayer = false;
         boolean playerMadeSuggestion = false;
         while (!endOfGame.equals("playerLost") && !endOfGame.equals("gameOver") &&
                 !gOPLResponse.equals("gameOver") && !gOPLResponse.equals("playerLost")) {
@@ -310,7 +313,8 @@ public class Game {
                     if (playerList.get(whoseTurn).getPlayerHand().isEmpty()) {
                         // Assign cards to player
                         StringBuilder cardAssignGET = ClueLessUtils
-                                .makeGet(gameActions.getGameUUID(), "whoCards","assignCards");
+                                .makeGet(gameActions.getGameUUID(), "whoCards",
+                                        "assignCards");
                         JSONObject cardAssignJSON = new JSONObject(cardAssignGET.toString());
                         ArrayList<String> cards = getPlayerCards(cardAssignJSON); // TODO: change function o getListFromJSON
                         playerList.get(whoseTurn).setPlayerHand(cards);
@@ -328,13 +332,14 @@ public class Game {
                         System.out.println("    a) Move Player");
                         System.out.println("    b) Make a Suggestion");
                         System.out.println("    c) Make an Accusation");
+                        System.out.println("    e) End Turn");
                         String choice = input.nextLine();
 
                         switch (choice.toLowerCase()) {
                             case "a":
                                 String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
                                 boolean validMove = false;
-                                while (!validMove) {
+                                while (!validMove && !movedPlayer) {
                                     System.out.println("Where would you like to move?");
                                     String newLocation = input.nextLine();
                                     validMove = validMove(currentLocation, newLocation);
@@ -342,10 +347,14 @@ public class Game {
                                         gameActions.movePiece(gameActions.getGameUUID(), playerName, newLocation);
                                         TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg
                                         playerList.get(whoseTurn).setPlayerLocation(newLocation);
+                                        movedPlayer = true;
                                     } else {
                                         System.out.println("Please choose another location");
                                         validInput = false;
                                     }
+                                }
+                                if (movedPlayer && !validMove) {
+                                    System.out.println("You can't move again.");
                                 }
                                 break;
                             case "b":
@@ -399,7 +408,9 @@ public class Game {
                                         autoMessageCheck.setStopThreads();
                                     }
                                     if (endOfGame.equals("playerLost")) {
-                                        ClueLessUtils.deleteItem(gameActions.getGameUUID(), playerName, "anything");
+                                        // Delete player who lost from db
+                                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                                playerName, "anything");
                                     }
                                     TimeUnit.SECONDS.sleep(2);
 
@@ -408,6 +419,10 @@ public class Game {
                                     validInput = false;
                                 }
                                 break;
+                            case "e":
+                                System.out.println("You have ended your turn.");
+                                movedPlayer = false;
+                                validInput = true;
                         }
                     } else {
                         // suggestion has been made, so player needs to act accordingly
@@ -446,12 +461,16 @@ public class Game {
                     }
 
                     // Send endTurn msg to signal player is done
-                    if (validInput) {
+                    boolean inARoom = ClueLessConstants.ROOM_LIST
+                            .contains(playerList.get(whoseTurn).getPlayerLocation());
+
+                    if ((validInput && !movedPlayer) || (movedPlayer && !inARoom)) {
                         if (whoseTurn == (playerList.size() - 1)) {
                             whoseTurn = 0;
                         } else {
                             whoseTurn++;
                         }
+                        movedPlayer = false;
                         // send msg to db ending player's turn
                         gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
                     }

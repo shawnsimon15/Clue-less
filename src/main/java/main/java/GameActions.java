@@ -32,6 +32,7 @@ public class GameActions {
      * Does not return
      **/
     public void joinGame(String gUUID, String pName) throws IOException {
+        gameUUID = gUUID;
         playerName = pName;
         ClueLessUtils.makePost(gUUID, pName, 5, "joinGame");
     }

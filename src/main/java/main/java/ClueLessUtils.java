@@ -12,6 +12,11 @@ import org.json.simple.JSONObject;
 
 public class ClueLessUtils {
     private static String url = "https://jroe630mfb.execute-api.us-east-2.amazonaws.com/Test/game/";
+    public static StringBuilder response;
+
+    public ClueLessUtils()  {
+        response = null;
+    }
 
     // setUpHttpConnection is called each time the a GET, PUT or POST request need to be made
     public static HttpURLConnection setUpHttpConnection(String requstMethod) throws IOException {
@@ -91,8 +96,7 @@ public class ClueLessUtils {
         jsonObject.put("cardsSuggested", cardsSuggested);
 
         int code = sendPost(jsonObject, con);
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
-        StringBuilder response = readPostReturn(con);
+        response = readPostReturn(con);
         return code;
     }
 
@@ -108,7 +112,7 @@ public class ClueLessUtils {
 
         int code = sendPost(jsonObject, con);
         //System.out.println("Reponse for " + typeOfPost + ": " + code);
-        StringBuilder response = readPostReturn(con);
+        response = readPostReturn(con);
         return code;
     }
 
@@ -124,7 +128,7 @@ public class ClueLessUtils {
 
         int code = sendPost(jsonObject, con);
         //System.out.println("Reponse for " + typeOfPost + ": " + code);
-        StringBuilder response = readPostReturn(con);
+        response = readPostReturn(con);
         return code;
     }
 
@@ -140,7 +144,7 @@ public class ClueLessUtils {
 
         int code = sendPost(jsonObject, con);
         //System.out.println("Reponse for " + typeOfPost + ": " + code);
-        StringBuilder response = readPostReturn(con);
+        response = readPostReturn(con);
         return code;
     }
 
@@ -158,8 +162,6 @@ public class ClueLessUtils {
             jsonObject.put("messageType", "JoinGame");
             jsonObject.put("gameID", gameUUID);
             jsonObject.put("playerName", playerName);
-        } else if (typeOfPost.equals("passSuggestion")) {
-
         } else if (typeOfPost.equals("gameOver")) {
             jsonObject.put("messageType", "GameOver");
             jsonObject.put("gameID", gameUUID);
@@ -176,7 +178,7 @@ public class ClueLessUtils {
         }
         int code = con.getResponseCode();
         //System.out.println("Reponse for " + typeOfPost + ": " + code);
-        StringBuilder response = readPostReturn(con);
+        response = readPostReturn(con);
         return code;
     }
 

@@ -31,8 +31,8 @@ public class AutoMessageCheck {
     public AutoMessageCheck(){
     }
 
-    public void startGameAutoMessageCheck(String gameUUId) {
-        gameUUID = gameUUId;
+    public void startGameAutoMessageCheck(String gameID) {
+        gameUUID = gameID;
         startGameTask = new StartGameTask(gameUUID);
         startGameTimer = new Timer();
         startGameTimer.schedule(startGameTask, 1000, 5000); // Run every 5 minutes (300000)
@@ -298,7 +298,7 @@ class StartGameTask extends TimerTask {
     @Override
     public void run() {
         String msg = " ";
-        if (startGameResponse != null) {
+        if (startGameResponse != null && startGameResponse.length() != 0) {
             JSONObject startGameJSON = new JSONObject(startGameResponse.toString());
             msg = startGameJSON.get("messageType").toString();
             if (msg.equals("startGame")) {
