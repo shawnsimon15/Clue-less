@@ -16,6 +16,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class ClueLessHandler implements RequestStreamHandler {
     private static final String DYNAMODB_GAMEDATA = "GameData";
@@ -199,41 +200,29 @@ public class ClueLessHandler implements RequestStreamHandler {
                     }
                     break;
                 case "JoinGame":
-                    String newPlayerName = event.get("playerName").toString();
-
                     game = dynamoDb.getTable(DYNAMODB_GAMEDATA).getItem("UUID", gameID);
                     if (game != null) {
                         int maxPlayers = Integer.parseInt(game.get("Max Players").toString());
-                        String players = game.get("Current Players").toString();
-                        String[] list = players.split(", ");
-                        int listSize = list.length;
+                        int listSize = listOfPlayers.length;
 
-                        String winningString = game.get("Winning Secret").toString();
-                        String[] winningStringList = winningString.split(", ");
+                        // Assign player a character in game
+                        ArrayList<String> unAssignedPlayersArray = new ArrayList<>();
+                        List<String> playersArray = Arrays.asList(listOfPlayers);
 
-                        ArrayList<String> susList = new ArrayList<>();
-                        for (String c : suspectCards) {
-                            if (!c.equals(winningStringList[0])) {
-                                susList.add(c);
+                        // Get all of the characters that have not been assigned
+                        for (String plyr : suspectCards) {
+                            if (!playersArray.contains(plyr)) {
+                                unAssignedPlayersArray.add(plyr);
                             }
                         }
 
-                        ArrayList<String> weapList = new ArrayList<>();
-                        for (String c : weaponCards) {
-                            if (!c.equals(winningStringList[1])) {
-                                weapList.add(c);
-                            }
-                        }
+                        // Get random index that will choose player's character
+                        int randomCharacter = (int) ((Math.random() *
+                                (unAssignedPlayersArray.size() -1 )));
+                        String newPlayerName = unAssignedPlayersArray.get(randomCharacter);
 
-                        ArrayList<String> locList = new ArrayList<>();
-                        for (String c : locationCards) {
-                            if (!c.equals(winningStringList[2])) {
-                                locList.add(c);
-                            }
-                        }
-
-                        if( maxPlayers >= (listSize + 1)) {
-                            String playersInGame = players + ", " + newPlayerName;
+                        if(maxPlayers >= (listSize + 1)) {
+                            String playersInGame = currentPlayers + ", " + newPlayerName;
                             if (maxPlayers == (listSize + 1)) {
                                 response.put("gameStarting", "The game will now start");
                                 ArrayList<String> playerList = new ArrayList<>(Arrays
@@ -249,6 +238,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                                         }
                                     }
                                 }
+
                                 dynamoDb.getTable(DYNAMODB_GAMEDATA)
                                         .putItem(new PutItemSpec().withItem(new Item()
                                                 .withString("UUID", gameID)
@@ -260,10 +250,14 @@ public class ClueLessHandler implements RequestStreamHandler {
                                                 .withInt("Max Players",
                                                         Integer.parseInt(game.get("Max Players")
                                                                 .toString()))
-                                                .withList("Remaining Suspect Cards", susList)
-                                                .withList("Remaining Weapon Cards", weapList)
-                                                .withList("Remaining Location Cards", locList)));
+                                                .withList("Remaining Suspect Cards",
+                                                        (ArrayList<String>) game.get("Remaining Suspect Cards"))
+                                                .withList("Remaining Weapon Cards",
+                                                        (ArrayList<String>) game.get("Remaining Weapon Cards"))
+                                                .withList("Remaining Location Cards",
+                                                        (ArrayList<String>) game.get("Remaining Location Cards"))));
                             } else {
+                                // put in response to add assigned player name
                                 dynamoDb.getTable(DYNAMODB_GAMEDATA)
                                         .putItem(new PutItemSpec().withItem(new Item()
                                                 .withString("UUID", gameID)
@@ -275,11 +269,15 @@ public class ClueLessHandler implements RequestStreamHandler {
                                                 .withInt("Max Players",
                                                         Integer.parseInt(game.get("Max Players")
                                                                 .toString()))
-                                                .withList("Remaining Suspect Cards", susList)
-                                                .withList("Remaining Weapon Cards", weapList)
-                                                .withList("Remaining Location Cards", locList)));
+                                                .withList("Remaining Suspect Cards",
+                                                        (ArrayList<String>) game.get("Remaining Suspect Cards"))
+                                                .withList("Remaining Weapon Cards",
+                                                        (ArrayList<String>) game.get("Remaining Weapon Cards"))
+                                                .withList("Remaining Location Cards",
+                                                        (ArrayList<String>) game.get("Remaining Location Cards"))));
                             }
 
+                            response.put("yourPlayer", newPlayerName);
                             // Do we respond with Welcome to the Game or write that to the db?
                             response.put("messageType", "welcomeToGame");
 
@@ -362,11 +360,11 @@ public class ClueLessHandler implements RequestStreamHandler {
                                                 Integer.parseInt(game.get("Max Players")
                                                         .toString()))
                                         .withList("Remaining Suspect Cards",
-                                                game.get("Remaining Suspect Cards"))
+                                                (ArrayList<String>) game.get("Remaining Suspect Cards"))
                                         .withList("Remaining Weapon Cards",
-                                                game.get("Remaining Weapon Cards"))
+                                                (ArrayList<String>) game.get("Remaining Weapon Cards"))
                                         .withList("Remaining Location Cards",
-                                                game.get("Remaining Location Cards"))));
+                                                (ArrayList<String>) game.get("Remaining Location Cards"))));
                     }
                     break;
             }
@@ -405,9 +403,6 @@ public class ClueLessHandler implements RequestStreamHandler {
                 response.put("location", list[2]);
 
             } else if (msgType.equals("RequestMessage")) {
-                //TODO: need to think of way to get latest msgs from Message Table
-                // Certain msgs have certain UUID's?
-                // i.e. Suggestions start with 4, Turn msgs start with 1, etc.
                 String type = queryString.get("Type").toString();
                 int maxPlayers = Integer.parseInt(game.get("Max Players").toString());
                 String players = game.get("Current Players").toString();
@@ -496,8 +491,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                     response.put("suggestionID", 1234);
 
                 } else if(type.equals("startGame")){
-                    response.put("messageType", "startGame");
                     if (maxPlayers == listSize) {
+                        response.put("messageType", "startGame");
                         JSONObject activePlayers = new JSONObject();
                          int i = 1;
                          for (String player : list) {
