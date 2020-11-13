@@ -35,11 +35,24 @@ public class Game {
                 int suspectIndex = (int) ((Math.random() * (5)));
                 playerName = ClueLessConstants.SUSPECT_LIST.get(suspectIndex);
                 System.out.println("You will be: " + playerName);
+                int numberOfPlayers;
+                while(true) {
 
-                System.out.println("How many players will be in the game (including you)? ");
-                String numberOfPlayers = input.nextLine();
+                    System.out.println("How many players will be in the game (including you)? ");
+                    try {
+                         numberOfPlayers =  Integer.parseInt(input.nextLine());
+                        if(numberOfPlayers > 2 && numberOfPlayers < 7){
+                            break;
+                        }
+                        else {
+                            System.out.println("Please enter a number between 3 and 5 ");
+                        }
+                    }catch (Exception e){
+                        System.out.println("Please enter a number between 3 and 5 ");
+                    }
+                }
 
-                gameActions.createGame(playerName, Integer.parseInt(numberOfPlayers));
+                gameActions.createGame(playerName,numberOfPlayers);
                 System.out.println("Your game ID is: " + gameActions.getGameUUID());
                 invalidInput = "VALID";
             } else if (gameType.toLowerCase().equals("join game") ||
@@ -336,7 +349,10 @@ public class Game {
                             justContradicted = false;
                         }
                         Scanner input = new Scanner(System.in);
-                        System.out.println("What would you like to do? ");
+
+                        String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
+                        System.out.println("You are in the " + currentLocation + ".");
+                         System.out.println("What would you like to do? ");
                         System.out.println("    a) Move Player");
                         System.out.println("    b) Make a Suggestion");
                         System.out.println("    c) Make an Accusation");
@@ -345,9 +361,12 @@ public class Game {
 
                         switch (choice.toLowerCase()) {
                             case "a":
-                                String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
                                 boolean validMove = false;
                                 while (!validMove && !movedPlayer) {
+                                    for(String location: ClueLessConstants.ADJACENCY_MAP.get(currentLocation)){
+                                        System.out.println("You may move to " + location);
+
+                                    }
                                     System.out.println("Where would you like to move?");
                                     String newLocation = input.nextLine();
                                     validMove = validMove(currentLocation, newLocation);

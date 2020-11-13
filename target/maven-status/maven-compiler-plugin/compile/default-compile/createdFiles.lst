@@ -1,0 +1,15 @@
+main/java/SuggestionTask.class
+main/java/GameActions.class
+main/java/Main.class
+main/java/GameOver_PlayerLostTask.class
+main/java/GameStatus.class
+main/java/PlayerStatus.class
+main/java/StartGameTask.class
+main/java/ContradictTask.class
+lambdaFunctions/ClueLessHandler.class
+main/java/ClueLessConstants$1.class
+main/java/ClueLessConstants.class
+main/java/ClueLessUtils.class
+main/java/Game.class
+main/java/AutoMessageCheck.class
+main/java/LocationUpdateTask.class
