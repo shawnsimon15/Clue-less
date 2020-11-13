@@ -54,10 +54,22 @@ public class Game {
                 if (ClueLessUtils.response != null){
                     StringBuilder joinGameReponse = ClueLessUtils.response;
                     JSONObject joinGameJSON = new JSONObject(joinGameReponse.toString());
-                    playerName = joinGameJSON.get("yourPlayer").toString();
-                    System.out.println("You will be: " + playerName);
+
+                    if(joinGameJSON.get("messageType").toString().contentEquals("welcomeToGame")) {
+                        playerName = joinGameJSON.get("yourPlayer").toString();
+                        System.out.println("You will be: " + playerName);
+                        invalidInput = "VALID";
+                    }
+                    
+                    else if(joinGameJSON.get("messageType").toString().contentEquals("MAX PLAYERS")) {
+                        System.out.println("Sorry, the selected game is full, please try a different game.");
+                        System.out.println("Please enter a game ID. (i.e. Create Game, Join Game");
+                    }
+                    else{
+                        System.out.println("Sorry, the selected game does not exist, please try a differnt game ID.");
+                        System.out.println("Please enter a game ID. (i.e. Create Game, Join Game");
+                    }
                 }
-                invalidInput = "VALID";
             } else {
                 System.out.println("Please enter a valid statement. (i.e. Create Game, Join Game");
                 gameType = input.nextLine();
