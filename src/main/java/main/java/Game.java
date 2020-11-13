@@ -392,7 +392,9 @@ public class Game {
                                     while (!validMove && !movedPlayer) {
 
                                         for(String location: ClueLessConstants.ADJACENCY_MAP.get(currentLocation)){
-                                            System.out.println("You may move to " + location);
+                                            if (!location.contains("Start")) {
+                                                System.out.println("You may move to " + location);
+                                            }
                                         }
 
                                         System.out.println("Where would you like to move?");
@@ -624,11 +626,6 @@ public class Game {
         ArrayList<String> locations = new ArrayList<>();
         for (PlayerStatus ps : gameStatus.getActivePlayerList()){
             locations.add(ps.getPlayerLocation());
-        }
-
-        System.out.println("All players occupy these positions: ");
-        for (String loc : locations) {
-            System.out.println(loc);
         }
         /********* Get location of each player on the board *********/
 
