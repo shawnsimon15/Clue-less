@@ -1,6 +1,7 @@
 package main.java;
 
 //import javafx.util.Pair;
+import com.amazonaws.services.dynamodbv2.xspec.S;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -245,6 +246,7 @@ public class Game {
 
         boolean movedPlayer = false;
         boolean playerMadeSuggestion = false;
+        boolean justContradicted = false;
         while (!endOfGame.equals("playerLost") && !endOfGame.equals("gameOver") &&
                 !gOPLResponse.equals("gameOver") && !gOPLResponse.equals("playerLost")) {
             // TODO: print board on screen
@@ -321,11 +323,17 @@ public class Game {
                     }
 
                     // Delete the suggestion msgs in db after everyone has contradicted
-                    if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion) {
-                        if (playerMadeSuggestion) {
+                    if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion ||
+                    justContradicted) {
+                        if (playerMadeSuggestion || justContradicted) {
                             ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                                     playerName, "makeSus_");
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "passSus_");
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "disproveSus_");
                             playerMadeSuggestion = false;
+                            justContradicted = false;
                         }
                         Scanner input = new Scanner(System.in);
                         System.out.println("What would you like to do? ");
@@ -382,6 +390,7 @@ public class Game {
                                         }
                                     }
                                     playerMadeSuggestion = true;
+                                    movedPlayer = false;
                                     TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
                                     // just written to db
                                 } else {
@@ -404,14 +413,8 @@ public class Game {
                                     endOfGame = gameActions.makeAccusation(gameActions.getGameUUID(),
                                             playerName, suspect, weapon, location);
                                     System.out.println(endOfGame);
-                                    if (endOfGame.equals("playerLost") || endOfGame.equals("gameOver")) {
-                                        autoMessageCheck.setStopThreads();
-                                    }
-                                    if (endOfGame.equals("playerLost")) {
-                                        // Delete player who lost from db
-                                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                                playerName, "anything");
-                                    }
+
+                                    movedPlayer = false;
                                     TimeUnit.SECONDS.sleep(2);
 
                                 } else {
@@ -458,6 +461,7 @@ public class Game {
                                         playerList.get(currentPlayer).getPlayerName());
                                 break;
                         }
+                        justContradicted = true;
                     }
 
                     // Send endTurn msg to signal player is done
@@ -474,57 +478,85 @@ public class Game {
                         // send msg to db ending player's turn
                         gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
                     }
+                    if (endOfGame.equals("playerLost") || endOfGame.equals("gameOver")) {
+                        autoMessageCheck.setStopThreads();
+                    }
+                    if (endOfGame.equals("playerLost")) {
+                        // Delete player who lost from db
+                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                playerName, "anything");
+                    }
 
                 } else {
-                    System.out.println("It is not your turn. Please Wait.");
+                    System.out.println("It is currently " + turnUpdateResponse +
+                            "'s turn. Please Wait.");
                     String playerWhoContradicted = "";
-                    if (playerMadeSuggestion) {
-                        if (contradictResponse.equals("disproveMade")) {
-                            // If a player has contradicted a suggestion, delete suggestion post for each player
-                            playerWhoContradicted = contradictJSON.get("playerWhoDisproved").toString();
-                            String cardRevealed = contradictJSON.get("cardRevealed").toString();
 
-                            // Add card to player who disproved
-                            ArrayList<PlayerStatus> gameStatusList
-                                    = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
-                            for (PlayerStatus ps : gameStatusList) {
-                                if (ps.getPlayerName().equals(playerWhoContradicted)) {
-                                    ps.addPlayerHand(cardRevealed);
-                                }
-                            }
-                            System.out.println(playerWhoContradicted + " revealed " + cardRevealed + "!");
+                    String waitingForPlayerToFinish = turnUpdateResponse;
 
-                        } else if (contradictResponse.equals("passMade")) {
-                            playerWhoContradicted = contradictJSON.get("playerWhoPassed").toString();
-                            String nextPlayer = contradictJSON.get("nextPlayer").toString();
-                            System.out.println(playerWhoContradicted + " passed suggestion!");
-                        }
-                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                playerWhoContradicted, "makeSus_");
-                    }
-                    /************ For testing ************/
-                    if (whoseTurn == (playerList.size() - 1)) {
-                        whoseTurn = 0;
-                    } else {
-                        whoseTurn++;
-                    }
-                    gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
-                    /************ For testing ************/
-
-
-                    /*String waitingForPlayerToFinish = turnUpdateResponse;
+                    boolean alreadyDeleted = false;
+                    int i = 0;
                     while (waitingForPlayerToFinish.equals(turnUpdateResponse)) {
-                        TimeUnit.SECONDS.sleep(10);
-                        StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(), "turnUpdate");
+                        String lastPlayer = waitingForPlayerToFinish;
+                        StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(),
+                                "whoCares", "turnUpdate");
                         JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
                         waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
-                        // TODO: put lines 459-482 within this loop
+                        TimeUnit.SECONDS.sleep(2);
+
+                        if (playerMadeSuggestion &&
+                                !(waitingForPlayerToFinish.equals(lastPlayer))) {
+                            StringBuilder cThreadResponse = autoMessageCheck.getContradictResponse();
+                            if (contradictThreadResponse != null) {
+                                contradictJSON = new JSONObject(cThreadResponse.toString());
+                                contradictResponse = contradictJSON.get("messageType").toString();
+                            }
+
+                            if (contradictResponse.equals("disproveMade")) {
+                                // If a player has contradicted a suggestion, delete suggestion post for each player
+                                playerWhoContradicted = contradictJSON.get("playerWhoDisproved").toString();
+                                String cardRevealed = contradictJSON.get("cardRevealed").toString();
+                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                        playerWhoContradicted, "disproveSus_");
+
+                                // Add card to player who disproved
+                                ArrayList<PlayerStatus> gameStatusList
+                                        = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+                                for (PlayerStatus ps : gameStatusList) {
+                                    if (ps.getPlayerName().equals(playerWhoContradicted)) {
+                                        ps.addPlayerHand(cardRevealed);
+                                    }
+                                }
+                                if (i == 0) {
+                                    System.out.println(playerWhoContradicted + " revealed " +
+                                            cardRevealed + "!");
+                                    ++i;
+                                }
+
+                            } else if (contradictResponse.equals("passMade")) {
+                                playerWhoContradicted = contradictJSON.get("playerWhoPassed").toString();
+                                String nextPlayer = contradictJSON.get("nextPlayer").toString();
+                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                        playerWhoContradicted, "passSus_");
+                                if (i == 0) {
+                                    System.out.println(playerWhoContradicted + " passed suggestion!");
+                                    ++i;
+                                }
+
+                            }
+                            if (contradictResponse.equals("passMade") ||
+                                contradictResponse.equals("disproveMade") && !alreadyDeleted) {
+                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                        playerWhoContradicted, "makeSus_");
+                                alreadyDeleted = true;
+                            }
+                        }
                     }
                     if (whoseTurn == (playerList.size() - 1)) {
                         whoseTurn = 0;
                     } else {
                         whoseTurn++;
-                    }*/
+                    }
                 }
             }
             System.out.println("****************************************************");

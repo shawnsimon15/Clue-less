@@ -2,7 +2,7 @@ package main.java;
 
 //import javafx.util.Pair;
 
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,29 +47,5 @@ public class Main {
         ClueLessConstants constants = new ClueLessConstants(); // Calls constructor to initialize constants
         Game newGame = new Game();
 
-
-        /********** Testing db **********
-        ClueLessUtils.makePost("444444", "Rick", 5, "disproveSuggestion");
-        ClueLessUtils.makePost("444444", "Rick", 5, "endTurn");
-
-        ClueLessUtils.makePost("444444", "Rick", 5, "passSuggestion");
-        ClueLessUtils.makePost("444444", "Rick", 5, "suggestion");
-
-        gameActions.createGame("Steve", 4);
-        gameActions.joinGame("444444", "Rock");
-        gameActions.joinGame("123458", "Rock");
-
-        System.out.println(ClueLessUtils.makeGet("123458", "makeAccusation"));
-        System.out.println(ClueLessUtils.makeGet("123458", "startGame"));
-        System.out.println(ClueLessUtils.makeGet("123458", "turnUpdate"));
-        //ClueLessUtils.makeGet("", "locationUpdate");
-        gameActions.movePiece("123458", "Luke", "location1", "Room1");
-        gameActions.makeGuess("123458","Luke", "feather", "location1");
-        gameActions.makeAccusation("123458","Luke", "feather", "location1");
-        gameActions.makeAccusation("123458","Person", "Weapon", "Location");
-
-        System.out.println(ClueLessUtils.makeGet("123458", "suggestion"));
-        System.out.println(ClueLessUtils.makeGet("123458", "contradict"));
-         ********** Testing db **********/
     }
 }

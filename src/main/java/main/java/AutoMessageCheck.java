@@ -55,7 +55,7 @@ public class AutoMessageCheck {
         // shifts to a state where player either disproves or passes
         contradictTimer = new Timer();
         // delay start of thread for 10 seconds and then query every 2 seconds
-        contradictTimer.schedule(contradictTask, 10000, 2000); // Run every 5 minutes (300000)
+        contradictTimer.schedule(contradictTask, 10000, 2000);
     }
 
     public void locationUpdateAutoMessageCheck(String gameUUId, String pName) {
@@ -64,7 +64,7 @@ public class AutoMessageCheck {
         // Keep track of where players are
         locationUpdateTimer = new Timer();
         // delay start of thread for 1 second and then query every 2 seconds
-        locationUpdateTimer.schedule(locationUpdateTask, 1000, 2000); // Run every 5 minutes (300000)
+        locationUpdateTimer.schedule(locationUpdateTask, 1000, 2000);
     }
 
     public void gOPLAutoMessageCheck(String gameUUId, String pName) {
@@ -73,7 +73,7 @@ public class AutoMessageCheck {
         // Keep track of where players are
         gOPLTimer = new Timer();
         // delay start of thread for 1 second and then query every 2 seconds
-        gOPLTimer.schedule(gOPLTask, 1000, 2000); // Run every 5 minutes (300000)
+        gOPLTimer.schedule(gOPLTask, 1000, 2000);
     }
 
 

@@ -119,7 +119,7 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                     // Create msg in db for each player
                     for (String plyr : listOfPlayers) {
-                        String susMsgID = "makeSus_" + plyr;
+                        String susMsgID = "makeSus_" + plyr + gameID;
                         String susMsg = "SuggestionMade: " + suspect +
                                 ", " + weapon + ", " + location;
 
@@ -137,7 +137,7 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                     // Create msg in db for each player
                     for (String plyr : listOfPlayers) {
-                        String passMsgID = "passSus_" + plyr;
+                        String passMsgID = "passSus_" + plyr + gameID;
                         String passMsg = "PassSuggestion: " + nextPlayer;
 
                         dynamoDb.getTable(DYNAMODB_MESSAGES)
@@ -156,7 +156,7 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                     // Create msg in db for each player
                     for (String plyr : listOfPlayers) {
-                        String endTurnMsgID = "endTurn_" + plyr;
+                        String endTurnMsgID = "endTurn_" + plyr + gameID;
                         dynamoDb.getTable(DYNAMODB_MESSAGES)
                                 .putItem(new PutItemSpec().withItem(new Item()
                                         .withString("UUID", endTurnMsgID)
@@ -173,7 +173,7 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                     // Create msg in db for each player
                     for (String plyr : listOfPlayers) {
-                        String moveMsgID = "movePlayer_" + plyr;
+                        String moveMsgID = "movePlayer_" + plyr + gameID;
                         dynamoDb.getTable(DYNAMODB_MESSAGES)
                                 .putItem(new PutItemSpec().withItem(new Item()
                                         .withString("UUID", moveMsgID)
@@ -190,7 +190,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String disMsg = "DisproveSuggestion: " + playerWhoDisprove + " revealed " + card;
 
                     for (String plyr : listOfPlayers) {
-                        String disMsgID = "disproveSus_" + plyr;
+                        String disMsgID = "disproveSus_" + plyr + gameID;
                         dynamoDb.getTable(DYNAMODB_MESSAGES)
                                 .putItem(new PutItemSpec().withItem(new Item()
                                         .withString("UUID", disMsgID)
@@ -300,7 +300,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String message = "gameOver: " + playerWhoWon + " has WON the game on a correct accusation";
 
                     for (String plyr : listOfPlayers) {
-                        String gameOverMsgID = "gameOver_" + plyr;
+                        String gameOverMsgID = "gameOver_" + plyr + gameID;
                         dynamoDb.getTable(DYNAMODB_MESSAGES)
                                 .putItem(new PutItemSpec().withItem(new Item()
                                         .withString("UUID", gameOverMsgID)
@@ -315,7 +315,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String lostMessage = "playerLost: " + playerWhoLost + " has lost the game on a wrong accusation";
 
                     for (String plyr : listOfPlayers) {
-                        String lostMsgID = "playerLost_" + plyr;
+                        String lostMsgID = "playerLost_" + plyr + gameID;
                         dynamoDb.getTable(DYNAMODB_MESSAGES)
                                 .putItem(new PutItemSpec().withItem(new Item()
                                         .withString("UUID", lostMsgID)
@@ -328,8 +328,9 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String playerToDelete = event.get("playerToDelete").toString();
                     String ID = event.get("msgID").toString();
 
-                    if (ID.equals("makeSus_")) {
-                        String deleteMsgID = ID + playerToDelete;
+                    if (ID.equals("makeSus_") || ID.equals("disproveSus_") ||
+                            ID.equals("passSus_")) {
+                        String deleteMsgID = ID + playerToDelete + gameID;
 
                         dynamoDb.getTable(DYNAMODB_MESSAGES).deleteItem(
                                 new PrimaryKey("UUID", deleteMsgID));
@@ -412,7 +413,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                 if(type.equals("turnUpdate")){
                     response.put("messageType", "playerTurnUpdate");
                     Item endTurnMsg = dynamoDb.getTable(DYNAMODB_MESSAGES)
-                            .getItem("UUID", "endTurn_" + list[0]);
+                            .getItem("UUID", "endTurn_" + list[0] + gameUUID);
                     if (endTurnMsg != null) {
                         String msg = endTurnMsg.get("Message").toString();
                         String[] endTurnList = msg.split(": ");
@@ -437,7 +438,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     response.put("messageType", "playerLocation");
                     String player = queryString.get("Player").toString();
                     Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
-                            "movePlayer_" + player);
+                            "movePlayer_" + player + gameUUID);
                     if (msg != null) {
                         response.put("playerWhoMoved", msg.get("Player Name").toString());
                         String receivedMsg = msg.get("Message").toString();
@@ -458,7 +459,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     // TODO:Need way of getting msg UUID
                     String player = queryString.get("Player").toString();
                     Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
-                            "makeSus_" + player);
+                            "makeSus_" + player + gameUUID);
                     if (msg != null) {
                         response.put("messageType", "suggestionMade");
                         String playerWhoSuggested = msg.get("Player Name").toString();
@@ -483,7 +484,8 @@ public class ClueLessHandler implements RequestStreamHandler {
                 } else if(type.equals("contradict")){
                     response.put("messageType", "contradictSuggestion");
                     //TODO:Need way of getting msg UUID
-                    Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID", "1234");
+                    Item msg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
+                            "1234");
 
                     String playerWhoSuggested = msg.get("Player Name").toString();
                     response.put("playerWhoSuggested", playerWhoSuggested);
@@ -507,9 +509,9 @@ public class ClueLessHandler implements RequestStreamHandler {
                 } else if (type.equals("disprove") || (type.equals("pass"))){
                     String player = queryString.get("Player").toString();
                     Item disproveMsg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
-                            "disproveSus_" + player);
+                            "disproveSus_" + player + gameUUID);
                     Item passMsg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
-                            "passSus_" + player);
+                            "passSus_" + player + gameUUID);
 
                     if (disproveMsg != null) {
                         response.put("messageType", "disproveMade");
@@ -545,9 +547,9 @@ public class ClueLessHandler implements RequestStreamHandler {
                 } else if (type.equals("gOPL")) {
                     String player = queryString.get("Player").toString();
                     Item gameOverMsg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
-                            "gameOver_" + player);
+                            "gameOver_" + player + gameUUID);
                     Item playerLostMsg = dynamoDb.getTable(DYNAMODB_MESSAGES).getItem("UUID",
-                            "playerLost_" + player);
+                            "playerLost_" + player + gameUUID);
 
                     if (gameOverMsg != null) {
                         response.put("messageType", "gameOver");
@@ -662,11 +664,13 @@ public class ClueLessHandler implements RequestStreamHandler {
         ArrayList<Integer> locationIndices = new ArrayList<>();
 
         for (int j = 0; j < suspectList.size(); ++j) {
-            suspectIndices.add(new Integer(j));
-            weaponIndices.add(new Integer(j));
+            suspectIndices.add(j);
+        }
+        for (int j = 0; j < weaponList.size(); ++j) {
+            weaponIndices.add(j);
         }
         for (int j = 0; j < locationList.size(); ++j) {
-            locationIndices.add(new Integer(j));
+            locationIndices.add(j);
         }
         suspectIndices = shuffleList(suspectIndices);
         weaponIndices = shuffleList(weaponIndices);
@@ -675,10 +679,18 @@ public class ClueLessHandler implements RequestStreamHandler {
         boolean stopSus = false;
         boolean stopWeap = false;
         boolean stopLoc = false;
+
         int cardNumber = 1;
         int susIndicesIndex = 0;
         int weapIndicesIndex = 0;
         int locIndicesIndex = 0;
+
+        if (susIndicesIndex == (suspectIndices.size()))
+            stopSus = true;
+        if (weapIndicesIndex == (weaponIndices.size()))
+            stopWeap = true;
+        if (locIndicesIndex == (locationIndices.size()))
+            stopLoc = true;
 
         while(cardsAssigned.size() != numberOfCards) {
             int randomList = pickRandomList(stopSus, stopWeap, stopLoc);
@@ -702,11 +714,11 @@ public class ClueLessHandler implements RequestStreamHandler {
                     locIndicesIndex++;
                 }
             }
-            if (susIndicesIndex == 4)
+            if (susIndicesIndex == (suspectIndices.size()))
                 stopSus = true;
-            if (weapIndicesIndex == 4)
+            if (weapIndicesIndex == (weaponIndices.size()))
                 stopWeap = true;
-            if (locIndicesIndex == 7)
+            if (locIndicesIndex == (locationIndices.size()))
                 stopLoc = true;
             cardNumber++;
         }
@@ -726,6 +738,12 @@ public class ClueLessHandler implements RequestStreamHandler {
             randomList = temp.get(0);
         } else if (!stopSus && !stopWeap && stopLoc) {
             randomList = (int) ((Math.random() * (1)));
+        } else if (stopSus && stopWeap && !stopLoc) {
+            randomList = 2;
+        } else if (!stopSus && stopWeap && stopLoc) {
+            randomList = 0;
+        } else if (stopSus && !stopWeap && stopLoc) {
+            randomList = 1;
         }
         return randomList;
     }
