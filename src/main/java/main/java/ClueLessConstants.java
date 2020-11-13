@@ -27,7 +27,7 @@ public class ClueLessConstants {
     public static ArrayList<String> kitchen  = new ArrayList(Arrays.asList("Study", "Hallway:DRK","Hallway:KB" ));
     public static ArrayList<String> hallwayLS  = new ArrayList(Arrays.asList("ProfessorPlumStart", "Library", "Study"));
     public static ArrayList<String> hallwayCB  = new ArrayList(Arrays.asList("Conservatory", "Ballroom", "Mr.GreenStart"));
-    public static ArrayList<String> hallwayCL  = new ArrayList(Arrays.asList("Conservatory", "Library", "PeacockStart"));
+    public static ArrayList<String> hallwayCL  = new ArrayList(Arrays.asList("Conservatory", "Library", "Mrs.PeacockStart"));
     public static ArrayList<String> hallwayLBR  = new ArrayList(Arrays.asList("Library", "Billiard Room"));
     public static ArrayList<String> hallwaySH  = new ArrayList(Arrays.asList("Study", "Hall"));
     public static ArrayList<String> hallwayHBR  = new ArrayList(Arrays.asList("Hall", "Billiard Room"));
@@ -39,7 +39,7 @@ public class ClueLessConstants {
     public static ArrayList<String> hallwayBBR  = new ArrayList(Arrays.asList("Ballroom", "Billiard Room"));
     public static ArrayList<String> professorPlumStart  = new ArrayList(Arrays.asList("Hallway:LS"));
     public static ArrayList<String> colonelMustardStart  = new ArrayList(Arrays.asList("Hallway:LDR"));
-    public static ArrayList<String> peacockStart  = new ArrayList(Arrays.asList("Hallway:CL"));
+    public static ArrayList<String> mrsPeacockStart  = new ArrayList(Arrays.asList("Hallway:CL"));
     public static ArrayList<String> mrGreenStart  = new ArrayList(Arrays.asList("Hallway:CB"));
     public static ArrayList<String> missScarletStart  = new ArrayList(Arrays.asList("Hallway:HL"));
     public static ArrayList<String> mrsWhiteStart  = new ArrayList(Arrays.asList("Hallway:KB"));
@@ -69,7 +69,7 @@ public class ClueLessConstants {
         put("Mrs.WhiteStart", mrsWhiteStart);
         put("ColonelMustardStart", colonelMustardStart);
         put("MissScarletStart", missScarletStart);
-        put("PeacockStart", peacockStart);
+        put("Mrs.PeacockStart", mrsPeacockStart);
         put("Mr.GreenStart", mrGreenStart);
         put("ProfessorPlumStart", professorPlumStart);
     }};

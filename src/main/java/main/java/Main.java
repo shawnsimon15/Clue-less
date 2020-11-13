@@ -37,14 +37,6 @@ public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Welcome to ClueLess!");
 
-        //autoMessageCheck = new AutoMessageCheck();
-        //gameStatus = new GameStatus();
-        //gameActions = new GameActions();
-        //ClueLessConstants constants = new ClueLessConstants(); // Calls constructor to initialize constants
-
-        //userInterface();
-
-        ClueLessConstants constants = new ClueLessConstants(); // Calls constructor to initialize constants
         Game newGame = new Game();
 
     }

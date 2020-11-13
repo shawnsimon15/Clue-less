@@ -23,31 +23,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a4ba0207-25c3-40b3-806e-46585c388591" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/main/java/ClueLessConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/main/java/ClueLessConstants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/main/java/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/main/java/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/ClueLess-1.0-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/lambdaFunctions/ClueLessHandler.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/AutoMessageCheck.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/ClueLessConstants$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/ClueLessConstants.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/ClueLessUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/ContradictTask.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/Game.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/GameActions.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/GameOver_PlayerLostTask.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/GameStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/LocationUpdateTask.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/Main.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/PlayerStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/StartGameTask.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/main/java/SuggestionTask.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-archiver/pom.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/original-ClueLess-1.0-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/test/ClueLessUtilsTest.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -242,11 +220,11 @@
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
     <state width="325" height="482" key="Diff.GoToChangePopup/65.24.1855.1056@65.24.1855.1056" timestamp="1605279453373" />
-    <state x="164" y="96" width="1657" height="885" key="DiffContextDialog" timestamp="1605290725780">
+    <state x="164" y="96" width="1657" height="885" key="DiffContextDialog" timestamp="1605290837811">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
     <state x="163" y="88" width="1643" height="791" key="DiffContextDialog/65.24.1839.943@65.24.1839.943" timestamp="1603760270547" />
-    <state x="164" y="96" width="1657" height="885" key="DiffContextDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1605290725780" />
+    <state x="164" y="96" width="1657" height="885" key="DiffContextDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1605290837811" />
     <state x="164" y="89" width="1658" height="805" key="DiffContextDialog/65.24.1855.959@65.24.1855.959" timestamp="1605272397388" />
     <state x="780" y="322" key="FileChooserDialogImpl" timestamp="1603749118389">
       <screen x="65" y="24" width="1855" height="1056" />
@@ -310,11 +288,11 @@
     </state>
     <state x="480" y="116" key="SettingsEditor/65.24.1855.1056@65.24.1855.1056" timestamp="1603673775238" />
     <state x="480" y="108" key="SettingsEditor/65.24.1855.959@65.24.1855.959" timestamp="1605052669887" />
-    <state x="736" y="256" key="VcsDiffUtil.ChangesDialog" timestamp="1605283005487">
+    <state x="736" y="256" key="VcsDiffUtil.ChangesDialog" timestamp="1605290736881">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
     <state x="730" y="231" key="VcsDiffUtil.ChangesDialog/65.24.1839.943@65.24.1839.943" timestamp="1603759688482" />
-    <state x="736" y="256" key="VcsDiffUtil.ChangesDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1605283005487" />
+    <state x="736" y="256" key="VcsDiffUtil.ChangesDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1605290736881" />
     <state x="736" y="235" key="VcsDiffUtil.ChangesDialog/65.24.1855.959@65.24.1855.959" timestamp="1605272165594" />
     <state x="543" y="251" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1605285126967">
       <screen x="65" y="24" width="1855" height="1056" />

@@ -45,10 +45,10 @@ public class Game {
                             break;
                         }
                         else {
-                            System.out.println("Please enter a number between 3 and 5 ");
+                            System.out.println("Please enter a number between 3 and 6 ");
                         }
                     }catch (Exception e){
-                        System.out.println("Please enter a number between 3 and 5 ");
+                        System.out.println("Please enter a number between 3 and 6 ");
                     }
                 }
 
