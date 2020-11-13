@@ -341,7 +341,6 @@ public class Game {
                 JSONObject turnUpdateJSON = new JSONObject(turnUpdate.toString());
                 String turnUpdateResponse = turnUpdateJSON.get("currentTurn").toString();
 
-
                 if (playerList.size() == 1) {
                     System.out.println("There is no else in the game");
                     System.out.println("You have won!");
@@ -377,7 +376,6 @@ public class Game {
                             }
                             Scanner input = new Scanner(System.in);
 
-
                             String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
                             System.out.println("You are in the " + currentLocation + ".");
 
@@ -395,7 +393,6 @@ public class Game {
 
                                         for(String location: ClueLessConstants.ADJACENCY_MAP.get(currentLocation)){
                                             System.out.println("You may move to " + location);
-
                                         }
 
                                         System.out.println("Where would you like to move?");
@@ -624,15 +621,14 @@ public class Game {
         boolean validMove = false;
 
         /********* Get location of each player on the board *********/
-        StringBuilder response = ClueLessUtils.makeGet(gameActions.getGameUUID(),
-                playerName, "locationUpdate");
-        JSONObject responseJSON = new JSONObject(response.toString());
-        JSONObject locationUpdate = (JSONObject) responseJSON.get("positionUpdates");
-
         ArrayList<String> locations = new ArrayList<>();
+        for (PlayerStatus ps : gameStatus.getActivePlayerList()){
+            locations.add(ps.getPlayerLocation());
+        }
 
-        for (String key : locationUpdate.keySet()) {
-            locations.add(locationUpdate.get(key).toString());
+        System.out.println("All players occupy these positions: ");
+        for (String loc : locations) {
+            System.out.println(loc);
         }
         /********* Get location of each player on the board *********/
 
