@@ -619,228 +619,30 @@ public class Game {
                                  Optional<String> notificationMessage) {
     }*/
 
-    public boolean validMove(String currentLocation, String desiredLocation) throws IOException {
+    public boolean validMove(String currentLocation, String desiredLocation) {
         boolean validMove = false;
 
-        /********* Get location of each player on the board *********/
         ArrayList<String> locations = new ArrayList<>();
         for (PlayerStatus ps : gameStatus.getActivePlayerList()){
             locations.add(ps.getPlayerLocation());
         }
-        /********* Get location of each player on the board *********/
-
-        switch (desiredLocation) {
-            case "Hallway:CB": // Hallway between Conservatory and Ballroom
-                System.out.println("");
-                if (locations.contains("Hallway:CB")) {
-                    validMove = false;
-                } else if (currentLocation.equals("Mr.GreenStart") ||
-                        currentLocation.equals("Conservatory") ||
-                        currentLocation.equals("Ballroom")) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Conservatory" +
-                            " and Ballroom"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:CL": // Hallway between Conservatory and Library
-                if (locations.contains("Hallway:CL")) {
-                    validMove = false;
-                } else if (currentLocation.equals("Mrs.PeacockStart") ||
-                        currentLocation.equals("Conservatory") ||
-                        currentLocation.equals("Library")) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Conservatory" +
-                            " and Library"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:LS": // Hallway between Library and Study
-                if (locations.contains("Hallway:LS")) {
-                    validMove = false;
-                } else if (currentLocation.equals("ProfessorPlumStart")  ||
-                        currentLocation.equals("Library") ||
-                        currentLocation.equals("Study")) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Library" +
-                            " and Study"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:LBR": // Hallway between Library and Billiard Room
-                if (!locations.contains("Hallway:LBR") &&
-                        (currentLocation.equals("Library") ||
-                                currentLocation.equals("Billiard Room"))) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Library" +
-                            " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:SH": // Hallway between Study and Hall
-                if (!locations.contains("Hallway:SH") &&
-                        (currentLocation.equals("Study") ||
-                                currentLocation.equals("Hall"))) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Study" +
-                            " and Hall"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:HBR": // Hallway between Hall and Billiard Room
-                if (!locations.contains("Hallway:HBR") &&
-                        (currentLocation.equals("Hall") ||
-                                currentLocation.equals("Billiard Room"))) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Hall" +
-                            " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:HL": // Hallway between Hall and Lounge
-                if (locations.contains("Hallway:HL")) {
-                    validMove = false;
-                } else if (currentLocation.equals("MissScarletStart")  ||
-                        currentLocation.equals("Hall") ||
-                        currentLocation.equals("Lounge")) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Hall" +
-                            " and Lounge"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:LDR": // Hallway between Lounge and Dining Room
-                if (locations.contains("Hallway:LDR")) {
-                    validMove = false;
-                } else if (currentLocation.equals("ColonelMustardStart")  ||
-                        currentLocation.equals("Lounge") ||
-                        currentLocation.equals("Dining Room")) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Lounge" +
-                            " and Dining Room"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:DRBR": // Hallway between Dining Room and Billiard Room
-                if (!locations.contains("Hallway:DRBR") &&
-                        (currentLocation.equals("Dining Room") ||
-                                currentLocation.equals("Billiard Room"))) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Dining Room" +
-                            " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:DRK": // Hallway between Dining Room and Kitchen
-                if (!locations.contains("Hallway:DRK") &&
-                        (currentLocation.equals("Dining Room") ||
-                                currentLocation.equals("Kitchen"))) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Dining Room" +
-                            " and Kitchen"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:KB": // Hallway between Kitchen and Ballroom
-                if (locations.contains("Hallway:KB")) {
-                    validMove = false;
-                } else if (currentLocation.equals("Mrs.WhiteStart")  ||
-                        currentLocation.equals("Kitchen") ||
-                        currentLocation.equals("Ballroom")) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Kitchen" +
-                            " and Ballroom"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Hallway:BBR": // Hallway between Ballroom and Billiard Room
-                if (!locations.contains("Hallway:BBR") &&
-                        (currentLocation.equals("Ballroom") ||
-                                currentLocation.equals("Billiard Room"))) {
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " cannot move to the hallway between Ballroom" +
-                            " and Billiard Room"); //TODO: maybe find way to add who is in the hallway currently
-                }
-                break;
-            case "Conservatory":
-                if (currentLocation.equals("Hallway:CB") || currentLocation.equals("Hallway:CL") ||
-                        currentLocation.equals("Lounge")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Library":
-                if (currentLocation.equals("Hallway:CL") || currentLocation.equals("Hallway:LS")
-                        || currentLocation.equals("Hallway:LBR")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Study":
-                if (currentLocation.equals("Hallway:LS") || currentLocation.equals("Hallway:SH") ||
-                        currentLocation.equals("Kitchen")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Hall":
-                if (currentLocation.equals("Hallway:SH") || currentLocation.equals("Hallway:HBR")
-                        || currentLocation.equals("Hallway:HL")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Lounge":
-                if (currentLocation.equals("Hallway:HL") || currentLocation.equals("Hallway:LDR") ||
-                        currentLocation.equals("Conservatory")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Dining Room":
-                if (currentLocation.equals("Hallway:LDR") || currentLocation.equals("Hallway:DRBR")
-                        || currentLocation.equals("Hallway:DRK")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Kitchen":
-                if (currentLocation.equals("Hallway:DRK") || currentLocation.equals("Hallway:KB") ||
-                        currentLocation.equals("Study")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Ballroom":
-                if (currentLocation.equals("Hallway:CB") || currentLocation.equals("Hallway:KB")
-                        || currentLocation.equals("Hallway:BBR")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-                break;
-            case "Billiard Room":
-                if (currentLocation.equals("Hallway:BBR") || currentLocation.equals("Hallway:LBR")
-                        || currentLocation.equals("Hallway:HBR") || currentLocation.equals("Hallway:DRBR")){
-                    validMove = true;
-                } else {
-                    System.out.println(playerName + " is not in valid Hallway"); //TODO: Think of better string
-                }
-            default:
-                validMove = false;
-                System.out.println(playerName + " did not enter valid location");
-                break;
-
+        ArrayList<String> possibleMoves
+                = (ArrayList<String>) ClueLessConstants.ADJACENCY_MAP.get(desiredLocation);
+        
+        if(desiredLocation.contains("Hallway")) {
+            if (!locations.contains(desiredLocation) &&
+                    possibleMoves.contains(currentLocation)) {
+                validMove = true;
+            } else {
+                System.out.println("Can't move to this hallway: " + desiredLocation);
+            }
+        } else {
+            if (possibleMoves.contains(currentLocation)) {
+                validMove = true;
+            } else {
+                System.out.println("Can't move to this room: " + currentLocation);
+            }
         }
-
         return validMove;
     }
 }

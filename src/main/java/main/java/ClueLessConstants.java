@@ -61,7 +61,7 @@ public class ClueLessConstants {
         put("Hallway:SH", hallwaySH);
         put("Hallway:HBR", hallwayHBR);
         put("Hallway:HL", hallwayHL);
-        put( "Hallway:LDR", hallwayLDR);
+        put("Hallway:LDR", hallwayLDR);
         put("Hallway:DRBR", hallwayDRBR);
         put("Hallway:DRK", hallwayDRK);
         put("Hallway:KB", hallwayKB);
