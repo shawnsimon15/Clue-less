@@ -78,7 +78,8 @@ public class GameActions {
     }
 
     // endTurn will be called when the player wants to end their turn
-    public void endTurn(String nextPlayer) throws IOException {
+    public void endTurn(String currentPlayer, String nextPlayer) throws IOException {
+        playerName = currentPlayer;
         // called by main.userInterface
         ClueLessUtils.endTurnPost(gameUUID, playerName, nextPlayer);
     }

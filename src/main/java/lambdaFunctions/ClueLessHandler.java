@@ -329,7 +329,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String ID = event.get("msgID").toString();
 
                     if (ID.equals("makeSus_") || ID.equals("disproveSus_") ||
-                            ID.equals("passSus_")) {
+                            ID.equals("passSus_") || ID.equals("playerLost_")) {
                         String deleteMsgID = ID + playerToDelete + gameID;
 
                         dynamoDb.getTable(DYNAMODB_MESSAGES).deleteItem(
@@ -557,7 +557,7 @@ public class ClueLessHandler implements RequestStreamHandler {
                         response.put("Winner", winner);
                     } else if (playerLostMsg != null) {
                         response.put("messageType", "playerLost");
-                        String loser = gameOverMsg.get("Player Name").toString();
+                        String loser = playerLostMsg.get("Player Name").toString();
                         response.put("Loser", loser);
                     } else {
                         response.put("messageType", "nothing");

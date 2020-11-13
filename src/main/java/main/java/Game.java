@@ -4,6 +4,7 @@ package main.java;
 import com.amazonaws.services.dynamodbv2.xspec.S;
 import org.json.JSONObject;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -260,17 +261,24 @@ public class Game {
             if (gOPLResponse.equals("gameOver")) {
                 String winner = gOPLJSON.get("Winner").toString();
                 System.out.println("The game is over! The winner is: " + winner);
+                autoMessageCheck.setStopThreads(); // End the game
             } else {
                 if (gOPLResponse.equals("playerLost")) {
                     String loser = gOPLJSON.get("Loser").toString();
                     System.out.println(loser + " has lost the game on an incorrect accusation.");
                     // take them out of the lineup
                     int playerListSize = playerList.size();
+
                     for (int i = 0; i < playerListSize; ++i) {
                         if(playerList.get(i).getPlayerName().equals(loser)){
                             playerList.remove(i);
+                            break;
                         }
                     }
+                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                            playerName, "playerLost_");
+                    gOPLResponse = " ";
+                    whoseTurn--;
                 }
 
                 boolean validInput = true;
@@ -308,254 +316,262 @@ public class Game {
                 JSONObject turnUpdateJSON = new JSONObject(turnUpdate.toString());
                 String turnUpdateResponse = turnUpdateJSON.get("currentTurn").toString();
 
-                if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
-                        turnUpdateResponse.equals(playerName)) {
 
-                    // When it is the player's first turn, assign them cards
-                    if (playerList.get(whoseTurn).getPlayerHand().isEmpty()) {
-                        // Assign cards to player
-                        StringBuilder cardAssignGET = ClueLessUtils
-                                .makeGet(gameActions.getGameUUID(), "whoCards",
-                                        "assignCards");
-                        JSONObject cardAssignJSON = new JSONObject(cardAssignGET.toString());
-                        ArrayList<String> cards = getPlayerCards(cardAssignJSON); // TODO: change function o getListFromJSON
-                        playerList.get(whoseTurn).setPlayerHand(cards);
-                    }
+                if (playerList.size() == 1) {
+                    System.out.println("There is no else in the game");
+                    System.out.println("You have won!");
+                    endOfGame = "gameOver";
+                    autoMessageCheck.setStopThreads();
+                } else {
+                    if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
+                            turnUpdateResponse.equals(playerName)) {
 
-                    // Delete the suggestion msgs in db after everyone has contradicted
-                    if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion ||
-                    justContradicted) {
-                        if (playerMadeSuggestion || justContradicted) {
-                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                    playerName, "makeSus_");
-                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                    playerName, "passSus_");
-                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                    playerName, "disproveSus_");
-                            playerMadeSuggestion = false;
-                            justContradicted = false;
+                        // When it is the player's first turn, assign them cards
+                        if (playerList.get(whoseTurn).getPlayerHand().isEmpty()) {
+                            // Assign cards to player
+                            StringBuilder cardAssignGET = ClueLessUtils
+                                    .makeGet(gameActions.getGameUUID(), "whoCards",
+                                            "assignCards");
+                            JSONObject cardAssignJSON = new JSONObject(cardAssignGET.toString());
+                            ArrayList<String> cards = getPlayerCards(cardAssignJSON); // TODO: change function o getListFromJSON
+                            playerList.get(whoseTurn).setPlayerHand(cards);
                         }
-                        Scanner input = new Scanner(System.in);
-                        System.out.println("What would you like to do? ");
-                        System.out.println("    a) Move Player");
-                        System.out.println("    b) Make a Suggestion");
-                        System.out.println("    c) Make an Accusation");
-                        System.out.println("    e) End Turn");
-                        String choice = input.nextLine();
 
-                        switch (choice.toLowerCase()) {
-                            case "a":
-                                String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
-                                boolean validMove = false;
-                                while (!validMove && !movedPlayer) {
-                                    System.out.println("Where would you like to move?");
-                                    String newLocation = input.nextLine();
-                                    validMove = validMove(currentLocation, newLocation);
-                                    if (validMove) {
-                                        gameActions.movePiece(gameActions.getGameUUID(), playerName, newLocation);
-                                        TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg
-                                        playerList.get(whoseTurn).setPlayerLocation(newLocation);
-                                        movedPlayer = true;
-                                    } else {
-                                        System.out.println("Please choose another location");
-                                        validInput = false;
-                                    }
-                                }
-                                if (movedPlayer && !validMove) {
-                                    System.out.println("You can't move again.");
-                                }
-                                break;
-                            case "b":
-                                if (ClueLessConstants.ROOM_LIST.contains(playerList.get(whoseTurn).getPlayerLocation())) {
-                                    String suspect;
-                                    suspect = getPlayerInputForSuggestion(input, "suspect");
+                        // Delete the suggestion msgs in db after everyone has contradicted
+                        if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion ||
+                                justContradicted) {
+                            if (playerMadeSuggestion || justContradicted) {
+                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                        playerName, "makeSus_");
+                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                        playerName, "passSus_");
+                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                        playerName, "disproveSus_");
+                                playerMadeSuggestion = false;
+                                justContradicted = false;
+                            }
+                            Scanner input = new Scanner(System.in);
+                            System.out.println("What would you like to do? ");
+                            System.out.println("    a) Move Player");
+                            System.out.println("    b) Make a Suggestion");
+                            System.out.println("    c) Make an Accusation");
+                            System.out.println("    e) End Turn");
+                            String choice = input.nextLine();
 
-                                    String location;
-                                    location = getPlayerInputForSuggestion(input, "location");
-
-                                    String weapon;
-                                    weapon = getPlayerInputForSuggestion(input, "weapon");
-
-                                    gameActions.makeGuess(gameActions.getGameUUID(), playerName, suspect, weapon, location);
-                                    System.out.println("You have made a suggestion");
-
-                                    // Need to move player in suggestion to location of current player
-                                    gameActions.movePiece(gameActions.getGameUUID(), suspect, location);
-                                    ArrayList<PlayerStatus> gameStatusList
-                                            = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
-
-                                    for (PlayerStatus ps : gameStatusList) {
-                                        if (ps.getPlayerName().equals(suspect)) {
-                                            ps.setPlayerLocation(location);
+                            switch (choice.toLowerCase()) {
+                                case "a":
+                                    String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
+                                    boolean validMove = false;
+                                    while (!validMove && !movedPlayer) {
+                                        System.out.println("Where would you like to move?");
+                                        String newLocation = input.nextLine();
+                                        validMove = validMove(currentLocation, newLocation);
+                                        if (validMove) {
+                                            gameActions.movePiece(gameActions.getGameUUID(), playerName, newLocation);
+                                            TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg
+                                            playerList.get(whoseTurn).setPlayerLocation(newLocation);
+                                            movedPlayer = true;
+                                        } else {
+                                            System.out.println("Please choose another location");
+                                            validInput = false;
                                         }
                                     }
-                                    playerMadeSuggestion = true;
+                                    if (movedPlayer && !validMove) {
+                                        System.out.println("You can't move again.");
+                                    }
+                                    break;
+                                case "b":
+                                    if (ClueLessConstants.ROOM_LIST.contains(playerList.get(whoseTurn).getPlayerLocation())) {
+                                        String suspect;
+                                        suspect = getPlayerInputForSuggestion(input, "suspect");
+
+                                        String location;
+                                        location = getPlayerInputForSuggestion(input, "location");
+
+                                        String weapon;
+                                        weapon = getPlayerInputForSuggestion(input, "weapon");
+
+                                        gameActions.makeGuess(gameActions.getGameUUID(), playerName, suspect, weapon, location);
+                                        System.out.println("You have made a suggestion");
+
+                                        // Need to move player in suggestion to location of current player
+                                        gameActions.movePiece(gameActions.getGameUUID(), suspect, location);
+                                        ArrayList<PlayerStatus> gameStatusList
+                                                = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+
+                                        for (PlayerStatus ps : gameStatusList) {
+                                            if (ps.getPlayerName().equals(suspect)) {
+                                                ps.setPlayerLocation(location);
+                                            }
+                                        }
+                                        playerMadeSuggestion = true;
+                                        movedPlayer = false;
+                                        TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
+                                        // just written to db
+                                    } else {
+                                        System.out.println("You cannot make a suggestion because you are not in a room.");
+                                        validInput = false;
+                                    }
+                                    break;
+                                case "c":
+                                    if (ClueLessConstants.ROOM_LIST.contains(playerList.get(whoseTurn).getPlayerLocation())) {
+                                        String suspect;
+                                        suspect = getPlayerInputForSuggestion(input, "suspect");
+
+                                        String location;
+                                        location = getPlayerInputForSuggestion(input, "location");
+
+                                        String weapon;
+                                        weapon = getPlayerInputForSuggestion(input, "weapon");
+
+                                        // update string endOfGame when needed
+                                        endOfGame = gameActions.makeAccusation(gameActions.getGameUUID(),
+                                                playerName, suspect, weapon, location);
+
+                                        movedPlayer = false;
+                                        TimeUnit.SECONDS.sleep(2);
+
+                                    } else {
+                                        System.out.println("You must be in a room to make an accusation.");
+                                        validInput = false;
+                                    }
+                                    break;
+                                case "e":
+                                    System.out.println("You have ended your turn.");
                                     movedPlayer = false;
-                                    TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
-                                    // just written to db
-                                } else {
-                                    System.out.println("You cannot make a suggestion because you are not in a room.");
-                                    validInput = false;
-                                }
-                                break;
-                            case "c":
-                                if (ClueLessConstants.ROOM_LIST.contains(playerList.get(whoseTurn).getPlayerLocation())) {
-                                    String suspect;
-                                    suspect = getPlayerInputForSuggestion(input, "suspect");
+                                    validInput = true;
+                            }
+                        } else {
+                            // suggestion has been made, so player needs to act accordingly
+                            // need to get a response from each player, then delete sus msgs in db
+                            String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
+                            System.out.println(playerWhoSuggested + " has made the following suggestion: ");
+                            JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
 
-                                    String location;
-                                    location = getPlayerInputForSuggestion(input, "location");
+                            System.out.print(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") + ", " +
+                                    cardsSuggested.get("location"));
+                            System.out.println();
+                            Scanner input = new Scanner(System.in);
+                            System.out.println("What would you like to do? ");
+                            System.out.println("    a) Disprove a Suggestion");
+                            System.out.println("    b) Pass Suggestion");
+                            String choice = input.nextLine();
 
-                                    String weapon;
-                                    weapon = getPlayerInputForSuggestion(input, "weapon");
+                            switch (choice.toLowerCase()) {
+                                case "a":
+                                    System.out.println("Which card do you want to reveal?");
+                                    String card = input.nextLine();
 
-                                    // update string endOfGame when needed
-                                    endOfGame = gameActions.makeAccusation(gameActions.getGameUUID(),
-                                            playerName, suspect, weapon, location);
-                                    System.out.println(endOfGame);
-
-                                    movedPlayer = false;
-                                    TimeUnit.SECONDS.sleep(2);
-
-                                } else {
-                                    System.out.println("You must be in a room to make an accusation.");
-                                    validInput = false;
-                                }
-                                break;
-                            case "e":
-                                System.out.println("You have ended your turn.");
-                                movedPlayer = false;
-                                validInput = true;
+                                    ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, card);
+                                    break;
+                                case "b":
+                                    int currentPlayer = whoseTurn;
+                                    if (currentPlayer == (playerList.size() - 1)) {
+                                        currentPlayer = 0;
+                                    } else {
+                                        currentPlayer++;
+                                    }
+                                    ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
+                                            playerList.get(currentPlayer).getPlayerName());
+                                    break;
+                            }
+                            justContradicted = true;
                         }
+
+                        // Send endTurn msg to signal player is done
+                        boolean inARoom = ClueLessConstants.ROOM_LIST
+                                .contains(playerList.get(whoseTurn).getPlayerLocation());
+
+                        if ((validInput && !movedPlayer) || (movedPlayer && !inARoom)) {
+                            if (whoseTurn == (playerList.size() - 1)) {
+                                whoseTurn = 0;
+                            } else {
+                                whoseTurn++;
+                            }
+                            movedPlayer = false;
+                            // send msg to db ending player's turn
+                            gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
+                        }
+                        if (endOfGame.equals("playerLost") || endOfGame.equals("gameOver")) {
+                            autoMessageCheck.setStopThreads();
+                        }
+                        if (endOfGame.equals("playerLost")) {
+                            // Delete player who lost from db
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "anything");
+                        }
+
                     } else {
-                        // suggestion has been made, so player needs to act accordingly
-                        // need to get a response from each player, then delete sus msgs in db
-                        String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
-                        System.out.println(playerWhoSuggested + " has made the following suggestion: ");
-                        JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
+                        System.out.println("It is currently " + turnUpdateResponse +
+                                "'s turn. Please Wait.");
+                        String playerWhoContradicted = "";
 
-                        System.out.print(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") + ", " +
-                                cardsSuggested.get("location"));
-                        System.out.println();
-                        Scanner input = new Scanner(System.in);
-                        System.out.println("What would you like to do? ");
-                        System.out.println("    a) Disprove a Suggestion");
-                        System.out.println("    b) Pass Suggestion");
-                        String choice = input.nextLine();
+                        String waitingForPlayerToFinish = turnUpdateResponse;
 
-                        switch (choice.toLowerCase()) {
-                            case "a":
-                                System.out.println("Which card do you want to reveal?");
-                                String card = input.nextLine();
+                        boolean alreadyDeleted = false;
+                        int i = 0;
+                        while (waitingForPlayerToFinish.equals(turnUpdateResponse)) {
+                            String lastPlayer = waitingForPlayerToFinish;
+                            StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(),
+                                    "whoCares", "turnUpdate");
+                            JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
+                            waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
+                            TimeUnit.SECONDS.sleep(2);
 
-                                ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, card);
-                                break;
-                            case "b":
-                                int currentPlayer = whoseTurn;
-                                if (currentPlayer == (playerList.size() - 1)) {
-                                    currentPlayer = 0;
-                                } else {
-                                    currentPlayer++;
+                            if (playerMadeSuggestion &&
+                                    !(waitingForPlayerToFinish.equals(lastPlayer))) {
+                                StringBuilder cThreadResponse = autoMessageCheck.getContradictResponse();
+                                if (contradictThreadResponse != null) {
+                                    contradictJSON = new JSONObject(cThreadResponse.toString());
+                                    contradictResponse = contradictJSON.get("messageType").toString();
                                 }
-                                ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
-                                        playerList.get(currentPlayer).getPlayerName());
-                                break;
+
+                                if (contradictResponse.equals("disproveMade")) {
+                                    // If a player has contradicted a suggestion, delete suggestion post for each player
+                                    playerWhoContradicted = contradictJSON.get("playerWhoDisproved").toString();
+                                    String cardRevealed = contradictJSON.get("cardRevealed").toString();
+                                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                            playerWhoContradicted, "disproveSus_");
+
+                                    // Add card to player who disproved
+                                    ArrayList<PlayerStatus> gameStatusList
+                                            = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+                                    for (PlayerStatus ps : gameStatusList) {
+                                        if (ps.getPlayerName().equals(playerWhoContradicted)) {
+                                            ps.addPlayerHand(cardRevealed);
+                                        }
+                                    }
+                                    if (i == 0) {
+                                        System.out.println(playerWhoContradicted + " revealed " +
+                                                cardRevealed + "!");
+                                        ++i;
+                                    }
+
+                                } else if (contradictResponse.equals("passMade")) {
+                                    playerWhoContradicted = contradictJSON.get("playerWhoPassed").toString();
+                                    String nextPlayer = contradictJSON.get("nextPlayer").toString();
+                                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                            playerWhoContradicted, "passSus_");
+                                    if (i == 0) {
+                                        System.out.println(playerWhoContradicted + " passed suggestion!");
+                                        ++i;
+                                    }
+
+                                }
+                                if (contradictResponse.equals("passMade") ||
+                                        contradictResponse.equals("disproveMade") && !alreadyDeleted) {
+                                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                            playerWhoContradicted, "makeSus_");
+                                    alreadyDeleted = true;
+                                }
+                            }
                         }
-                        justContradicted = true;
-                    }
 
-                    // Send endTurn msg to signal player is done
-                    boolean inARoom = ClueLessConstants.ROOM_LIST
-                            .contains(playerList.get(whoseTurn).getPlayerLocation());
-
-                    if ((validInput && !movedPlayer) || (movedPlayer && !inARoom)) {
                         if (whoseTurn == (playerList.size() - 1)) {
                             whoseTurn = 0;
                         } else {
                             whoseTurn++;
                         }
-                        movedPlayer = false;
-                        // send msg to db ending player's turn
-                        gameActions.endTurn(playerList.get(whoseTurn).getPlayerName());
-                    }
-                    if (endOfGame.equals("playerLost") || endOfGame.equals("gameOver")) {
-                        autoMessageCheck.setStopThreads();
-                    }
-                    if (endOfGame.equals("playerLost")) {
-                        // Delete player who lost from db
-                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                playerName, "anything");
-                    }
-
-                } else {
-                    System.out.println("It is currently " + turnUpdateResponse +
-                            "'s turn. Please Wait.");
-                    String playerWhoContradicted = "";
-
-                    String waitingForPlayerToFinish = turnUpdateResponse;
-
-                    boolean alreadyDeleted = false;
-                    int i = 0;
-                    while (waitingForPlayerToFinish.equals(turnUpdateResponse)) {
-                        String lastPlayer = waitingForPlayerToFinish;
-                        StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(),
-                                "whoCares", "turnUpdate");
-                        JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
-                        waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
-                        TimeUnit.SECONDS.sleep(2);
-
-                        if (playerMadeSuggestion &&
-                                !(waitingForPlayerToFinish.equals(lastPlayer))) {
-                            StringBuilder cThreadResponse = autoMessageCheck.getContradictResponse();
-                            if (contradictThreadResponse != null) {
-                                contradictJSON = new JSONObject(cThreadResponse.toString());
-                                contradictResponse = contradictJSON.get("messageType").toString();
-                            }
-
-                            if (contradictResponse.equals("disproveMade")) {
-                                // If a player has contradicted a suggestion, delete suggestion post for each player
-                                playerWhoContradicted = contradictJSON.get("playerWhoDisproved").toString();
-                                String cardRevealed = contradictJSON.get("cardRevealed").toString();
-                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                        playerWhoContradicted, "disproveSus_");
-
-                                // Add card to player who disproved
-                                ArrayList<PlayerStatus> gameStatusList
-                                        = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
-                                for (PlayerStatus ps : gameStatusList) {
-                                    if (ps.getPlayerName().equals(playerWhoContradicted)) {
-                                        ps.addPlayerHand(cardRevealed);
-                                    }
-                                }
-                                if (i == 0) {
-                                    System.out.println(playerWhoContradicted + " revealed " +
-                                            cardRevealed + "!");
-                                    ++i;
-                                }
-
-                            } else if (contradictResponse.equals("passMade")) {
-                                playerWhoContradicted = contradictJSON.get("playerWhoPassed").toString();
-                                String nextPlayer = contradictJSON.get("nextPlayer").toString();
-                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                        playerWhoContradicted, "passSus_");
-                                if (i == 0) {
-                                    System.out.println(playerWhoContradicted + " passed suggestion!");
-                                    ++i;
-                                }
-
-                            }
-                            if (contradictResponse.equals("passMade") ||
-                                contradictResponse.equals("disproveMade") && !alreadyDeleted) {
-                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                        playerWhoContradicted, "makeSus_");
-                                alreadyDeleted = true;
-                            }
-                        }
-                    }
-                    if (whoseTurn == (playerList.size() - 1)) {
-                        whoseTurn = 0;
-                    } else {
-                        whoseTurn++;
                     }
                 }
             }
