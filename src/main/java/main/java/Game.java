@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static main.java.ClueLessConstants.MAIN_MENU_ENTRIES;
+
 public class Game {
     private GameActions gameActions;
     private AutoMessageCheck autoMessageCheck;
@@ -228,18 +230,16 @@ public class Game {
         ArrayList<String> list;
         if (cardType.equals("suspect")) {
             list = ClueLessConstants.SUSPECT_LIST;
-        } else if (cardType.equals("location")) {
-            list = ClueLessConstants.ROOM_LIST;
         } else {
             list = ClueLessConstants.WEAPON_LIST;
         }
 
-        if (cardType.equals("suspect") || cardType.equals("weapon") || cardType.equals("location")) {
+        if (cardType.equals("suspect") || cardType.equals("weapon")) {
             while (!list.contains(card)) {
                 System.out.println("The " + cardType + " is?");
                 card = input.nextLine();
                 if (!list.contains(card)) {
-                    System.out.println(card + " is not a valid suspect.");
+                    System.out.println(card + " is not a valid" + cardType + ".");
                 }
             }
         } else if (cardType.equals("disprove")) {
@@ -378,13 +378,21 @@ public class Game {
 
                             String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
                             System.out.println("You are in the " + currentLocation + ".");
-
-                            System.out.println("What would you like to do? ");
-                            System.out.println("    a) Move Player");
-                            System.out.println("    b) Make a Suggestion");
-                            System.out.println("    c) Make an Accusation");
-                            System.out.println("    e) End Turn");
-                            String choice = input.nextLine();
+                            String choice;
+                            while(true) {
+                                System.out.println("What would you like to do? ");
+                                System.out.println("    a) Move Player");
+                                System.out.println("    b) Make a Suggestion");
+                                System.out.println("    c) Make an Accusation");
+                                System.out.println("    d) End Turn");
+                                choice = input.nextLine();
+                                if(MAIN_MENU_ENTRIES.contains(choice)){
+                                    break;
+                                }
+                                else{
+                                    System.out.println(choice + " is an invalid entry.");
+                                }
+                            }
 
                             switch (choice.toLowerCase()) {
                                 case "a":
@@ -419,8 +427,8 @@ public class Game {
                                         String suspect;
                                         suspect = getPlayerInputForSuggestion(input, "suspect");
 
-                                        String location;
-                                        location = getPlayerInputForSuggestion(input, "location");
+                                        String location = playerList.get(whoseTurn).getPlayerLocation();
+                                        System.out.println("The location is " + location + ".");
 
                                         String weapon;
                                         weapon = getPlayerInputForSuggestion(input, "weapon");
@@ -452,8 +460,9 @@ public class Game {
                                         String suspect;
                                         suspect = getPlayerInputForSuggestion(input, "suspect");
 
-                                        String location;
-                                        location = getPlayerInputForSuggestion(input, "location");
+
+                                        String location = playerList.get(whoseTurn).getPlayerLocation();
+                                        System.out.println("The location is " + location + ".");
 
                                         String weapon;
                                         weapon = getPlayerInputForSuggestion(input, "weapon");
@@ -470,10 +479,11 @@ public class Game {
                                         validInput = false;
                                     }
                                     break;
-                                case "e":
+                                case "d":
                                     System.out.println("You have ended your turn.");
                                     movedPlayer = false;
                                     validInput = true;
+                                    break;
                             }
                         } else {
                             // suggestion has been made, so player needs to act accordingly

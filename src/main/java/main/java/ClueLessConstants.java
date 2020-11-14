@@ -73,6 +73,6 @@ public class ClueLessConstants {
         put("Mr.GreenStart", mrGreenStart);
         put("ProfessorPlumStart", professorPlumStart);
     }};
-            ;
+    public static ArrayList<String> MAIN_MENU_ENTRIES = new ArrayList(Arrays.asList("a", "b", "c", "d"));
 
 }
