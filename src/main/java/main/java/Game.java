@@ -24,7 +24,7 @@ public class Game {
         gameStatus = new GameStatus();
         playerName = " ";
         activePlayerList = new ArrayList<>();
-        autoMessageCheck = new AutoMessageCheck();
+       // autoMessageCheck = new AutoMessageCheck(new UserInterface());
         userInterface();
     }
 
@@ -43,7 +43,7 @@ public class Game {
 
                     System.out.println("How many players will be in the game (including you)? ");
                     try {
-                         numberOfPlayers =  Integer.parseInt(input.nextLine());
+                        numberOfPlayers =  Integer.parseInt(input.nextLine());
                         if(numberOfPlayers > 2 && numberOfPlayers < 7){
                             break;
                         }
@@ -75,7 +75,7 @@ public class Game {
                         System.out.println("You will be: " + playerName);
                         invalidInput = "VALID";
                     }
-                    
+
                     else if(joinGameJSON.get("messageType").toString().contentEquals("MAX PLAYERS")) {
                         System.out.println("Sorry, the selected game is full, please try a different game.");
                         System.out.println("Please enter a game ID. (i.e. Create Game, Join Game");
@@ -334,6 +334,8 @@ public class Game {
                     locationUpdateJSON = new JSONObject(locationUpdateThreadResponse.toString());
                     locationUpdateResponse = locationUpdateJSON.get("messageType").toString();
                 }
+
+
                 updateLocation(locationUpdateResponse, locationUpdateJSON, playerList);
 
                 StringBuilder turnUpdate = ClueLessUtils.makeGet(gameActions.getGameUUID(),
@@ -638,7 +640,7 @@ public class Game {
         }
         ArrayList<String> possibleMoves
                 = (ArrayList<String>) ClueLessConstants.ADJACENCY_MAP.get(desiredLocation);
-        
+
         if(desiredLocation.contains("Hallway")) {
             if (!locations.contains(desiredLocation) &&
                     possibleMoves.contains(currentLocation)) {

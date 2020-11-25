@@ -35,9 +35,7 @@ public class Main {
 
     // main will run be the application run by a player
     public static void main(String[] args) throws IOException, InterruptedException {
-        System.out.println("Welcome to ClueLess!");
-
-        Game newGame = new Game();
+        UserInterface newGame = new UserInterface();
 
     }
 }
