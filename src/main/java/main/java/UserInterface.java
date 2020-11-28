@@ -10,13 +10,14 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import static main.java.ClueLessConstants.MAIN_MENU_ENTRIES;
 
 public class UserInterface extends JFrame implements ActionListener {
+
+    //will be removed with real GUI
+    private JTextArea locations;
 
     //constants declared for ease of access and editing.
     private final static int FRAMEXDIMENSION = 1800;
@@ -39,16 +40,18 @@ public class UserInterface extends JFrame implements ActionListener {
     private JLabel mrsWhiteLable = new JLabel(MRSWHITE);
     private JLabel profPlumLable = new JLabel(PROFESSORPLUM);
     private HashMap<String, JLabel> playersToLableMap = new HashMap(){{
-        put("MissScarlet", missScarletLable);
-        put("ColonelMustard", colonelMustardLable);
-        put("Mrs.White", mrsPeacokLable);
-        put("Mr.Green", mrGreenLable);
-        put("Mrs.Peacock", mrsWhiteLable);
-        put("ProfessorPlum", profPlumLable);
+        put(ClueLessConstants.SUSPECT_LIST.get(0), missScarletLable);
+        put(ClueLessConstants.SUSPECT_LIST.get(1), colonelMustardLable);
+        put(ClueLessConstants.SUSPECT_LIST.get(2),mrsWhiteLable);
+        put(ClueLessConstants.SUSPECT_LIST.get(3), mrGreenLable);
+        put(ClueLessConstants.SUSPECT_LIST.get(4), mrsPeacokLable);
+        put(ClueLessConstants.SUSPECT_LIST.get(5), profPlumLable);
         }};
     JPanel cardsPanel = new JPanel();
     Popup p;
     private JComboBox<String> inputBox;
+    private JComboBox<String> guessBoxWeapons=  new JComboBox<>(ClueLessConstants.WEAPON_LIST.toArray(new String[0]));
+    private JComboBox<String> guessBoxSuspects =  new JComboBox<>(ClueLessConstants.SUSPECT_LIST.toArray(new String[0]));
     JTextField uuidField = new JTextField();
     private GameActions gameActions;
     private AutoMessageCheck autoMessageCheck;
@@ -60,8 +63,28 @@ public class UserInterface extends JFrame implements ActionListener {
     JPanel boardPanel = new JPanel();
     ArrayList<String> playerHand = new ArrayList<>();
     int whoseTurn = 0;
+    boolean movedPlayer = false;
+    boolean playerMadeSuggestion = false;
+    boolean justContradicted = false;
+
+
+    JButton moveUp;
+    JButton moveDown ;
+    JButton moveLeft;
+    JButton moveRight;
+    JButton MovePassage;
+    JButton makeSuggestionBtn;
+    JButton makeAccusationBtn;
+    JButton endTurnBtn;
 
     public UserInterface() {
+
+
+
+        // create a text area, specifying the rows and columns
+        locations = new JTextArea(8, 40);
+
+
 
         gameActions = new GameActions();
         gameStatus = new GameStatus();
@@ -80,25 +103,25 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
         //GAME PANNEL SETUP
-        boardPanel.setBackground(Color.CYAN);
+        boardPanel.add(locations);
         // CONTROLS PANNEL SETUP
-        JButton moveUp = new JButton("Move Up");
-        JButton moveDown = new JButton("Move Down");
-        JButton moveLeft = new JButton("Move Left");
-        JButton moveRight = new JButton("Move Right");
-        JButton MovePassage = new JButton("Enter Passage");
-        JButton makeGuess = new JButton("Make Guess");
-        JButton makeAccussation = new JButton("Make Accussation");
-        JButton endTurn = new JButton("End Turn");
+        moveUp = new JButton("Move Up");
+        moveDown = new JButton("Move Down");
+        moveLeft = new JButton("Move Left");
+        moveRight = new JButton("Move Right");
+        MovePassage = new JButton("Move Through Passage");
+        makeSuggestionBtn = new JButton("Make Suggestion");
+        makeAccusationBtn = new JButton("Make Accusation");
+        endTurnBtn = new JButton("End Turn");
 
         controlButtons.add(moveUp);
         controlButtons.add(moveDown);
         controlButtons.add(moveLeft);
         controlButtons.add(moveRight);
         controlButtons.add(MovePassage);
-        controlButtons.add(makeGuess);
-        controlButtons.add(makeAccussation);
-        controlButtons.add(endTurn);
+        controlButtons.add(makeSuggestionBtn);
+        controlButtons.add(makeAccusationBtn);
+        controlButtons.add(endTurnBtn);
 
 
         controlsPanel.setLayout(new GridLayout(8, 1));
@@ -331,39 +354,6 @@ public class UserInterface extends JFrame implements ActionListener {
 
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand()){
-            case "Create Game":
-                p.hide();
-                createMenu();
-                break;
-            case "Join Game":
-                p.hide();
-                joinMenu();
-                break;
-            case "Connect to Game":
-                gameUUID = uuidField.getText().trim();
-                gameUUIDLable.setText(gameUUIDLable.getText() + " " + gameUUID);
-
-                try {
-                    joinGame();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-                break;
-            case "Start Game":
-                p.hide();
-                try {
-                    createGame();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-                break;
-
-        }
-        System.out.println(e);
-    }
 
     private void waitingForPlayers(){
 
@@ -386,6 +376,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
     public void preGamePrep(String startGameResponse) {
+        p.hide();
         int i = 0;
         ArrayList<String> players = new ArrayList<>();
 
@@ -394,16 +385,24 @@ public class UserInterface extends JFrame implements ActionListener {
 
         int counter =2;
         for (String key : activePlayers.keySet()) {
-            JLabel current = playersToLableMap.get(key);
-            current.setText(current.getText() + "Player: "+ counter);
-            counter++;
+            String player = activePlayers.getString(key);
+            if(!player.equals(playerName)) {
+                JLabel current = playersToLableMap.get(player);
+                current.setText(current.getText() + "  Player: " + counter);
+                counter++;
+            }
             players.add(activePlayers.get(key).toString()); // all active players in game
+
         }
         printListContents(players, "players");
         ArrayList<String> turnOrderForGame = obtainTurnOrder(players);
         loadPlayerInfoIntoGameStatus(turnOrderForGame);
+        String eachLoc = "";
+        for(PlayerStatus player: playerList){
+            eachLoc +=("Player: "+player.getPlayerName()+ " is in " +player.getPlayerLocation()+ ".\n");
+        }
 
-
+        locations.setText(eachLoc);
         // Thread to check if suggestion has been made
         autoMessageCheck.suggestionAutoMessageCheck(gameActions.getGameUUID(), playerName);
         // Thread to check if contradiction has been made
@@ -434,7 +433,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
     public void loadPlayerInfoIntoGameStatus(ArrayList<String> turnOrderForGame) {
-        ArrayList<PlayerStatus> gameStatusPL = new ArrayList<>();
+        playerList = new ArrayList<>();
         for (String plyr : turnOrderForGame) {
             PlayerStatus playerStatus = new PlayerStatus();
             playerStatus.setPlayerName(plyr);
@@ -443,9 +442,9 @@ public class UserInterface extends JFrame implements ActionListener {
             playerStatus.setPlayerHand(emptyList);
 
             playerStatus.setPlayerLocation(plyr + "Start");
-            gameStatusPL.add(playerStatus);
+            playerList.add(playerStatus);
         }
-        gameStatus.setActivePlayerList(gameStatusPL); // add ordered active players to GameStatus
+        gameStatus.setActivePlayerList(playerList); // add ordered active players to GameStatus
     }
 
     public ArrayList<String> obtainTurnOrder(ArrayList<String> players) {
@@ -493,7 +492,6 @@ public class UserInterface extends JFrame implements ActionListener {
 
         JTextArea text = new JTextArea(outString);
         JOptionPane.showMessageDialog(null,text);
-        waitingForPlayers();
     }
 
 
@@ -539,7 +537,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
             for (PlayerStatus ps : playerList) {
                 if(ps.getPlayerName().equals(player)) {
-                    //TODO move on board
+                    boardSetLocation(ps.getPlayerName(), playerNewLocation);
                     ps.setPlayerLocation(playerNewLocation);
                 }
             }
@@ -548,9 +546,9 @@ public class UserInterface extends JFrame implements ActionListener {
 
     public void playerTurnUpdate(String newTurnName) throws IOException {
 
-        boolean movedPlayer = false;
-        boolean playerMadeSuggestion = false;
-        boolean justContradicted = false;
+        movedPlayer = false;
+        playerMadeSuggestion = false;
+        justContradicted = false;
 
         StringBuilder suggestionThreadResponse = autoMessageCheck.getSuggestionResponse();
         StringBuilder contradictThreadResponse = autoMessageCheck.getContradictResponse();
@@ -562,6 +560,7 @@ public class UserInterface extends JFrame implements ActionListener {
         if (suggestionThreadResponse != null) {
             suggestionJSON = new JSONObject(suggestionThreadResponse.toString());
             suggestionResponse = suggestionJSON.get("messageType").toString();
+            System.out.println(suggestionResponse);
         }
 
         // Check if anyone has disproved/passed a suggestion
@@ -570,6 +569,7 @@ public class UserInterface extends JFrame implements ActionListener {
         if (contradictThreadResponse != null) {
             contradictJSON = new JSONObject(contradictThreadResponse.toString());
             contradictResponse = contradictJSON.get("messageType").toString();
+            System.out.println(contradictResponse);
         }
 
         // Check if anyone has moved
@@ -583,6 +583,8 @@ public class UserInterface extends JFrame implements ActionListener {
 
         if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
                 newTurnName.equals(playerName)) {
+
+            p.hide();
             // When it is the player's first turn, assign them cards
             if (playerList.get(whoseTurn).getPlayerHand().isEmpty()) {
                 // Assign cards to player
@@ -592,7 +594,9 @@ public class UserInterface extends JFrame implements ActionListener {
                 JSONObject cardAssignJSON = new JSONObject(cardAssignGET.toString());
                 ArrayList<String> cards = getPlayerCards(cardAssignJSON); // TODO: change function o getListFromJSON
                 for(String card: cards){
-                    cardsPanel.add(new JLabel("card"));                }
+                    cardsPanel.add(new JLabel(card));
+                }
+                playerHand.addAll(cards);
                 playerList.get(whoseTurn).setPlayerHand(cards);
             }
 
@@ -610,67 +614,60 @@ public class UserInterface extends JFrame implements ActionListener {
                     justContradicted = false;
                 }
 
+                p.hide();
                 for(JButton button: controlButtons) {
                     button.setEnabled(true);
+
                 }
+                String outputString = "Your turn has begun.";
+                JTextArea text = new JTextArea(outputString);
+                JOptionPane.showMessageDialog(null,text);
             } else {
                 // suggestion has been made, so player needs to act accordingly
                 // need to get a response from each player, then delete sus msgs in db
+
                 String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
-                System.out.println(playerWhoSuggested + " has made the following suggestion: ");
                 JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
-
-                System.out.print(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") + ", " +
+                JLabel popLabel = new JLabel(playerWhoSuggested + " has made the following suggestion:");
+                JLabel popLabelTwo = new JLabel(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") + ", " +
                         cardsSuggested.get("location"));
-                System.out.println();
-                Scanner input = new Scanner(System.in);
-                System.out.println("What would you like to do? ");
-                System.out.println("    a) Disprove a Suggestion");
-                System.out.println("    b) Pass Suggestion");
-                String choice = input.nextLine();
 
-                switch (choice.toLowerCase()) {
-                    case "a":
-                        System.out.println("Which card do you want to reveal?");
-                        String card = input.nextLine();
 
-                        ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, card);
-                        break;
-                    case "b":
-                        int currentPlayer = whoseTurn;
-                        if (currentPlayer == (playerList.size() - 1)) {
-                            currentPlayer = 0;
-                        } else {
-                            currentPlayer++;
-                        }
-                        ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
-                                playerList.get(currentPlayer).getPlayerName());
-                        break;
+                ArrayList<String> choices = new ArrayList();
+                if(playerHand.contains(cardsSuggested.get("suspect").toString())){choices.add(cardsSuggested.get("suspect").toString());}
+
+                if(playerHand.contains(cardsSuggested.get("weapon").toString())){choices.add(cardsSuggested.get("weapon").toString());}
+
+                if(playerHand.contains(cardsSuggested.get("location").toString())){choices.add(cardsSuggested.get("location").toString());}
+
+                JPanel popPanel = new JPanel();
+                PopupFactory pf = new PopupFactory();
+                Button option;
+                // create a panel
+                popPanel.setLayout(new GridLayout(5, 1));
+                popPanel.add(new JPanel());
+
+                popPanel.add(popLabel);
+                popPanel.add(popLabelTwo);
+                if(!choices.isEmpty()){
+                    String[] choicesArray = new String[choices.size()];
+                    choicesArray = choices.toArray(choicesArray);
+                    inputBox = new JComboBox<String>(choicesArray);
+
+                    option = new Button("Disprove Suggestion");
+                    option.addActionListener(this);
+                    popPanel.add(option);
+                    popPanel.add(inputBox);
                 }
+                else{
+                    option = new Button("Pass Suggestion");
+                    option.addActionListener(this);
+                    popPanel.add(option);
+                }
+
+                p = pf.getPopup(this, popPanel, 600, 350);
+                p.show();
                 justContradicted = true;
-            }
-
-            // Send endTurn msg to signal player is done
-            boolean inARoom = ClueLessConstants.ROOM_LIST
-                    .contains(playerList.get(whoseTurn).getPlayerLocation());
-
-            if ((validInput && !movedPlayer) || (movedPlayer && !inARoom)) {
-                if (whoseTurn == (playerList.size() - 1)) {
-                    whoseTurn = 0;
-                } else {
-                    whoseTurn++;
-                }
-                movedPlayer = false;
-                // send msg to db ending player's turn
-                gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
-            }
-            if (endOfGame.equals("playerLost") || endOfGame.equals("gameOver")) {
-                autoMessageCheck.setStopThreads();
-            }
-            if (endOfGame.equals("playerLost")) {
-                // Delete player who lost from db
-                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                        playerName, "anything");
             }
 
         } else {
@@ -704,7 +701,11 @@ public class UserInterface extends JFrame implements ActionListener {
                         "whoCares", "turnUpdate");
                 JSONObject turnUpdateGETJSON = new JSONObject(turnUpdateGET.toString());
                 waitingForPlayerToFinish = turnUpdateGETJSON.get("currentTurn").toString();
-                TimeUnit.SECONDS.sleep(2);
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 if (playerMadeSuggestion &&
                         !(waitingForPlayerToFinish.equals(lastPlayer))) {
@@ -763,5 +764,305 @@ public class UserInterface extends JFrame implements ActionListener {
         }
     }
 
+    private void makeSuggestion() {
 
+        if (ClueLessConstants.ROOM_LIST.contains(playerList.get(whoseTurn).getPlayerLocation())) {
+
+
+            JLabel popLabel = new JLabel("Please select options for your suggestion.");
+            JPanel popPanel = new JPanel();
+            PopupFactory pf = new PopupFactory();
+            JPanel headers = new JPanel();
+            headers.setLayout(new GridLayout(1, 3));
+            headers.add(new JLabel("Weapon:"));
+            headers.add(new JLabel("Location:"));
+            headers.add(new JLabel("Suspect:"));
+            JPanel options = new JPanel();
+            options.setLayout(new GridLayout(1, 3));
+            options.add(guessBoxWeapons);
+            options.add( new JLabel(playerList.get(whoseTurn).getPlayerLocation()));
+            options.add(guessBoxSuspects);
+
+            JButton inputSuggestion = new JButton("Submit Suggestion");
+            inputSuggestion.addActionListener(this);
+
+            // create a panel
+            popPanel.setLayout(new GridLayout(4, 1));
+
+            popPanel.add(popLabel);
+            popPanel.add(headers);
+            popPanel.add(options);
+            popPanel.add(inputSuggestion);
+            makeAccusationBtn.setEnabled(false);
+            makeSuggestionBtn.setEnabled(false);
+
+
+        } else {
+            String outputString = "You cannot make a suggestion because you are not in a room.";
+            JTextArea text = new JTextArea(outputString);
+            JOptionPane.showMessageDialog(null,text);
+        }
+    }
+
+    private void submitSuggestion() throws IOException {
+        String suspect = guessBoxSuspects.getSelectedItem().toString();
+
+        String location = playerList.get(whoseTurn).getPlayerLocation();
+
+        String weapon = guessBoxWeapons.getSelectedItem().toString();
+
+        gameActions.makeGuess(gameActions.getGameUUID(), playerName, suspect, weapon, location);
+        System.out.println("You have made a suggestion");
+
+        // Need to move player in suggestion to location of current player
+        gameActions.movePiece(gameActions.getGameUUID(), suspect, location);
+        ArrayList<PlayerStatus> gameStatusList
+                = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
+
+        for (PlayerStatus ps : gameStatusList) {
+            if (ps.getPlayerName().equals(suspect)) {
+                ps.setPlayerLocation(location);
+            }
+        }
+        playerMadeSuggestion = true;
+        movedPlayer = false;
+        try {
+            TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // just written to db
+            String outputString = "Moving in that direction is not possible.";
+            JTextArea text = new JTextArea(outputString);
+            JOptionPane.showMessageDialog(null,text);
+    }
+
+
+    private void makeAccusation() {
+
+        if (ClueLessConstants.ROOM_LIST.contains(playerList.get(whoseTurn).getPlayerLocation())) {
+
+
+            JLabel popLabel = new JLabel("Please select options for your suggestion.");
+            JPanel popPanel = new JPanel();
+            PopupFactory pf = new PopupFactory();
+            JPanel headers = new JPanel();
+            headers.setLayout(new GridLayout(1, 3));
+            headers.add(new JLabel("Weapon:"));
+            headers.add(new JLabel("Location:"));
+            headers.add(new JLabel("Suspect:"));
+            JPanel options = new JPanel();
+            options.setLayout(new GridLayout(1, 3));
+            options.add(guessBoxWeapons);
+            options.add( new JLabel(playerList.get(whoseTurn).getPlayerLocation()));
+            options.add(guessBoxSuspects);
+
+            JButton inputSuggestion = new JButton("Submit Accusation");
+            inputSuggestion.addActionListener(this);
+
+            // create a panel
+            popPanel.setLayout(new GridLayout(4, 1));
+
+            popPanel.add(popLabel);
+            popPanel.add(headers);
+            popPanel.add(options);
+            popPanel.add(inputSuggestion);
+
+
+        } else {
+            String outputString = "You cannot make an accusation because you are not in a room.";
+            JTextArea text = new JTextArea(outputString);
+            JOptionPane.showMessageDialog(null,text);
+        }
+    }
+
+    private void submitAccusation() throws IOException, InterruptedException {
+        String suspect = guessBoxSuspects.getSelectedItem().toString();
+
+        String location = playerList.get(whoseTurn).getPlayerLocation();
+
+        String weapon = guessBoxWeapons.getSelectedItem().toString();
+
+        String outputString = gameActions.makeAccusation(gameActions.getGameUUID(),
+                playerName, suspect, weapon, location);
+        JTextArea text = new JTextArea(outputString);
+        JOptionPane.showMessageDialog(null,text);
+        movedPlayer = false;
+        TimeUnit.SECONDS.sleep(2);
+    }
+
+
+    private void boardSetLocation(String playerName, String playerNewLocation){
+
+        String eachLoc = "";
+        for(PlayerStatus player: playerList){
+            eachLoc +=("Player:"+player.getPlayerName()+ " is in " +player.getPlayerLocation()+ ".\n");
+        }
+
+        locations.setText(eachLoc);
+
+    }
+    private void movePlayer(String moveType) throws InterruptedException, IOException {
+
+        int moveDirection = 99;
+        switch (moveType) {
+            case "move up":
+                moveDirection =0;
+                break;
+            case "move right":
+                moveDirection =1;
+                break;
+            case "move down":
+                moveDirection =2;
+                break;
+            case "move left":
+                moveDirection =3;
+                break;
+            case "move through passage":
+                moveDirection = 4;
+                break;
+
+        }
+        String location = playerList.get(whoseTurn).getPlayerLocation();
+        String newLocation = ClueLessConstants.ADJACENCY_MAP.get(location).get(moveDirection);
+        if(!newLocation.equals("nomove")){
+
+            moveUp.setEnabled(false);
+            moveDown.setEnabled(false);
+            moveLeft.setEnabled(false);
+            moveRight.setEnabled(false);
+            MovePassage.setEnabled(false);
+            gameActions.movePiece(gameActions.getGameUUID(), playerName, newLocation);
+            TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg
+            playerList.get(whoseTurn).setPlayerLocation(newLocation);
+            movedPlayer = true;
+
+
+        }
+        else{
+            String outputString = "Moving in that direction is not possible.";
+            JTextArea text = new JTextArea(outputString);
+            JOptionPane.showMessageDialog(null,text);
+        }
+
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if(e.getActionCommand().toLowerCase().contains("move")){
+            try {
+                movePlayer(e.getActionCommand().toLowerCase());
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+
+        switch (e.getActionCommand().toLowerCase()){
+            case "create game":
+                p.hide();
+                createMenu();
+                break;
+            case "join game":
+                p.hide();
+                joinMenu();
+                break;
+            case "connect to game":
+                gameUUID = uuidField.getText().trim();
+                gameUUIDLable.setText(gameUUIDLable.getText() + " " + gameUUID);
+
+                try {
+                    joinGame();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+            case "start game":
+                p.hide();
+                try {
+                    createGame();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+
+            case "disprove suggestion":
+                System.out.println("disprove suggestion");
+                p.hide();
+                try {
+                    ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, inputBox.getSelectedItem().toString());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+
+            case "pass suggestion":
+                p.hide();
+
+                int currentPlayer = whoseTurn;
+                if (currentPlayer == (playerList.size() - 1)) {
+                    currentPlayer = 0;
+                } else {
+                    currentPlayer++;
+                }
+                try {
+                    ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
+                            playerList.get(currentPlayer).getPlayerName());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+
+            case "make suggestion":
+                makeSuggestion();
+                break;
+
+            case "submit suggestion":
+                p.hide();
+                try {
+                    submitSuggestion();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+
+            case "make accusation":
+                makeAccusation();
+                break;
+
+            case "submit accusation":
+                p.hide();
+                try {
+                    submitAccusation();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+                break;
+
+            case "end turn":
+
+                endTurnBtn.setEnabled(false);
+                makeAccusationBtn.setEnabled(false);
+                makeSuggestionBtn.setEnabled(false);
+                if (whoseTurn == (playerList.size() - 1)) {
+                    whoseTurn = 0;
+                } else {
+                    whoseTurn++;
+                }
+                movedPlayer = false;
+                System.out.println("I got here");
+                try {
+                    gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                break;
+        }
+        System.out.println(e);
+    }
 }

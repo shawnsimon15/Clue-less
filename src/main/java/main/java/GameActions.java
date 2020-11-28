@@ -63,17 +63,13 @@ public class GameActions {
         if (suspect.equals(suspectName) &&
                 weapon.equals(weaponName) &&
                 location.equals(locationName)) {
-            System.out.println("You made the correct accusation!");
-            System.out.println("The game is over");
             //Send msg to db that game is over
             ClueLessUtils.makePost(gameID, pName, 5, "gameOver");
-            return "gameOver";
+            return "You made the correct accusation!\nThe game is over";
         }
-        System.out.println("You made the WRONG accusation");
-        System.out.println("Your game is over");
         //Send msg to db that this player lost
         ClueLessUtils.makePost(gameID, pName, 5, "playerLost");
-        return "playerLost";
+        return "You made the WRONG accusation\nYour game is over";
 
     }
 
@@ -82,15 +78,5 @@ public class GameActions {
         playerName = currentPlayer;
         // called by main.userInterface
         ClueLessUtils.endTurnPost(gameUUID, playerName, nextPlayer);
-    }
-
-    // respondToAccusation will be called when a player tries to respond to an accusation
-    public void respondToAccusation(Optional<String> suspectName, Optional<String> weaponName,
-                                    Optional<String> locationName) {
-        ClueLessUtils.makePut("");
-    }
-
-    public void exitGame() {
-        // figure out what to do here
     }
 }
