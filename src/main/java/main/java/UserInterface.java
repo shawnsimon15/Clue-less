@@ -793,6 +793,9 @@ public class UserInterface extends JFrame implements ActionListener {
             popPanel.add(headers);
             popPanel.add(options);
             popPanel.add(inputSuggestion);
+
+            p = pf.getPopup(this, popPanel, 600, 350);
+            p.show();
             makeAccusationBtn.setEnabled(false);
             makeSuggestionBtn.setEnabled(false);
 
@@ -826,15 +829,21 @@ public class UserInterface extends JFrame implements ActionListener {
         }
         playerMadeSuggestion = true;
         movedPlayer = false;
+
         try {
             TimeUnit.SECONDS.sleep(2); // Need to sleep to let Thread read msg that was
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        int currentPlayer = whoseTurn;
+        if (currentPlayer == (playerList.size() - 1)) {
+            currentPlayer = 0;
+        } else {
+            currentPlayer++;
+        }
+        gameActions.endTurn(playerName, playerList.get(currentPlayer).getPlayerName());
         // just written to db
-            String outputString = "Moving in that direction is not possible.";
-            JTextArea text = new JTextArea(outputString);
-            JOptionPane.showMessageDialog(null,text);
     }
 
 
@@ -868,6 +877,8 @@ public class UserInterface extends JFrame implements ActionListener {
             popPanel.add(options);
             popPanel.add(inputSuggestion);
 
+            p = pf.getPopup(this, popPanel, 600, 350);
+            p.show();
 
         } else {
             String outputString = "You cannot make an accusation because you are not in a room.";
@@ -888,7 +899,16 @@ public class UserInterface extends JFrame implements ActionListener {
         JTextArea text = new JTextArea(outputString);
         JOptionPane.showMessageDialog(null,text);
         movedPlayer = false;
+
         TimeUnit.SECONDS.sleep(2);
+
+        int currentPlayer = whoseTurn;
+        if (currentPlayer == (playerList.size() - 1)) {
+            currentPlayer = 0;
+        } else {
+            currentPlayer++;
+        }
+        gameActions.endTurn(playerName, playerList.get(currentPlayer).getPlayerName());
     }
 
 
@@ -925,7 +945,18 @@ public class UserInterface extends JFrame implements ActionListener {
         }
         String location = playerList.get(whoseTurn).getPlayerLocation();
         String newLocation = ClueLessConstants.ADJACENCY_MAP.get(location).get(moveDirection);
-        if(!newLocation.equals("nomove")){
+        if(newLocation.toLowerCase().contains("hallway")){
+            for(PlayerStatus player: playerList){
+                if(player.getPlayerLocation().toLowerCase().matches(newLocation.toLowerCase())){
+                    String outputString = "Two players can not enter the same hallway\nPlease select anouther move.";
+                    JTextArea text = new JTextArea(outputString);
+                    JOptionPane.showMessageDialog(null,text);
+                    newLocation ="failmove";
+                }
+            }
+        }
+
+        if(!newLocation.equals("nomove") || newLocation.equals("failmove")){
 
             moveUp.setEnabled(false);
             moveDown.setEnabled(false);
@@ -939,7 +970,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
         }
-        else{
+        else if(newLocation.equals("nomove")){
             String outputString = "Moving in that direction is not possible.";
             JTextArea text = new JTextArea(outputString);
             JOptionPane.showMessageDialog(null,text);
@@ -994,6 +1025,14 @@ public class UserInterface extends JFrame implements ActionListener {
                 p.hide();
                 try {
                     ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, inputBox.getSelectedItem().toString());
+                    if (whoseTurn == (playerList.size() - 1)) {
+                        whoseTurn = 0;
+                    } else {
+                        whoseTurn++;
+                    }
+                    movedPlayer = false;
+                    // send msg to db ending player's turn
+                    gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -1011,6 +1050,8 @@ public class UserInterface extends JFrame implements ActionListener {
                 try {
                     ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
                             playerList.get(currentPlayer).getPlayerName());
+                    gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
+
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -1045,10 +1086,9 @@ public class UserInterface extends JFrame implements ActionListener {
                 break;
 
             case "end turn":
-
-                endTurnBtn.setEnabled(false);
-                makeAccusationBtn.setEnabled(false);
-                makeSuggestionBtn.setEnabled(false);
+                for(JButton button: controlButtons) {
+                    button.setEnabled(false);
+                }
                 if (whoseTurn == (playerList.size() - 1)) {
                     whoseTurn = 0;
                 } else {

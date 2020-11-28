@@ -11,14 +11,14 @@ import java.util.concurrent.TimeUnit;
 
 import static main.java.ClueLessConstants.MAIN_MENU_ENTRIES;
 
-public class Game {
+public class OldGame {
     private GameActions gameActions;
     private AutoMessageCheck autoMessageCheck;
     private GameStatus gameStatus;
     private String playerName;
     private List<PlayerStatus> activePlayerList;
 
-    public Game() throws IOException, InterruptedException {
+    public OldGame() throws IOException, InterruptedException {
         // Default Constructor
         gameActions = new GameActions();
         gameStatus = new GameStatus();
