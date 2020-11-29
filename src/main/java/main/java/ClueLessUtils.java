@@ -63,7 +63,6 @@ public class ClueLessUtils {
         jsonObject.put("newLocation", newLocation);
 
         int code = sendPost(jsonObject, con);
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
         StringBuilder response = readPostReturn(con);
         return code;
     }
@@ -77,7 +76,6 @@ public class ClueLessUtils {
         jsonObject.put("nextPlayer", nextPlayer);
 
         int code = sendPost(jsonObject, con);
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
         StringBuilder response = readPostReturn(con);
         return code;
     }
@@ -111,7 +109,6 @@ public class ClueLessUtils {
         jsonObject.put("cardRevealed",  cardRevealed);
 
         int code = sendPost(jsonObject, con);
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
         response = readPostReturn(con);
         return code;
     }
@@ -127,7 +124,6 @@ public class ClueLessUtils {
         jsonObject.put("nextPlayer", nextPlayer);
 
         int code = sendPost(jsonObject, con);
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
         response = readPostReturn(con);
         return code;
     }
@@ -143,7 +139,6 @@ public class ClueLessUtils {
         jsonObject.put("msgID", msgID);
 
         int code = sendPost(jsonObject, con);
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
         response = readPostReturn(con);
         return code;
     }
@@ -177,7 +172,6 @@ public class ClueLessUtils {
             outStream.write(requestString.getBytes("UTF-8"));
         }
         int code = con.getResponseCode();
-        //System.out.println("Reponse for " + typeOfPost + ": " + code);
         response = readPostReturn(con);
         return code;
     }
@@ -262,7 +256,6 @@ public class ClueLessUtils {
         }
 
         int code = con.getResponseCode();
-        //System.out.println(typeOfGet +": " + code);
         try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()))) {
             String line;

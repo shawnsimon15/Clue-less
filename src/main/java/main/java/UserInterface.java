@@ -9,15 +9,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import static main.java.ClueLessConstants.MAIN_MENU_ENTRIES;
+import static main.java.ClueLessConstants.SUSPECT_LIST;
 
 public class UserInterface extends JFrame implements ActionListener {
-
-    //will be removed with real GUI
-    private JTextArea locations;
 
     //constants declared for ease of access and editing.
     private final static int FRAMEXDIMENSION = 1800;
@@ -40,18 +38,19 @@ public class UserInterface extends JFrame implements ActionListener {
     private JLabel mrsWhiteLable = new JLabel(MRSWHITE);
     private JLabel profPlumLable = new JLabel(PROFESSORPLUM);
     private HashMap<String, JLabel> playersToLableMap = new HashMap(){{
-        put(ClueLessConstants.SUSPECT_LIST.get(0), missScarletLable);
-        put(ClueLessConstants.SUSPECT_LIST.get(1), colonelMustardLable);
-        put(ClueLessConstants.SUSPECT_LIST.get(2),mrsWhiteLable);
-        put(ClueLessConstants.SUSPECT_LIST.get(3), mrGreenLable);
-        put(ClueLessConstants.SUSPECT_LIST.get(4), mrsPeacokLable);
-        put(ClueLessConstants.SUSPECT_LIST.get(5), profPlumLable);
+        put(SUSPECT_LIST.get(0), missScarletLable);
+        put(SUSPECT_LIST.get(1), colonelMustardLable);
+        put(SUSPECT_LIST.get(2),mrsWhiteLable);
+        put(SUSPECT_LIST.get(3), mrGreenLable);
+        put(SUSPECT_LIST.get(4), mrsPeacokLable);
+        put(SUSPECT_LIST.get(5), profPlumLable);
         }};
+
     JPanel cardsPanel = new JPanel();
     Popup p;
     private JComboBox<String> inputBox;
     private JComboBox<String> guessBoxWeapons=  new JComboBox<>(ClueLessConstants.WEAPON_LIST.toArray(new String[0]));
-    private JComboBox<String> guessBoxSuspects =  new JComboBox<>(ClueLessConstants.SUSPECT_LIST.toArray(new String[0]));
+    private JComboBox<String> guessBoxSuspects =  new JComboBox<>(SUSPECT_LIST.toArray(new String[0]));
     JTextField uuidField = new JTextField();
     private GameActions gameActions;
     private AutoMessageCheck autoMessageCheck;
@@ -77,14 +76,172 @@ public class UserInterface extends JFrame implements ActionListener {
     JButton makeAccusationBtn;
     JButton endTurnBtn;
 
+    HashMap<String, Color> playerToColor = new HashMap(){{
+        put(SUSPECT_LIST.get(0), Color.red);
+        put(SUSPECT_LIST.get(1), Color.YELLOW);
+        put(SUSPECT_LIST.get(2),Color.DARK_GRAY);
+        put(SUSPECT_LIST.get(3), Color.GREEN);
+        put(SUSPECT_LIST.get(4), Color.BLUE);
+        put(SUSPECT_LIST.get(5), Color.MAGENTA);
+        put("defaultHall", new Color(238, 238, 238));
+        put("defaulRoom", Color.lightGray);
+    }};
+    //GAME BOARD
+
+    JPanel studyPanel  = new JPanel();
+    JPanel studyPanelOne  = new JPanel();
+    JPanel studyPanelTwo  = new JPanel();
+    JPanel studyPanelThree  = new JPanel();
+    JPanel studyPanelFour  = new JPanel();
+    JPanel studyPanelFive  = new JPanel();
+    JPanel studyPanelSix  = new JPanel();
+    ArrayList<JPanel> studytList = new ArrayList<>(Arrays.asList(studyPanelOne, studyPanelTwo,
+            studyPanelThree, studyPanelFour, studyPanelFive, studyPanelSix));
+
+    JPanel hallPanel  = new JPanel();
+    JPanel hallPanelOne  = new JPanel();
+    JPanel hallPanelTwo  = new JPanel();
+    JPanel hallPanelThree  = new JPanel();
+    JPanel hallPanelFour  = new JPanel();
+    JPanel hallPanelFive  = new JPanel();
+    JPanel hallPanelSix  = new JPanel();
+    ArrayList<JPanel> hallList = new ArrayList<>(Arrays.asList(hallPanelOne, hallPanelTwo,
+            hallPanelThree, hallPanelFour, hallPanelFive, hallPanelSix));
+
+    JPanel loungePanel  = new JPanel();
+    JPanel loungePanelOne  = new JPanel();
+    JPanel loungePanelTwo  = new JPanel();
+    JPanel loungePanelThree  = new JPanel();
+    JPanel loungePanelFour  = new JPanel();
+    JPanel loungePanelFive  = new JPanel();
+    JPanel loungePanelSix  = new JPanel();
+    ArrayList<JPanel> loungeList = new ArrayList<>(Arrays.asList(loungePanelOne, loungePanelTwo,
+            loungePanelThree, loungePanelFour, loungePanelFive, loungePanelSix));
+
+    JPanel libraryPanel  = new JPanel();
+    JPanel librarayPanelOne  = new JPanel();
+    JPanel librarayPanelTwo  = new JPanel();
+    JPanel librarayPanelThree  = new JPanel();
+    JPanel librarayPanelFour  = new JPanel();
+    JPanel librarayPanelFive  = new JPanel();
+    JPanel librarayPanelSix  = new JPanel();
+    ArrayList<JPanel> librarayList = new ArrayList<>(Arrays.asList(librarayPanelOne, librarayPanelTwo,
+            librarayPanelThree, librarayPanelFour, librarayPanelFive, librarayPanelSix));
+
+    JPanel biliardRoomPanel  = new JPanel();
+    JPanel  biliardRoomPanelOne  = new JPanel();
+    JPanel  biliardRoomPanelTwo  = new JPanel();
+    JPanel  biliardRoomPanelThree  = new JPanel();
+    JPanel  biliardRoomPanelFour  = new JPanel();
+    JPanel  biliardRoomPanelFive  = new JPanel();
+    JPanel  biliardRoomPanelSix  = new JPanel();
+    ArrayList<JPanel>  biliardRoomList = new ArrayList<>(Arrays.asList( biliardRoomPanelOne,  biliardRoomPanelTwo,
+             biliardRoomPanelThree,  biliardRoomPanelFour,  biliardRoomPanelFive,  biliardRoomPanelSix));
+
+    JPanel diningRoomPanel  = new JPanel();
+    JPanel diningRoomPanelOne  = new JPanel();
+    JPanel diningRoomPanelTwo  = new JPanel();
+    JPanel diningRoomPanelThree  = new JPanel();
+    JPanel diningRoomPanelFour  = new JPanel();
+    JPanel diningRoomPanelFive  = new JPanel();
+    JPanel diningRoomPanelSix  = new JPanel();
+    ArrayList<JPanel> diningRoomList = new ArrayList<>(Arrays.asList(diningRoomPanelOne, diningRoomPanelTwo,
+            diningRoomPanelThree, diningRoomPanelFour, diningRoomPanelFive, diningRoomPanelSix));
+
+    JPanel conseratoryPanel  = new JPanel();
+    JPanel conseratoryPanelOne  = new JPanel();
+    JPanel conseratoryPanelTwo  = new JPanel();
+    JPanel conseratoryPanelThree  = new JPanel();
+    JPanel conseratoryPanelFour  = new JPanel();
+    JPanel conseratoryPanelFive  = new JPanel();
+    JPanel conseratoryPanelSix  = new JPanel();
+    ArrayList<JPanel> conseratoryList = new ArrayList<>(Arrays.asList(conseratoryPanelOne, conseratoryPanelTwo,
+            conseratoryPanelThree, conseratoryPanelFour, conseratoryPanelFive, conseratoryPanelSix));
+
+    JPanel ballRoomPanel  = new JPanel();
+    JPanel ballRoomPanelOne  = new JPanel();
+    JPanel ballRoomPanelTwo  = new JPanel();
+    JPanel ballRoomPanelThree  = new JPanel();
+    JPanel ballRoomPanelFour  = new JPanel();
+    JPanel ballRoomPanelFive  = new JPanel();
+    JPanel ballRoomPanelSix  = new JPanel();
+    ArrayList<JPanel> ballRoomList = new ArrayList<>(Arrays.asList(ballRoomPanelOne, ballRoomPanelTwo,
+            ballRoomPanelThree, ballRoomPanelFour, ballRoomPanelFive, ballRoomPanelSix));
+
+    JPanel kitchenPanel  = new JPanel();
+    JPanel kitchenPanelOne  = new JPanel();
+    JPanel kitchenPanelTwo  = new JPanel();
+    JPanel kitchenPanelThree  = new JPanel();
+    JPanel kitchenPanelFour  = new JPanel();
+    JPanel kitchenPanelFive  = new JPanel();
+    JPanel kitchenPanelSix  = new JPanel();
+    ArrayList<JPanel> kitchenList = new ArrayList<>(Arrays.asList(kitchenPanelOne, kitchenPanelTwo,
+            kitchenPanelThree, kitchenPanelFour, kitchenPanelFive, kitchenPanelSix));
+
+    JPanel hallwayLSSubPanel  = new JPanel();
+    JPanel hallwayCBSubPanel  = new JPanel();
+    JPanel hallwayCLSubPanel  = new JPanel();
+    JPanel hallwayLBRSubPanel  = new JPanel();
+    JPanel hallwaySHSubPanel  = new JPanel();
+    JPanel hallwayHBRSubPanel  = new JPanel();
+    JPanel hallwayHLSubPanel  = new JPanel();
+    JPanel hallwayLDRSubPanel  = new JPanel();
+    JPanel hallwayDRBRSubPanel  = new JPanel();
+    JPanel hallwayDRKSubPanel  = new JPanel();
+    JPanel hallwayKBSubPanel  = new JPanel();
+    JPanel hallwayBBRSubPanel  = new JPanel();
+
+    JPanel missScarletStart = new JPanel();
+    JPanel colonelMustardStart = new JPanel();
+    JPanel mrsPeacokStart = new JPanel();
+    JPanel mrGreenStart = new JPanel();
+    JPanel mrsWhiteStart = new JPanel();
+    JPanel profPlumStart = new JPanel();
+
+    HashMap<String, ArrayList<JPanel>> locationToRoomLists = new HashMap(){{
+        put("Kitchen", kitchenList);
+        put("Hall", hallList);
+        put("Ballroom", ballRoomList);
+        put("Conservatory", conseratoryList);
+        put("Dining Room", diningRoomList);
+        put("Study", studytList);
+        put("Billiard Room", biliardRoomList);
+        put("Library", librarayList);
+        put("Lounge", loungeList);
+    }};
+
+    HashMap<String, JPanel> locationToPanels = new HashMap(){{
+        put("Hallway:LS", hallwayLSSubPanel);
+        put("Hallway:CB", hallwayCBSubPanel);
+        put("Hallway:CL", hallwayCLSubPanel);
+        put("Hallway:LBR", hallwayLBRSubPanel);
+        put("Hallway:SH", hallwaySHSubPanel);
+        put("Hallway:HBR", hallwayHBRSubPanel);
+        put("Hallway:HL", hallwayHLSubPanel);
+        put("Hallway:LDR", hallwayLDRSubPanel);
+        put("Hallway:DRBR", hallwayDRBRSubPanel);
+        put("Hallway:DRK", hallwayDRKSubPanel);
+        put("Hallway:KB", hallwayKBSubPanel);
+        put("Hallway:BBR", hallwayBBRSubPanel);
+        put("Mrs.WhiteStart", mrsWhiteStart);
+        put("ColonelMustardStart", colonelMustardStart);
+        put("MissScarletStart", missScarletStart);
+        put("Mrs.PeacockStart", mrsPeacokStart);
+        put("Mr.GreenStart", mrGreenStart);
+        put("ProfessorPlumStart", profPlumStart);
+    }};
+
+
+    private HashMap<String, String> playerLocations = new HashMap(){{
+        put(SUSPECT_LIST.get(0), "MissScarletStart");
+        put(SUSPECT_LIST.get(1), "ColonelMustardStart");
+        put(SUSPECT_LIST.get(2),"Mrs.WhiteStart");
+        put(SUSPECT_LIST.get(3), "Mr.GreenStart");
+        put(SUSPECT_LIST.get(4), "Mrs.PeacockStart");
+        put(SUSPECT_LIST.get(5), "ProfessorPlumStart");
+    }};
+
     public UserInterface() {
-
-
-
-        // create a text area, specifying the rows and columns
-        locations = new JTextArea(8, 40);
-
-
 
         gameActions = new GameActions();
         gameStatus = new GameStatus();
@@ -103,7 +260,201 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
         //GAME PANNEL SETUP
-        boardPanel.add(locations);
+        boardPanel.setLayout(new GridLayout(5, 5));
+        //Rooms
+        studyPanel.setLayout(new GridLayout(4, 2));
+        studyPanel.setBackground(Color.LIGHT_GRAY);
+        studyPanel.add(new JLabel("Study"));
+        for(JPanel panel: studytList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            studyPanel.add(panel);
+        }
+
+        hallPanel.setLayout(new GridLayout(4, 2));
+        hallPanel.setBackground(Color.LIGHT_GRAY);
+        hallPanel.add(new JLabel("Hall"));
+        for(JPanel panel: hallList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            hallPanel.add(panel);
+        }
+
+        loungePanel.setLayout(new GridLayout(4, 2));
+        loungePanel.setBackground(Color.LIGHT_GRAY);
+        loungePanel.add(new JLabel("Lounge"));
+        for(JPanel panel: loungeList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            loungePanel.add(panel);
+        }
+
+        libraryPanel.setLayout(new GridLayout(4, 2));
+        libraryPanel.setBackground(Color.LIGHT_GRAY);
+        libraryPanel.add(new JLabel("Library"));
+        for(JPanel panel: librarayList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            libraryPanel.add(panel);
+        }
+
+        biliardRoomPanel.setLayout(new GridLayout(4, 2));
+        biliardRoomPanel.setBackground(Color.LIGHT_GRAY);
+        biliardRoomPanel.add(new JLabel("Billiard Room"));
+        for(JPanel panel: biliardRoomList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            diningRoomPanel.add(panel);
+        }
+
+        diningRoomPanel.setLayout(new GridLayout(4, 2));
+        diningRoomPanel.setBackground(Color.LIGHT_GRAY);
+        diningRoomPanel.add(new JLabel("Dining Room"));
+        for(JPanel panel: diningRoomList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            diningRoomPanel.add(panel);
+        }
+
+        conseratoryPanel.setLayout(new GridLayout(4, 2));
+        conseratoryPanel.setBackground(Color.LIGHT_GRAY);
+        conseratoryPanel.add(new JLabel("Conseratory"));
+        for(JPanel panel: conseratoryList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            conseratoryPanel.add(panel);
+        }
+
+        ballRoomPanel.setLayout(new GridLayout(4, 2));
+        ballRoomPanel.setBackground(Color.LIGHT_GRAY);
+        ballRoomPanel.add(new JLabel("Ball Room"));
+        for(JPanel panel: ballRoomList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            ballRoomPanel.add(panel);
+        }
+
+        kitchenPanel.setLayout(new GridLayout(4, 2));
+        kitchenPanel.setBackground(Color.LIGHT_GRAY);
+        kitchenPanel.add(new JLabel("Kitchen"));
+        for(JPanel panel: kitchenList){
+            panel.setBackground(playerToColor.get("defaultRoom"));
+            kitchenPanel.add(panel);
+        }
+
+        //Halls
+
+        hallwayLSSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayCBSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayCLSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayLBRSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwaySHSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayHBRSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayHLSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayLDRSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayDRBRSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayDRKSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayKBSubPanel.setBackground(Color.LIGHT_GRAY);
+        hallwayBBRSubPanel.setBackground(Color.LIGHT_GRAY);
+        
+        JPanel hallwayLSPanel  = new JPanel();
+        JPanel hallwayCBPanel  = new JPanel();
+        JPanel hallwayCLPanel  = new JPanel();
+        JPanel hallwayLBRPanel  = new JPanel();
+        JPanel hallwaySHPanel  = new JPanel();
+        JPanel hallwayHBRPanel  = new JPanel();
+        JPanel hallwayHLPanel  = new JPanel();
+        JPanel hallwayLDRPanel  = new JPanel();
+        JPanel hallwayDRBRPanel  = new JPanel();
+        JPanel hallwayDRKPanel  = new JPanel();
+        JPanel hallwayKBPanel  = new JPanel();
+        JPanel hallwayBBRPanel  = new JPanel();
+
+        profPlumStart.setBackground(playerToColor.get(SUSPECT_LIST.get(5)));
+        hallwayLSPanel.setLayout(new GridLayout(1, 3));
+        hallwayLSPanel.add(profPlumStart);
+        hallwayLSPanel.add(hallwayLSSubPanel);
+        hallwayLSPanel.add(new JPanel());
+
+        mrGreenStart.setBackground(playerToColor.get(SUSPECT_LIST.get(3)));
+        hallwayCBPanel.setLayout(new GridLayout(3, 1));
+        hallwayCBPanel.add(new JPanel());
+        hallwayCBPanel.add(hallwayCBSubPanel);
+        hallwayCBPanel.add(mrGreenStart);
+
+        mrsPeacokStart.setBackground(playerToColor.get(SUSPECT_LIST.get(4)));
+        hallwayCLPanel.setLayout(new GridLayout(1, 3));
+        hallwayCLPanel.add(mrsPeacokStart);
+        hallwayCLPanel.add(hallwayCLSubPanel);
+        hallwayCLPanel.add(new JPanel());
+
+        hallwayLBRPanel.setLayout(new GridLayout(3, 1));
+        hallwayLBRPanel.add(new JPanel());
+        hallwayLBRPanel.add(hallwayLBRSubPanel);
+        hallwayLBRPanel.add(new JPanel());
+
+        hallwaySHPanel.setLayout(new GridLayout(3, 1));
+        hallwaySHPanel.add(new JPanel());
+        hallwaySHPanel.add(hallwaySHSubPanel);
+        hallwaySHPanel.add(new JPanel());
+
+        hallwayHBRPanel.setLayout(new GridLayout(1, 3));
+        hallwayHBRPanel.add(new JPanel());
+        hallwayHBRPanel.add(hallwayHBRSubPanel);
+        hallwayHBRPanel.add(new JPanel());
+
+        missScarletStart.setBackground(playerToColor.get(SUSPECT_LIST.get(0)));
+        hallwayHLPanel.setLayout(new GridLayout(3, 1));
+        hallwayHLPanel.add(missScarletStart);
+        hallwayHLPanel.add(hallwayHLSubPanel);
+        hallwayHLPanel.add(new JPanel());
+
+        colonelMustardStart.setBackground(playerToColor.get(SUSPECT_LIST.get(1)));
+        hallwayLDRPanel.setLayout(new GridLayout(1, 3));
+        hallwayLDRPanel.add(new JPanel());
+        hallwayLDRPanel.add(hallwayLDRSubPanel);
+        hallwayLDRPanel.add(colonelMustardStart);
+
+        hallwayDRBRPanel.setLayout(new GridLayout(3, 1));
+        hallwayDRBRPanel.add(new JPanel());
+        hallwayDRBRPanel.add(hallwayDRBRSubPanel);
+        hallwayDRBRPanel.add(new JPanel());
+
+        hallwayDRKPanel.setLayout(new GridLayout(1, 3));
+        hallwayDRKPanel.add(new JPanel());
+        hallwayDRKPanel.add(hallwayDRKSubPanel);
+        hallwayDRKPanel.add(new JPanel());
+
+        mrsWhiteStart.setBackground(playerToColor.get(SUSPECT_LIST.get(2)));
+        hallwayKBPanel.setLayout(new GridLayout(3, 1));
+        hallwayKBPanel.add(new JPanel());
+        hallwayKBPanel.add(hallwayKBSubPanel);
+        hallwayKBPanel.add(mrsWhiteStart);
+
+        hallwayBBRPanel.setLayout(new GridLayout(1, 3));
+        hallwayBBRPanel.add(new JPanel());
+        hallwayBBRPanel.add(hallwayBBRSubPanel);
+        hallwayBBRPanel.add(new JPanel());
+
+        
+        boardPanel.add(studyPanel);
+        boardPanel.add(hallwaySHPanel);
+        boardPanel.add(hallPanel);
+        boardPanel.add(hallwayHLPanel);
+        boardPanel.add(loungePanel);
+        boardPanel.add(hallwayLSPanel);
+        boardPanel.add(new Panel());
+        boardPanel.add(hallwayHBRPanel);
+        boardPanel.add(new Panel());
+        boardPanel.add(hallwayLDRPanel);
+        boardPanel.add(libraryPanel);
+        boardPanel.add(hallwayLBRPanel);
+        boardPanel.add(biliardRoomPanel);
+        boardPanel.add(hallwayDRBRPanel);
+        boardPanel.add(diningRoomPanel);
+        boardPanel.add(hallwayCLPanel);
+        boardPanel.add(new Panel());
+        boardPanel.add(hallwayBBRPanel);
+        boardPanel.add(new Panel());
+        boardPanel.add(hallwayDRKPanel);
+        boardPanel.add(conseratoryPanel);
+        boardPanel.add(hallwayCBPanel);
+        boardPanel.add(ballRoomPanel);
+        boardPanel.add(hallwayKBPanel);
+        boardPanel.add(kitchenPanel);
+
         // CONTROLS PANNEL SETUP
         moveUp = new JButton("Move Up");
         moveDown = new JButton("Move Down");
@@ -206,7 +557,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
         JPanel whitePanel = new JPanel();
-        whitePanel.setBackground(Color.WHITE);
+        whitePanel.setBackground(Color.darkGray);
         playersPanel.add(whitePanel);
         playersPanel.add(mrsWhiteLable);
 
@@ -235,6 +586,8 @@ public class UserInterface extends JFrame implements ActionListener {
     private void startMenu(){
 
         JLabel popLabel = new JLabel("Would you like to start or join a game?");
+        popLabel.setForeground(Color.WHITE);
+        popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
 
         popPanel.setLayout(new GridLayout(2, 2));
@@ -250,7 +603,7 @@ public class UserInterface extends JFrame implements ActionListener {
         popPanel.add(create);
         popPanel.add(join);
         // create a popup
-        p = pf.getPopup(this, popPanel, 600, 350);
+        p = pf.getPopup(this, popPanel, 400, 250);
 
         p.show();
     }
@@ -258,11 +611,15 @@ public class UserInterface extends JFrame implements ActionListener {
     private void joinMenu(){
 
         JLabel popLabel = new JLabel("Please enter the game UUID");
+        popLabel.setForeground(Color.WHITE);
+        popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
 
         popPanel.setLayout(new GridLayout(3, 1));
 
         Button join = new Button("Connect to Game");
+        join.setForeground(Color.WHITE);
+        join.setBackground(Color.BLACK);
         join.addActionListener(this);
         PopupFactory pf = new PopupFactory();
         // create a panel
@@ -273,7 +630,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
         // create a popup
 
-        p = pf.getPopup(this, popPanel, 600, 350);
+ p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -310,23 +667,29 @@ public class UserInterface extends JFrame implements ActionListener {
     private void createMenu(){
 
         JLabel popLabel = new JLabel("Please select number of players");
+        popLabel.setForeground(Color.WHITE);
+        popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
 
         popPanel.setLayout(new GridLayout(3, 1));
 
         Button join = new Button("Start Game");
+        join.setForeground(Color.WHITE);
+        join.setBackground(Color.BLACK);
         join.addActionListener(this);
         PopupFactory pf = new PopupFactory();
         // create a panel
         String[] choices = { "3","4", "5","6"};
         inputBox = new JComboBox<String>(choices);
+        inputBox.setForeground(Color.WHITE);
+        inputBox.setBackground(Color.BLACK);
         popPanel.add(popLabel);
         popPanel.add(inputBox);
         popPanel.add(join);
 
         // create a popup
 
-        p = pf.getPopup(this, popPanel, 600, 350);
+ p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -334,7 +697,7 @@ public class UserInterface extends JFrame implements ActionListener {
     private void createGame() throws IOException {
 
         int suspectIndex = (int) ((Math.random() * (5)));
-        playerName = ClueLessConstants.SUSPECT_LIST.get(suspectIndex);
+        playerName = SUSPECT_LIST.get(suspectIndex);
         currentPlayerLable.setText(playerName);
         playersToLableMap.get(playerName).setText(playersToLableMap.get(playerName).getText() + " (You)");
         try {
@@ -358,6 +721,8 @@ public class UserInterface extends JFrame implements ActionListener {
     private void waitingForPlayers(){
 
         JLabel popLabel = new JLabel("Waiting for remaining players");
+        popLabel.setForeground(Color.WHITE);
+        popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
         PopupFactory pf = new PopupFactory();
         // create a panel
@@ -369,7 +734,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
         // create a popup
 
-        p = pf.getPopup(this, popPanel, 600, 350);
+ p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -397,12 +762,7 @@ public class UserInterface extends JFrame implements ActionListener {
         printListContents(players, "players");
         ArrayList<String> turnOrderForGame = obtainTurnOrder(players);
         loadPlayerInfoIntoGameStatus(turnOrderForGame);
-        String eachLoc = "";
-        for(PlayerStatus player: playerList){
-            eachLoc +=("Player: "+player.getPlayerName()+ " is in " +player.getPlayerLocation()+ ".\n");
-        }
 
-        locations.setText(eachLoc);
         // Thread to check if suggestion has been made
         autoMessageCheck.suggestionAutoMessageCheck(gameActions.getGameUUID(), playerName);
         // Thread to check if contradiction has been made
@@ -416,6 +776,8 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
         JLabel popLabel = new JLabel("Setting up game, please wait.");
+        popLabel.setForeground(Color.WHITE);
+        popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
         PopupFactory pf = new PopupFactory();
         // create a panel
@@ -427,7 +789,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
         // create a popup
 
-        p = pf.getPopup(this, popPanel, 600, 350);
+ p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -449,7 +811,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
     public ArrayList<String> obtainTurnOrder(ArrayList<String> players) {
         ArrayList<String> turnOrderForGame = new ArrayList<>();
-        for (String plyr : ClueLessConstants.SUSPECT_LIST) {
+        for (String plyr : SUSPECT_LIST) {
             if (players.contains(plyr)) {
                 turnOrderForGame.add(plyr);
             }
@@ -514,7 +876,6 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
         String loser = gOPLJSON.get("Loser").toString();
-        System.out.println(loser + " has lost the game on an incorrect accusation.");
         // take them out of the lineup
         int playerListSize = playerList.size();
 
@@ -535,6 +896,7 @@ public class UserInterface extends JFrame implements ActionListener {
             String player = locationUpdateJSON.get("playerWhoMoved").toString();
             String playerNewLocation = locationUpdateJSON.get("location").toString();
 
+            boardSetLocation(player, playerNewLocation);
             for (PlayerStatus ps : playerList) {
                 if(ps.getPlayerName().equals(player)) {
                     boardSetLocation(ps.getPlayerName(), playerNewLocation);
@@ -546,10 +908,6 @@ public class UserInterface extends JFrame implements ActionListener {
 
     public void playerTurnUpdate(String newTurnName) throws IOException {
 
-        movedPlayer = false;
-        playerMadeSuggestion = false;
-        justContradicted = false;
-
         StringBuilder suggestionThreadResponse = autoMessageCheck.getSuggestionResponse();
         StringBuilder contradictThreadResponse = autoMessageCheck.getContradictResponse();
         StringBuilder locationUpdateThreadResponse = autoMessageCheck.getLocationUpdateResponse();
@@ -560,7 +918,6 @@ public class UserInterface extends JFrame implements ActionListener {
         if (suggestionThreadResponse != null) {
             suggestionJSON = new JSONObject(suggestionThreadResponse.toString());
             suggestionResponse = suggestionJSON.get("messageType").toString();
-            System.out.println(suggestionResponse);
         }
 
         // Check if anyone has disproved/passed a suggestion
@@ -569,7 +926,6 @@ public class UserInterface extends JFrame implements ActionListener {
         if (contradictThreadResponse != null) {
             contradictJSON = new JSONObject(contradictThreadResponse.toString());
             contradictResponse = contradictJSON.get("messageType").toString();
-            System.out.println(contradictResponse);
         }
 
         // Check if anyone has moved
@@ -613,15 +969,18 @@ public class UserInterface extends JFrame implements ActionListener {
                     playerMadeSuggestion = false;
                     justContradicted = false;
                 }
+                else{
+                    p.hide();
+                    for(JButton button: controlButtons) {
+                        button.setEnabled(true);
 
-                p.hide();
-                for(JButton button: controlButtons) {
-                    button.setEnabled(true);
+                    }
+                    String outputString = "Your turn has begun.";
+                    JTextArea text = new JTextArea(outputString);
+                    JOptionPane.showMessageDialog(null,text);
 
                 }
-                String outputString = "Your turn has begun.";
-                JTextArea text = new JTextArea(outputString);
-                JOptionPane.showMessageDialog(null,text);
+
             } else {
                 // suggestion has been made, so player needs to act accordingly
                 // need to get a response from each player, then delete sus msgs in db
@@ -629,8 +988,12 @@ public class UserInterface extends JFrame implements ActionListener {
                 String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
                 JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
                 JLabel popLabel = new JLabel(playerWhoSuggested + " has made the following suggestion:");
+                popLabel.setForeground(Color.WHITE);
+                popLabel.setBackground(Color.BLACK);
                 JLabel popLabelTwo = new JLabel(cardsSuggested.get("suspect") + ", " + cardsSuggested.get("weapon") + ", " +
                         cardsSuggested.get("location"));
+                popLabelTwo.setForeground(Color.WHITE);
+                popLabelTwo.setBackground(Color.BLACK);
 
 
                 ArrayList<String> choices = new ArrayList();
@@ -653,6 +1016,8 @@ public class UserInterface extends JFrame implements ActionListener {
                     String[] choicesArray = new String[choices.size()];
                     choicesArray = choices.toArray(choicesArray);
                     inputBox = new JComboBox<String>(choicesArray);
+                    inputBox.add(popLabel);
+                    inputBox.add(popLabelTwo);
 
                     option = new Button("Disprove Suggestion");
                     option.addActionListener(this);
@@ -665,7 +1030,9 @@ public class UserInterface extends JFrame implements ActionListener {
                     popPanel.add(option);
                 }
 
-                p = pf.getPopup(this, popPanel, 600, 350);
+                option.setForeground(Color.WHITE);
+                option.setBackground(Color.BLACK);
+         p = pf.getPopup(this, popPanel, 400, 250);
                 p.show();
                 justContradicted = true;
             }
@@ -675,6 +1042,8 @@ public class UserInterface extends JFrame implements ActionListener {
             p.hide();
             JLabel popLabel = new JLabel("It is currently " + newTurnName +
                     "'s turn. Please Wait.");
+            popLabel.setForeground(Color.WHITE);
+            popLabel.setBackground(Color.BLACK);
             JPanel popPanel = new JPanel();
             PopupFactory pf = new PopupFactory();
             // create a panel
@@ -686,7 +1055,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
             // create a popup
 
-            p = pf.getPopup(this, popPanel, 600, 350);
+     p = pf.getPopup(this, popPanel, 400, 250);
             p.show();
 
             String playerWhoContradicted = "";
@@ -722,17 +1091,14 @@ public class UserInterface extends JFrame implements ActionListener {
                         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                                 playerWhoContradicted, "disproveSus_");
 
-                        // Add card to player who disproved
                         ArrayList<PlayerStatus> gameStatusList
                                 = (ArrayList<PlayerStatus>) gameStatus.getActivePlayerList();
-                        for (PlayerStatus ps : gameStatusList) {
-                            if (ps.getPlayerName().equals(playerWhoContradicted)) {
-                                ps.addPlayerHand(cardRevealed);
-                            }
-                        }
                         if (i == 0) {
-                            System.out.println(playerWhoContradicted + " revealed " +
-                                    cardRevealed + "!");
+
+                            String outputString = playerWhoContradicted + " revealed " +
+                                    cardRevealed + "!";
+                            JTextArea text = new JTextArea(outputString);
+                            JOptionPane.showMessageDialog(null,text);
                             ++i;
                         }
 
@@ -742,7 +1108,10 @@ public class UserInterface extends JFrame implements ActionListener {
                         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                                 playerWhoContradicted, "passSus_");
                         if (i == 0) {
-                            System.out.println(playerWhoContradicted + " passed suggestion!");
+
+                            String outputString = playerWhoContradicted + " passed suggestion!";
+                            JTextArea text = new JTextArea(outputString);
+                            JOptionPane.showMessageDialog(null,text);
                             ++i;
                         }
 
@@ -770,13 +1139,26 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
             JLabel popLabel = new JLabel("Please select options for your suggestion.");
+            popLabel.setForeground(Color.WHITE);
+            popLabel.setBackground(Color.BLACK);
             JPanel popPanel = new JPanel();
             PopupFactory pf = new PopupFactory();
             JPanel headers = new JPanel();
+            popLabel.setForeground(Color.WHITE);
+            popLabel.setBackground(Color.BLACK);
             headers.setLayout(new GridLayout(1, 3));
-            headers.add(new JLabel("Weapon:"));
-            headers.add(new JLabel("Location:"));
-            headers.add(new JLabel("Suspect:"));
+            JLabel weapon = new JLabel("Location:");
+            weapon.setForeground(Color.WHITE);
+            weapon.setBackground(Color.BLACK);
+            JLabel location = new JLabel("Weapon:");
+            location.setForeground(Color.WHITE);
+            location.setBackground(Color.BLACK);
+            JLabel suspect = new JLabel("Suspect:");
+            suspect.setForeground(Color.WHITE);
+            suspect.setBackground(Color.BLACK);
+            headers.add(weapon);
+            headers.add(location);
+            headers.add(suspect);
             JPanel options = new JPanel();
             options.setLayout(new GridLayout(1, 3));
             options.add(guessBoxWeapons);
@@ -784,6 +1166,8 @@ public class UserInterface extends JFrame implements ActionListener {
             options.add(guessBoxSuspects);
 
             JButton inputSuggestion = new JButton("Submit Suggestion");
+            inputSuggestion.setForeground(Color.WHITE);
+            inputSuggestion.setBackground(Color.BLACK);
             inputSuggestion.addActionListener(this);
 
             // create a panel
@@ -794,7 +1178,7 @@ public class UserInterface extends JFrame implements ActionListener {
             popPanel.add(options);
             popPanel.add(inputSuggestion);
 
-            p = pf.getPopup(this, popPanel, 600, 350);
+     p = pf.getPopup(this, popPanel, 400, 250);
             p.show();
             makeAccusationBtn.setEnabled(false);
             makeSuggestionBtn.setEnabled(false);
@@ -815,7 +1199,6 @@ public class UserInterface extends JFrame implements ActionListener {
         String weapon = guessBoxWeapons.getSelectedItem().toString();
 
         gameActions.makeGuess(gameActions.getGameUUID(), playerName, suspect, weapon, location);
-        System.out.println("You have made a suggestion");
 
         // Need to move player in suggestion to location of current player
         gameActions.movePiece(gameActions.getGameUUID(), suspect, location);
@@ -836,13 +1219,12 @@ public class UserInterface extends JFrame implements ActionListener {
             e.printStackTrace();
         }
 
-        int currentPlayer = whoseTurn;
-        if (currentPlayer == (playerList.size() - 1)) {
-            currentPlayer = 0;
+        if (whoseTurn == (playerList.size() - 1)) {
+            whoseTurn = 0;
         } else {
-            currentPlayer++;
+            whoseTurn++;
         }
-        gameActions.endTurn(playerName, playerList.get(currentPlayer).getPlayerName());
+        gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
         // just written to db
     }
 
@@ -877,7 +1259,7 @@ public class UserInterface extends JFrame implements ActionListener {
             popPanel.add(options);
             popPanel.add(inputSuggestion);
 
-            p = pf.getPopup(this, popPanel, 600, 350);
+     p = pf.getPopup(this, popPanel, 400, 250);
             p.show();
 
         } else {
@@ -901,26 +1283,54 @@ public class UserInterface extends JFrame implements ActionListener {
         movedPlayer = false;
 
         TimeUnit.SECONDS.sleep(2);
-
-        int currentPlayer = whoseTurn;
-        if (currentPlayer == (playerList.size() - 1)) {
-            currentPlayer = 0;
+        if (whoseTurn == (playerList.size() - 1)) {
+            whoseTurn = 0;
         } else {
-            currentPlayer++;
+            whoseTurn++;
         }
-        gameActions.endTurn(playerName, playerList.get(currentPlayer).getPlayerName());
+        gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
+
+        if(outputString.contains("WRONG")){
+            movedPlayer = false;
+            // send msg to db ending player's turn
+            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                    playerName, "anything");
+            System.exit(0);
+
+        }
+
     }
 
 
     private void boardSetLocation(String playerName, String playerNewLocation){
+        String oldLocation = playerLocations.get(playerName);
+        JPanel oldPanel;
+        JPanel newPanel;
 
-        String eachLoc = "";
-        for(PlayerStatus player: playerList){
-            eachLoc +=("Player:"+player.getPlayerName()+ " is in " +player.getPlayerLocation()+ ".\n");
+        if(oldLocation.contains("Hallway:")){
+            oldPanel = locationToPanels.get(oldLocation);
+            oldPanel.setBackground(playerToColor.get("defaulRoom"));
+        }
+        else if( oldLocation.contains("Start")){
+
+            oldPanel = locationToPanels.get(oldLocation);
+            oldPanel.setBackground(playerToColor.get("defaultHall"));
+        }
+        else{
+            oldPanel = locationToRoomLists.get(oldLocation).get(SUSPECT_LIST.indexOf(playerName));
+            oldPanel.setBackground(playerToColor.get("defaulRoom"));
         }
 
-        locations.setText(eachLoc);
+        if(playerNewLocation.contains("Hallway:")|| playerNewLocation.contains("Start")){
+            newPanel = locationToPanels.get(playerNewLocation);
+            newPanel.setBackground(playerToColor.get(playerName));
+        }
+        else{
+            newPanel = locationToRoomLists.get(playerNewLocation).get(SUSPECT_LIST.indexOf(playerName));
+            newPanel.setBackground(playerToColor.get(playerName));
+        }
 
+        playerLocations.put(playerName, playerNewLocation);
     }
     private void movePlayer(String moveType) throws InterruptedException, IOException {
 
@@ -1021,7 +1431,6 @@ public class UserInterface extends JFrame implements ActionListener {
                 break;
 
             case "disprove suggestion":
-                System.out.println("disprove suggestion");
                 p.hide();
                 try {
                     ClueLessUtils.disproveSuggestionPost(gameActions.getGameUUID(), playerName, inputBox.getSelectedItem().toString());
@@ -1078,10 +1487,8 @@ public class UserInterface extends JFrame implements ActionListener {
                 p.hide();
                 try {
                     submitAccusation();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
+                } catch (Exception ee) {
+                    ee.printStackTrace();
                 }
                 break;
 
@@ -1095,7 +1502,6 @@ public class UserInterface extends JFrame implements ActionListener {
                     whoseTurn++;
                 }
                 movedPlayer = false;
-                System.out.println("I got here");
                 try {
                     gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
                 } catch (IOException ioException) {
@@ -1103,6 +1509,5 @@ public class UserInterface extends JFrame implements ActionListener {
                 }
                 break;
         }
-        System.out.println(e);
     }
 }

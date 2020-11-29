@@ -39,7 +39,6 @@ public class GameActions {
 
     // movePiece will be called by a player who wants to move their piece.
     public void movePiece(String gameID, String pName, String newLocation) throws IOException {
-        System.out.println(pName + " has moved to " + newLocation);
         ClueLessUtils.movePlayerPost(gameID, pName, newLocation);
     }
 
