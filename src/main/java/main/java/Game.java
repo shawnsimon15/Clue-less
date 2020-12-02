@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import static main.java.ClueLessConstants.SUSPECT_LIST;
 
-public class UserInterface extends JFrame implements ActionListener {
+public class Game extends JFrame implements ActionListener {
 
     //constants declared for ease of access and editing.
     private final static int FRAMEXDIMENSION = 1800;
@@ -241,7 +241,7 @@ public class UserInterface extends JFrame implements ActionListener {
         put(SUSPECT_LIST.get(5), "ProfessorPlumStart");
     }};
 
-    public UserInterface() {
+    public Game() {
 
         gameActions = new GameActions();
         gameStatus = new GameStatus();
@@ -299,7 +299,7 @@ public class UserInterface extends JFrame implements ActionListener {
         biliardRoomPanel.add(new JLabel("Billiard Room"));
         for(JPanel panel: biliardRoomList){
             panel.setBackground(playerToColor.get("defaultRoom"));
-            diningRoomPanel.add(panel);
+            biliardRoomPanel.add(panel);
         }
 
         diningRoomPanel.setLayout(new GridLayout(4, 2));
@@ -589,11 +589,16 @@ public class UserInterface extends JFrame implements ActionListener {
         popLabel.setForeground(Color.WHITE);
         popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
+        popPanel.setBackground(Color.BLACK);
 
         popPanel.setLayout(new GridLayout(2, 2));
         Button create = new Button("Create Game");
+        create.setForeground(Color.WHITE);
+        create.setBackground(Color.BLACK);
         create.addActionListener(this);
         Button join = new Button("Join Game");
+        join.setForeground(Color.WHITE);
+        join.setBackground(Color.BLACK);
         join.addActionListener(this);
         PopupFactory pf = new PopupFactory();
         // create a panel
@@ -614,6 +619,8 @@ public class UserInterface extends JFrame implements ActionListener {
         popLabel.setForeground(Color.WHITE);
         popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
+        popPanel.setForeground(Color.WHITE);
+        popPanel.setBackground(Color.BLACK);
 
         popPanel.setLayout(new GridLayout(3, 1));
 
@@ -624,6 +631,8 @@ public class UserInterface extends JFrame implements ActionListener {
         PopupFactory pf = new PopupFactory();
         // create a panel
         uuidField.setColumns(42);
+        uuidField.setForeground(Color.WHITE);
+        uuidField.setBackground(Color.BLACK);
         popPanel.add(popLabel);
         popPanel.add(uuidField);
         popPanel.add(join);
@@ -670,6 +679,8 @@ public class UserInterface extends JFrame implements ActionListener {
         popLabel.setForeground(Color.WHITE);
         popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
+        popPanel.setForeground(Color.WHITE);
+        popPanel.setBackground(Color.BLACK);
 
         popPanel.setLayout(new GridLayout(3, 1));
 
@@ -688,8 +699,7 @@ public class UserInterface extends JFrame implements ActionListener {
         popPanel.add(join);
 
         // create a popup
-
- p = pf.getPopup(this, popPanel, 400, 250);
+        p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -724,6 +734,8 @@ public class UserInterface extends JFrame implements ActionListener {
         popLabel.setForeground(Color.WHITE);
         popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
+        popPanel.setForeground(Color.WHITE);
+        popPanel.setBackground(Color.BLACK);
         PopupFactory pf = new PopupFactory();
         // create a panel
         popPanel.setLayout(new GridLayout(3, 1));
@@ -734,7 +746,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
         // create a popup
 
- p = pf.getPopup(this, popPanel, 400, 250);
+        p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -779,6 +791,8 @@ public class UserInterface extends JFrame implements ActionListener {
         popLabel.setForeground(Color.WHITE);
         popLabel.setBackground(Color.BLACK);
         JPanel popPanel = new JPanel();
+        popPanel.setForeground(Color.WHITE);
+        popPanel.setBackground(Color.BLACK);
         PopupFactory pf = new PopupFactory();
         // create a panel
         popPanel.setLayout(new GridLayout(3, 1));
@@ -789,7 +803,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
         // create a popup
 
- p = pf.getPopup(this, popPanel, 400, 250);
+        p = pf.getPopup(this, popPanel, 400, 250);
         p.show();
     }
 
@@ -1004,6 +1018,8 @@ public class UserInterface extends JFrame implements ActionListener {
                 if(playerHand.contains(cardsSuggested.get("location").toString())){choices.add(cardsSuggested.get("location").toString());}
 
                 JPanel popPanel = new JPanel();
+                popPanel.setForeground(Color.WHITE);
+                popPanel.setBackground(Color.BLACK);
                 PopupFactory pf = new PopupFactory();
                 Button option;
                 // create a panel
@@ -1016,6 +1032,8 @@ public class UserInterface extends JFrame implements ActionListener {
                     String[] choicesArray = new String[choices.size()];
                     choicesArray = choices.toArray(choicesArray);
                     inputBox = new JComboBox<String>(choicesArray);
+                    inputBox.setForeground(Color.WHITE);
+                    inputBox.setBackground(Color.BLACK);
                     inputBox.add(popLabel);
                     inputBox.add(popLabelTwo);
 
@@ -1032,7 +1050,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
                 option.setForeground(Color.WHITE);
                 option.setBackground(Color.BLACK);
-         p = pf.getPopup(this, popPanel, 400, 250);
+                p = pf.getPopup(this, popPanel, 400, 250);
                 p.show();
                 justContradicted = true;
             }
@@ -1045,6 +1063,8 @@ public class UserInterface extends JFrame implements ActionListener {
             popLabel.setForeground(Color.WHITE);
             popLabel.setBackground(Color.BLACK);
             JPanel popPanel = new JPanel();
+            popPanel.setForeground(Color.WHITE);
+            popPanel.setBackground(Color.BLACK);
             PopupFactory pf = new PopupFactory();
             // create a panel
             popPanel.setLayout(new GridLayout(3, 1));
@@ -1055,7 +1075,7 @@ public class UserInterface extends JFrame implements ActionListener {
 
             // create a popup
 
-     p = pf.getPopup(this, popPanel, 400, 250);
+            p = pf.getPopup(this, popPanel, 400, 250);
             p.show();
 
             String playerWhoContradicted = "";
@@ -1142,10 +1162,12 @@ public class UserInterface extends JFrame implements ActionListener {
             popLabel.setForeground(Color.WHITE);
             popLabel.setBackground(Color.BLACK);
             JPanel popPanel = new JPanel();
+            popPanel.setForeground(Color.WHITE);
+            popPanel.setBackground(Color.BLACK);
             PopupFactory pf = new PopupFactory();
             JPanel headers = new JPanel();
-            popLabel.setForeground(Color.WHITE);
-            popLabel.setBackground(Color.BLACK);
+            headers.setForeground(Color.WHITE);
+            headers.setBackground(Color.BLACK);
             headers.setLayout(new GridLayout(1, 3));
             JLabel weapon = new JLabel("Location:");
             weapon.setForeground(Color.WHITE);
@@ -1160,9 +1182,18 @@ public class UserInterface extends JFrame implements ActionListener {
             headers.add(location);
             headers.add(suspect);
             JPanel options = new JPanel();
+            options.setForeground(Color.WHITE);
+            options.setBackground(Color.BLACK);
             options.setLayout(new GridLayout(1, 3));
+            guessBoxWeapons.setForeground(Color.WHITE);
+            guessBoxWeapons.setBackground(Color.BLACK);
             options.add(guessBoxWeapons);
-            options.add( new JLabel(playerList.get(whoseTurn).getPlayerLocation()));
+            JLabel locationlbl = new JLabel(playerList.get(whoseTurn).getPlayerLocation());
+            locationlbl.setForeground(Color.WHITE);
+            locationlbl.setBackground(Color.BLACK);
+            options.add(locationlbl );
+            guessBoxSuspects.setForeground(Color.WHITE);
+            guessBoxSuspects.setBackground(Color.BLACK);
             options.add(guessBoxSuspects);
 
             JButton inputSuggestion = new JButton("Submit Suggestion");
@@ -1178,7 +1209,7 @@ public class UserInterface extends JFrame implements ActionListener {
             popPanel.add(options);
             popPanel.add(inputSuggestion);
 
-     p = pf.getPopup(this, popPanel, 400, 250);
+            p = pf.getPopup(this, popPanel, 400, 250);
             p.show();
             makeAccusationBtn.setEnabled(false);
             makeSuggestionBtn.setEnabled(false);
@@ -1235,20 +1266,46 @@ public class UserInterface extends JFrame implements ActionListener {
 
 
             JLabel popLabel = new JLabel("Please select options for your suggestion.");
+            popLabel.setForeground(Color.WHITE);
+            popLabel.setBackground(Color.BLACK);
             JPanel popPanel = new JPanel();
+            popPanel.setForeground(Color.WHITE);
+            popPanel.setBackground(Color.BLACK);
             PopupFactory pf = new PopupFactory();
             JPanel headers = new JPanel();
+            headers.setForeground(Color.WHITE);
+            headers.setBackground(Color.BLACK);
+
+            JLabel weaponsLable = new JLabel("Weapon: ");
+            weaponsLable.setForeground(Color.WHITE);
+            weaponsLable.setBackground(Color.BLACK);
+            JLabel locationLable = new JLabel("Location: ");
+            locationLable.setForeground(Color.WHITE);
+            locationLable.setBackground(Color.BLACK);
+            JLabel suspectLable = new JLabel("Suspect: ");
+            suspectLable.setForeground(Color.WHITE);
+            suspectLable.setBackground(Color.BLACK);
+
+
             headers.setLayout(new GridLayout(1, 3));
-            headers.add(new JLabel("Weapon:"));
-            headers.add(new JLabel("Location:"));
-            headers.add(new JLabel("Suspect:"));
+            headers.add(weaponsLable);
+            headers.add(locationLable);
+            headers.add(suspectLable);
             JPanel options = new JPanel();
+            options.setForeground(Color.WHITE);
+            options.setBackground(Color.BLACK);
             options.setLayout(new GridLayout(1, 3));
+            guessBoxWeapons.setForeground(Color.WHITE);
+            guessBoxWeapons.setBackground(Color.BLACK);
             options.add(guessBoxWeapons);
             options.add( new JLabel(playerList.get(whoseTurn).getPlayerLocation()));
+            guessBoxSuspects.setForeground(Color.WHITE);
+            guessBoxSuspects.setBackground(Color.BLACK);
             options.add(guessBoxSuspects);
 
             JButton inputSuggestion = new JButton("Submit Accusation");
+            inputSuggestion.setForeground(Color.WHITE);
+            inputSuggestion.setBackground(Color.BLACK);
             inputSuggestion.addActionListener(this);
 
             // create a panel

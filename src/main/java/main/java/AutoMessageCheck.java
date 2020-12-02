@@ -22,7 +22,7 @@ public class AutoMessageCheck {
     public static Timer gOPLTimer;
     public static Timer turnUpdateTimer;
 
-    private UserInterface ui;
+    private Game ui;
     private String gameUUID;
 
     /**
@@ -31,7 +31,7 @@ public class AutoMessageCheck {
      * Does not return but initializes all data members and schedules thread
      *      for querying database
      **/
-    public AutoMessageCheck(UserInterface ui){
+    public AutoMessageCheck(Game ui){
         this.ui = ui;
     }
 
@@ -127,9 +127,9 @@ class GameOver_PlayerLostTask extends TimerTask {
     private String playerName;
     private String stopThreads;
     private volatile StringBuilder gOPLResponse;
-    private UserInterface ui;
+    private Game ui;
 
-    public GameOver_PlayerLostTask(String gameID, String pName, UserInterface ui) {
+    public GameOver_PlayerLostTask(String gameID, String pName, Game ui) {
         // Constructor for subclass
         this.ui = ui;
         stopThreads = " ";
@@ -174,9 +174,9 @@ class LocationUpdateTask extends TimerTask {
     private String playerName;
     private String stopThreads;
     private volatile StringBuilder locationUpdateResponse;
-    private UserInterface ui;
+    private Game ui;
 
-    public LocationUpdateTask(String gameID, String pName, UserInterface ui) {
+    public LocationUpdateTask(String gameID, String pName, Game ui) {
         // Constructor for subclass
         this.ui = ui;
         stopThreads = " ";
@@ -225,9 +225,9 @@ class ContradictTask extends TimerTask {
     private String playerName;
     private String stopThreads;
     private volatile StringBuilder contradictResponse;
-    private UserInterface ui;
+    private Game ui;
 
-    public ContradictTask(String gameID, String pName, UserInterface ui) {
+    public ContradictTask(String gameID, String pName, Game ui) {
         // Constructor for subclass
         this.ui = ui;
         stopThreads = " ";
@@ -269,9 +269,9 @@ class SuggestionTask extends TimerTask {
     private String playerName;
     private String stopThreads;
     private volatile StringBuilder suggestionResponse;
-    private UserInterface ui;
+    private Game ui;
 
-    public SuggestionTask(String gameID, String pName, UserInterface ui) {
+    public SuggestionTask(String gameID, String pName, Game ui) {
         // Constructor for subclass
         this.ui = ui;
         this.gameID = gameID;
@@ -313,9 +313,9 @@ class SuggestionTask extends TimerTask {
 class StartGameTask extends TimerTask {
     private String gameID;
     private volatile StringBuilder startGameResponse;
-    private UserInterface ui;
+    private Game ui;
 
-    public StartGameTask(String gameID, UserInterface ui) {
+    public StartGameTask(String gameID, Game ui) {
         this.ui = ui;
         this.gameID = gameID;
         startGameResponse = null;
@@ -363,9 +363,9 @@ class TurnUpdateTask extends TimerTask {
     private String playerName;
     private String stopThreads;
     private volatile StringBuilder suggestionResponse;
-    private UserInterface ui;
+    private Game ui;
     private String currentlyTurn = " ";
-    public TurnUpdateTask(String gameID, String pName, UserInterface ui) {
+    public TurnUpdateTask(String gameID, String pName, Game ui) {
         // Constructor for subclass
         this.ui = ui;
         this.gameID = gameID;

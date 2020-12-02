@@ -2,18 +2,8 @@ package main.java;
 
 //import javafx.util.Pair;
 
-import org.json.simple.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 
 public class Main {
@@ -35,7 +25,7 @@ public class Main {
 
     // main will run be the application run by a player
     public static void main(String[] args) throws IOException, InterruptedException {
-        UserInterface newGame = new UserInterface();
+        Game newGame = new Game();
 
     }
 }
