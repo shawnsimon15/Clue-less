@@ -262,13 +262,16 @@ public class Game extends JFrame implements ActionListener {
         //GAME PANNEL SETUP
         boardPanel.setLayout(new GridLayout(5, 5));
         //Rooms
-        studyPanel.setLayout(new GridLayout(4, 2));
+        studyPanel.setLayout(new GridLayout(5, 2));
         studyPanel.setBackground(Color.LIGHT_GRAY);
         studyPanel.add(new JLabel("Study"));
         for(JPanel panel: studytList){
             panel.setBackground(playerToColor.get("defaultRoom"));
             studyPanel.add(panel);
         }
+        studyPanel.add(new JLabel("Passage to"));
+        studyPanel.add(new JLabel());
+        studyPanel.add(new JLabel("Kitchen"));
 
         hallPanel.setLayout(new GridLayout(4, 2));
         hallPanel.setBackground(Color.LIGHT_GRAY);
@@ -278,13 +281,16 @@ public class Game extends JFrame implements ActionListener {
             hallPanel.add(panel);
         }
 
-        loungePanel.setLayout(new GridLayout(4, 2));
+        loungePanel.setLayout(new GridLayout(5, 2));
         loungePanel.setBackground(Color.LIGHT_GRAY);
         loungePanel.add(new JLabel("Lounge"));
         for(JPanel panel: loungeList){
             panel.setBackground(playerToColor.get("defaultRoom"));
             loungePanel.add(panel);
         }
+        loungePanel.add(new JLabel("Passage to"));
+        loungePanel.add(new JLabel());
+        loungePanel.add(new JLabel("Conservatory"));
 
         libraryPanel.setLayout(new GridLayout(4, 2));
         libraryPanel.setBackground(Color.LIGHT_GRAY);
@@ -310,13 +316,16 @@ public class Game extends JFrame implements ActionListener {
             diningRoomPanel.add(panel);
         }
 
-        conseratoryPanel.setLayout(new GridLayout(4, 2));
+        conseratoryPanel.setLayout(new GridLayout(5, 2));
         conseratoryPanel.setBackground(Color.LIGHT_GRAY);
         conseratoryPanel.add(new JLabel("Conseratory"));
         for(JPanel panel: conseratoryList){
             panel.setBackground(playerToColor.get("defaultRoom"));
             conseratoryPanel.add(panel);
         }
+        conseratoryPanel.add(new JLabel("Passage to"));
+        conseratoryPanel.add(new JLabel());
+        conseratoryPanel.add(new JLabel("Lounge"));
 
         ballRoomPanel.setLayout(new GridLayout(4, 2));
         ballRoomPanel.setBackground(Color.LIGHT_GRAY);
@@ -326,14 +335,16 @@ public class Game extends JFrame implements ActionListener {
             ballRoomPanel.add(panel);
         }
 
-        kitchenPanel.setLayout(new GridLayout(4, 2));
+        kitchenPanel.setLayout(new GridLayout(5, 2));
         kitchenPanel.setBackground(Color.LIGHT_GRAY);
         kitchenPanel.add(new JLabel("Kitchen"));
         for(JPanel panel: kitchenList){
             panel.setBackground(playerToColor.get("defaultRoom"));
             kitchenPanel.add(panel);
         }
-
+        kitchenPanel.add(new JLabel("Passage to"));
+        kitchenPanel.add(new JLabel(""));
+        kitchenPanel.add(new JLabel("Study"));
         //Halls
 
         hallwayLSSubPanel.setBackground(Color.LIGHT_GRAY);
@@ -1423,7 +1434,7 @@ public class Game extends JFrame implements ActionListener {
             }
         }
 
-        if(!newLocation.equals("nomove") || newLocation.equals("failmove")){
+        if(!newLocation.equals("nomove") || !newLocation.equals("failmove")){
 
             moveUp.setEnabled(false);
             moveDown.setEnabled(false);

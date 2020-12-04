@@ -36,7 +36,7 @@ public class ClueLessConstants {
     public static ArrayList<String> hallwayDRBR  = new ArrayList(Arrays.asList("nomove", "Dining Room", "nomove", "Billiard Room", "nomove"));
     public static ArrayList<String> hallwayDRK  = new ArrayList(Arrays.asList("Dining Room", "nomove", "Kitchen", "nomove"));
     public static ArrayList<String> hallwayKB  = new ArrayList(Arrays.asList("nomove", "Kitchen", "Ballroom", "nomove", "nomove"));
-    public static ArrayList<String> hallwayBBR  = new ArrayList(Arrays.asList("Billiard Room", "nomove", "Ballroom",  "nomove", "nomove"));
+    public static ArrayList<String> hallwayBBR  = new ArrayList(Arrays.asList("Billiard Room", "nomove", "nomove", "Ballroom", "nomove"));
     public static ArrayList<String> professorPlumStart  = new ArrayList(Arrays.asList("nomove", "Hallway:LS", "nomove", "nomove", "nomove"));
     public static ArrayList<String> colonelMustardStart  = new ArrayList(Arrays.asList("nomove", "nomove", "nomove", "Hallway:LDR", "nomove"));
     public static ArrayList<String> mrsPeacockStart  = new ArrayList(Arrays.asList("nomove", "Hallway:CL", "nomove", "nomove", "nomove"));
