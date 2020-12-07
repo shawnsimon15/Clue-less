@@ -119,16 +119,18 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                     // Create msg in db for each player
                     for (String plyr : listOfPlayers) {
-                        String susMsgID = "makeSus_" + plyr + gameID;
-                        String susMsg = "SuggestionMade: " + suspect +
-                                ", " + weapon + ", " + location;
+                        if (!plyr.equals(playerWhoSuggested)) {
+                            String susMsgID = "makeSus_" + plyr + gameID;
+                            String susMsg = "SuggestionMade: " + suspect +
+                                    ", " + weapon + ", " + location;
 
-                        dynamoDb.getTable(DYNAMODB_MESSAGES)
-                                .putItem(new PutItemSpec().withItem(new Item()
-                                        .withString("UUID", susMsgID)
-                                        .withString("GameID", gameID)
-                                        .withString("Player Name", playerWhoSuggested)
-                                        .withString("Message", susMsg)));
+                            dynamoDb.getTable(DYNAMODB_MESSAGES)
+                                    .putItem(new PutItemSpec().withItem(new Item()
+                                            .withString("UUID", susMsgID)
+                                            .withString("GameID", gameID)
+                                            .withString("Player Name", playerWhoSuggested)
+                                            .withString("Message", susMsg)));
+                        }
                     }
                     break;
                 case "PassSuggestion":
@@ -137,15 +139,17 @@ public class ClueLessHandler implements RequestStreamHandler {
 
                     // Create msg in db for each player
                     for (String plyr : listOfPlayers) {
-                        String passMsgID = "passSus_" + plyr + gameID;
-                        String passMsg = "PassSuggestion: " + nextPlayer;
+                        if (!plyr.equals(playerName)) {
+                            String passMsgID = "passSus_" + plyr + gameID;
+                            String passMsg = "PassSuggestion: " + nextPlayer;
 
-                        dynamoDb.getTable(DYNAMODB_MESSAGES)
-                                .putItem(new PutItemSpec().withItem(new Item()
-                                        .withString("UUID", passMsgID)
-                                        .withString("GameID", gameID)
-                                        .withString("Player Name", playerName)
-                                        .withString("Message", passMsg)));
+                            dynamoDb.getTable(DYNAMODB_MESSAGES)
+                                    .putItem(new PutItemSpec().withItem(new Item()
+                                            .withString("UUID", passMsgID)
+                                            .withString("GameID", gameID)
+                                            .withString("Player Name", playerName)
+                                            .withString("Message", passMsg)));
+                        }
                     }
                     break;
                 case "EndTurn":
@@ -190,13 +194,15 @@ public class ClueLessHandler implements RequestStreamHandler {
                     String disMsg = "DisproveSuggestion: " + playerWhoDisprove + " revealed " + card;
 
                     for (String plyr : listOfPlayers) {
-                        String disMsgID = "disproveSus_" + plyr + gameID;
-                        dynamoDb.getTable(DYNAMODB_MESSAGES)
-                                .putItem(new PutItemSpec().withItem(new Item()
-                                        .withString("UUID", disMsgID)
-                                        .withString("GameID", gameID)
-                                        .withString("Player Name", playerWhoDisprove)
-                                        .withString("Message", disMsg)));
+                        if (!plyr.equals(playerWhoDisprove)) {
+                            String disMsgID = "disproveSus_" + plyr + gameID;
+                            dynamoDb.getTable(DYNAMODB_MESSAGES)
+                                    .putItem(new PutItemSpec().withItem(new Item()
+                                            .withString("UUID", disMsgID)
+                                            .withString("GameID", gameID)
+                                            .withString("Player Name", playerWhoDisprove)
+                                            .withString("Message", disMsg)));
+                        }
                     }
                     break;
                 case "JoinGame":

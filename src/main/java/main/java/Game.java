@@ -64,7 +64,7 @@ public class Game extends JFrame implements ActionListener {
     int whoseTurn = 0;
     boolean movedPlayer = false;
     boolean playerMadeSuggestion = false;
-    boolean justContradicted = false;
+    //boolean justContradicted = false;
 
 
     JButton moveUp;
@@ -961,7 +961,7 @@ public class Game extends JFrame implements ActionListener {
             locationUpdateResponse = locationUpdateJSON.get("messageType").toString();
         }
 
-
+        System.out.println("SEEING WHOSE TURN: " + newTurnName);
         if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
                 newTurnName.equals(playerName)) {
 
@@ -982,34 +982,40 @@ public class Game extends JFrame implements ActionListener {
             }
 
             // Delete the suggestion msgs in db after everyone has contradicted
-            if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion ||
-                    justContradicted) {
-                if (playerMadeSuggestion || justContradicted) {
-                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                            playerName, "makeSus_");
-                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                            playerName, "passSus_");
-                    ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                            playerName, "disproveSus_");
-                    playerMadeSuggestion = false;
-                    justContradicted = false;
-                }
-                else{
-                    p.hide();
-                    for(JButton button: controlButtons) {
-                        button.setEnabled(true);
+            /*if (contradictResponse.equals("disproveMade") ||
+                    contradictResponse.equals("passMade") ||
+                    !suggestionResponse.equals("suggestionMade") ||
+                    playerMadeSuggestion || justContradicted) {*/
+            System.out.println("Response: " + suggestionResponse);
+            System.out.println("playerMadeSuggestion: " + playerMadeSuggestion);
+            if (!suggestionResponse.equals("suggestionMade") ||
+                    contradictResponse.equals("disproveMade") ||
+                    playerMadeSuggestion) {
 
-                    }
-                    String outputString = "Your turn has begun.";
-                    JTextArea text = new JTextArea(outputString);
-                    JOptionPane.showMessageDialog(null,text);
-
+                // TODO: if a disprove has been made, then we should let the player know it has happened
+                if (contradictResponse.equals("disproveMade")) {
+                    // TODO: print out msg saying suggestion has been made by someone and someone contradicted
                 }
+                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                        playerName, "makeSus_");
+                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                        playerName, "passSus_");
+                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                        playerName, "disproveSus_");
+                playerMadeSuggestion = false;
+                //justContradicted = false;
+
+                p.hide();
+                for(JButton button: controlButtons) {
+                    button.setEnabled(true);
+                }
+                String outputString = "Your turn has begun.";
+                JTextArea text = new JTextArea(outputString);
+                JOptionPane.showMessageDialog(null,text);
 
             } else {
                 // suggestion has been made, so player needs to act accordingly
                 // need to get a response from each player, then delete sus msgs in db
-
                 String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
                 JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
                 JLabel popLabel = new JLabel(playerWhoSuggested + " has made the following suggestion:");
@@ -1022,11 +1028,17 @@ public class Game extends JFrame implements ActionListener {
 
 
                 ArrayList<String> choices = new ArrayList();
-                if(playerHand.contains(cardsSuggested.get("suspect").toString())){choices.add(cardsSuggested.get("suspect").toString());}
+                if (playerHand.contains(cardsSuggested.get("suspect").toString())) {
+                    choices.add(cardsSuggested.get("suspect").toString());
+                }
 
-                if(playerHand.contains(cardsSuggested.get("weapon").toString())){choices.add(cardsSuggested.get("weapon").toString());}
+                if (playerHand.contains(cardsSuggested.get("weapon").toString())) {
+                    choices.add(cardsSuggested.get("weapon").toString());
+                }
 
-                if(playerHand.contains(cardsSuggested.get("location").toString())){choices.add(cardsSuggested.get("location").toString());}
+                if (playerHand.contains(cardsSuggested.get("location").toString())) {
+                    choices.add(cardsSuggested.get("location").toString());
+                }
 
                 JPanel popPanel = new JPanel();
                 popPanel.setForeground(Color.WHITE);
@@ -1039,7 +1051,7 @@ public class Game extends JFrame implements ActionListener {
 
                 popPanel.add(popLabel);
                 popPanel.add(popLabelTwo);
-                if(!choices.isEmpty()){
+                if (!choices.isEmpty()) {
                     String[] choicesArray = new String[choices.size()];
                     choicesArray = choices.toArray(choicesArray);
                     inputBox = new JComboBox<String>(choicesArray);
@@ -1052,8 +1064,7 @@ public class Game extends JFrame implements ActionListener {
                     option.addActionListener(this);
                     popPanel.add(option);
                     popPanel.add(inputBox);
-                }
-                else{
+                } else {
                     option = new Button("Pass Suggestion");
                     option.addActionListener(this);
                     popPanel.add(option);
@@ -1063,7 +1074,13 @@ public class Game extends JFrame implements ActionListener {
                 option.setBackground(Color.BLACK);
                 p = pf.getPopup(this, popPanel, 400, 250);
                 p.show();
-                justContradicted = true;
+                //justContradicted = true;
+                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                        playerName, "makeSus_");
+                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                        playerName, "passSus_");
+                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                        playerName, "disproveSus_");
             }
 
         } else {
