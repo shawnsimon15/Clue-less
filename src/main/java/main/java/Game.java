@@ -362,18 +362,22 @@ public class Game {
                         }
 
                         // Delete the suggestion msgs in db after everyone has contradicted
-                        if (!suggestionResponse.equals("suggestionMade") || playerMadeSuggestion ||
-                                justContradicted) {
-                            if (playerMadeSuggestion || justContradicted) {
-                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                        playerName, "makeSus_");
-                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                        playerName, "passSus_");
-                                ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                                        playerName, "disproveSus_");
-                                playerMadeSuggestion = false;
-                                justContradicted = false;
-                            }
+                        System.out.println("Response: " + suggestionResponse);
+                        System.out.println("playerMadeSuggestion: " + playerMadeSuggestion);
+
+                        if (!suggestionResponse.equals("suggestionMade") ||
+                                contradictResponse.equals("disproveMade") ||
+                                playerMadeSuggestion)
+                        {
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "makeSus_");
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "passSus_");
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "disproveSus_");
+                            playerMadeSuggestion = false;
+                            //justContradicted = false;
+
                             Scanner input = new Scanner(System.in);
 
                             String currentLocation = playerList.get(whoseTurn).getPlayerLocation();
@@ -488,6 +492,7 @@ public class Game {
                         } else {
                             // suggestion has been made, so player needs to act accordingly
                             // need to get a response from each player, then delete sus msgs in db
+
                             String playerWhoSuggested = suggestionJSON.get("playerWhoSuggested").toString();
                             System.out.println(playerWhoSuggested + " has made the following suggestion: ");
                             JSONObject cardsSuggested = (JSONObject) suggestionJSON.get("cardsSuggested");
@@ -519,7 +524,13 @@ public class Game {
                                             playerList.get(currentPlayer).getPlayerName());
                                     break;
                             }
-                            justContradicted = true;
+                            //justContradicted = true;
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "makeSus_");
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "passSus_");
+                            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                    playerName, "disproveSus_");
                         }
 
                         // Send endTurn msg to signal player is done
