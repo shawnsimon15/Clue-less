@@ -26,7 +26,7 @@ public class ClueLessConstants {
     public static ArrayList<String> ballRoom  = new ArrayList(Arrays.asList("Hallway:BBR", "Hallway:KB",  "nomove", "Hallway:CB", "nomove"));
     public static ArrayList<String> kitchen  = new ArrayList(Arrays.asList("Hallway:DRK", "nomove", "nomove", "Hallway:KB", "Study" ));
     public static ArrayList<String> hallwayLS  = new ArrayList(Arrays.asList("Study", "nomove", "Library", "nomove", "nomove"));
-    public static ArrayList<String> hallwayCB  = new ArrayList(Arrays.asList("Conservatory", "Ballroom", "nomove", "nomove"));
+    public static ArrayList<String> hallwayCB  = new ArrayList(Arrays.asList("nomove", "Ballroom", "nomove", "Conservatory", "nomove"));
     public static ArrayList<String> hallwayCL  = new ArrayList(Arrays.asList("Library", "nomove", "Conservatory",  "nomove", "nomove"));
     public static ArrayList<String> hallwayLBR  = new ArrayList(Arrays.asList("nomove",  "Billiard Room", "nomove", "Library", "nomove"));
     public static ArrayList<String> hallwaySH  = new ArrayList(Arrays.asList("nomove", "Hall", "nomove", "Study", "nomove"));
@@ -35,8 +35,8 @@ public class ClueLessConstants {
     public static ArrayList<String> hallwayLDR  = new ArrayList(Arrays.asList("Lounge", "nomove", "Dining Room", "nomove", "nomove"));
     public static ArrayList<String> hallwayDRBR  = new ArrayList(Arrays.asList("nomove", "Dining Room", "nomove", "Billiard Room", "nomove"));
     public static ArrayList<String> hallwayDRK  = new ArrayList(Arrays.asList("Dining Room", "nomove", "Kitchen", "nomove"));
-    public static ArrayList<String> hallwayKB  = new ArrayList(Arrays.asList("nomove", "Kitchen", "Ballroom", "nomove", "nomove"));
-    public static ArrayList<String> hallwayBBR  = new ArrayList(Arrays.asList("Billiard Room", "nomove", "nomove", "Ballroom", "nomove"));
+    public static ArrayList<String> hallwayKB  = new ArrayList(Arrays.asList("nomove", "Kitchen", "nomove", "Ballroom", "nomove"));
+    public static ArrayList<String> hallwayBBR  = new ArrayList(Arrays.asList("Billiard Room", "nomove", "Ballroom", "nomove",  "nomove"));
     public static ArrayList<String> professorPlumStart  = new ArrayList(Arrays.asList("nomove", "Hallway:LS", "nomove", "nomove", "nomove"));
     public static ArrayList<String> colonelMustardStart  = new ArrayList(Arrays.asList("nomove", "nomove", "nomove", "Hallway:LDR", "nomove"));
     public static ArrayList<String> mrsPeacockStart  = new ArrayList(Arrays.asList("nomove", "Hallway:CL", "nomove", "nomove", "nomove"));

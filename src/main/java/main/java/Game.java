@@ -241,6 +241,15 @@ public class Game extends JFrame implements ActionListener {
         put(SUSPECT_LIST.get(5), "ProfessorPlumStart");
     }};
 
+    private JLabel cardOne = new JLabel();
+    private JLabel cardTwo = new JLabel();
+    private JLabel cardThree = new JLabel();
+    private JLabel cardFour = new JLabel();
+    private JLabel cardFive = new JLabel();
+    private JLabel cardSix = new JLabel();
+    private ArrayList<JLabel> cardLables = new ArrayList(Arrays.asList(cardOne, cardTwo,
+            cardThree, cardFour, cardFive, cardSix));
+
     public Game() {
 
         gameActions = new GameActions();
@@ -581,6 +590,9 @@ public class Game extends JFrame implements ActionListener {
         cardsPanel.setLayout(new GridLayout(8, 1));
         cardsPanel.add(gameUUIDLable);
         cardsPanel.add(new JLabel("Card Hand"));
+        for(JLabel cardLable: cardLables){
+            cardsPanel.add(cardLable);
+        }
         infoPanel.add(playersPanel);
         infoPanel.add(cardsPanel);
         // final set up and display of the  game board
@@ -974,8 +986,8 @@ public class Game extends JFrame implements ActionListener {
                                 "assignCards");
                 JSONObject cardAssignJSON = new JSONObject(cardAssignGET.toString());
                 ArrayList<String> cards = getPlayerCards(cardAssignJSON); // TODO: change function o getListFromJSON
-                for(String card: cards){
-                    cardsPanel.add(new JLabel(card));
+                for(int counter = 0; counter < cards.size(); counter++){
+                    cardLables.get(counter).setText(cards.get(counter));
                 }
                 playerHand.addAll(cards);
                 playerList.get(whoseTurn).setPlayerHand(cards);
@@ -1434,7 +1446,7 @@ public class Game extends JFrame implements ActionListener {
             }
         }
 
-        if(!newLocation.equals("nomove") || !newLocation.equals("failmove")){
+        if(!newLocation.equals("nomove") && !newLocation.equals("failmove")){
 
             moveUp.setEnabled(false);
             moveDown.setEnabled(false);
