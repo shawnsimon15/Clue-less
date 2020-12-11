@@ -1,8 +1,10 @@
 package main.java;
 
 import org.json.JSONObject;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -894,12 +896,12 @@ public class Game extends JFrame implements ActionListener {
     }
 
 
-    public void gameOver(String message){
-        JSONObject gOPLJSON = new JSONObject(message);
+    public void gameOver(String winner){
+        //JSONObject gOPLJSON = new JSONObject(message);
 
-        String winner = "The game is over! The winner is: " + gOPLJSON.get("Winner").toString();
+        String winningString = "The game is over! The winner is: " + winner;
 
-        JTextArea text = new JTextArea(winner);
+        JTextArea text = new JTextArea(winningString);
         JOptionPane.showMessageDialog(null,text);
 
         autoMessageCheck.setStopThreads(); // End the game
@@ -907,14 +909,16 @@ public class Game extends JFrame implements ActionListener {
     }
 
 
-    public void playerEliminated(String message) throws IOException {
+    public void playerEliminated(String loser) throws IOException {
 
-        JSONObject gOPLJSON = new JSONObject(message);
-
-
-        String loser = gOPLJSON.get("Loser").toString();
         // take them out of the lineup
         int playerListSize = playerList.size();
+
+        if ((playerListSize - 1) == 1) {
+            // No one left in game
+            // TODO: print out "NO ONE LEFT, you won!
+            System.exit(0);
+        }
 
         for (int i = 0; i < playerListSize; ++i) {
             if(playerList.get(i).getPlayerName().equals(loser)){
@@ -924,6 +928,8 @@ public class Game extends JFrame implements ActionListener {
         }
         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                 playerName, "playerLost_");
+
+        System.out.println("HE GONE" + playerList.size());
     }
 
 
@@ -948,6 +954,7 @@ public class Game extends JFrame implements ActionListener {
         StringBuilder suggestionThreadResponse = autoMessageCheck.getSuggestionResponse();
         StringBuilder contradictThreadResponse = autoMessageCheck.getContradictResponse();
         StringBuilder locationUpdateThreadResponse = autoMessageCheck.getLocationUpdateResponse();
+        StringBuilder gOPLThreadResponse = autoMessageCheck.getGOPLResponse();
 
         // Check if a suggestion was made
         String suggestionResponse = " ";
@@ -973,7 +980,8 @@ public class Game extends JFrame implements ActionListener {
             locationUpdateResponse = locationUpdateJSON.get("messageType").toString();
         }
 
-        System.out.println("SEEING WHOSE TURN: " + newTurnName);
+
+        System.out.println("YOUR whoseTurn: " + whoseTurn);
         if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
                 newTurnName.equals(playerName)) {
 
@@ -994,26 +1002,21 @@ public class Game extends JFrame implements ActionListener {
             }
 
             // Delete the suggestion msgs in db after everyone has contradicted
-            /*if (contradictResponse.equals("disproveMade") ||
-                    contradictResponse.equals("passMade") ||
-                    !suggestionResponse.equals("suggestionMade") ||
-                    playerMadeSuggestion || justContradicted) {*/
-            System.out.println("Response: " + suggestionResponse);
-            System.out.println("playerMadeSuggestion: " + playerMadeSuggestion);
             if (!suggestionResponse.equals("suggestionMade") ||
-                    contradictResponse.equals("disproveMade") ||
-                    playerMadeSuggestion) {
+                    contradictResponse.equals("disproveMade")) {
 
-                // TODO: if a disprove has been made, then we should let the player know it has happened
+                /* TODO: if a disprove has been made, then we should let the player know it has happened
                 if (contradictResponse.equals("disproveMade")) {
                     // TODO: print out msg saying suggestion has been made by someone and someone contradicted
-                }
+                }*/
+
                 ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                         playerName, "makeSus_");
                 ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                         playerName, "passSus_");
                 ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                         playerName, "disproveSus_");
+
                 playerMadeSuggestion = false;
                 //justContradicted = false;
 
@@ -1149,6 +1152,8 @@ public class Game extends JFrame implements ActionListener {
                         playerWhoContradicted = contradictJSON.get("playerWhoDisproved").toString();
                         String cardRevealed = contradictJSON.get("cardRevealed").toString();
                         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                playerName, "disproveSus_");
+                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                                 playerWhoContradicted, "disproveSus_");
 
                         ArrayList<PlayerStatus> gameStatusList
@@ -1165,6 +1170,8 @@ public class Game extends JFrame implements ActionListener {
                     } else if (contradictResponse.equals("passMade")) {
                         playerWhoContradicted = contradictJSON.get("playerWhoPassed").toString();
                         String nextPlayer = contradictJSON.get("nextPlayer").toString();
+                        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                                playerName, "passSus_");
                         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                                 playerWhoContradicted, "passSus_");
                         if (i == 0) {
@@ -1391,7 +1398,7 @@ public class Game extends JFrame implements ActionListener {
             movedPlayer = false;
             // send msg to db ending player's turn
             ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                    playerName, "anything");
+                    playerName, "anything"); // TODO: SHAWN DON'T FORGET TO CHECK THIS
             System.exit(0);
 
         }

@@ -12,7 +12,7 @@ public class AutoMessageCheck {
     private LocationUpdateTask locationUpdateTask;
     private SuggestionTask suggestionTask;
     private ContradictTask contradictTask;
-    private GameOver_PlayerLostTask gOPLTask;
+    private GOPLTask gOPLTask;
     private TurnUpdateTask turnUpdateTask;
 
     public static Timer startGameTimer;
@@ -44,9 +44,7 @@ public class AutoMessageCheck {
 
     public void suggestionAutoMessageCheck(String gameUUId, String pName) {
         gameUUID = gameUUId;
-        suggestionTask = new SuggestionTask(gameUUID, pName, ui); // when someone makes a suggestion,
-                                                              // everyone needs to be alerted and game
-        // shifts to a state where player either disproves or passes
+        suggestionTask = new SuggestionTask(gameUUID, pName, ui);
         suggestionTimer = new Timer();
         // delay start of thread for 10 seconds and then query every 2 seconds
         suggestionTimer.schedule(suggestionTask, 10000, 2000);
@@ -54,9 +52,7 @@ public class AutoMessageCheck {
 
     public void contradictAutoMessageCheck(String gameUUId, String pName) {
         gameUUID = gameUUId;
-        contradictTask = new ContradictTask(gameUUID, pName, ui); // when someone makes a suggestion,
-        // everyone needs to be alerted and game
-        // shifts to a state where player either disproves or passes
+        contradictTask = new ContradictTask(gameUUID, pName, ui);
         contradictTimer = new Timer();
         // delay start of thread for 10 seconds and then query every 2 seconds
         contradictTimer.schedule(contradictTask, 10000, 2000);
@@ -73,16 +69,14 @@ public class AutoMessageCheck {
 
     public void gOPLAutoMessageCheck(String gameUUId, String pName) {
         gameUUID = gameUUId;
-        gOPLTask = new GameOver_PlayerLostTask(gameUUID, pName, ui); // when someone makes a suggestion,
-        // Keep track of where players are
+        gOPLTask = new GOPLTask(gameUUID, pName, ui);
         gOPLTimer = new Timer();
-        // delay start of thread for 1 second and then query every 2 seconds
+        // delay start of thread for 1 seconds and then query every 2 seconds
         gOPLTimer.schedule(gOPLTask, 1000, 2000);
     }
 
 
     public void startTurnCheck(String gameUUID, String pName) {
-
         turnUpdateTask = new TurnUpdateTask(gameUUID, pName,ui);
         turnUpdateTimer = new Timer();
         turnUpdateTimer.schedule(turnUpdateTask, 1000, 5000); // Run every 5 minutes (300000)
@@ -122,14 +116,14 @@ public class AutoMessageCheck {
     }
 }
 
-class GameOver_PlayerLostTask extends TimerTask {
+class GOPLTask extends TimerTask {
     private String gameID;
     private String playerName;
     private String stopThreads;
     private volatile StringBuilder gOPLResponse;
     private Game ui;
 
-    public GameOver_PlayerLostTask(String gameID, String pName, Game ui) {
+    public GOPLTask(String gameID, String pName, Game ui) {
         // Constructor for subclass
         this.ui = ui;
         stopThreads = " ";
@@ -149,11 +143,15 @@ class GameOver_PlayerLostTask extends TimerTask {
         try {
             if(!stopThreads.equals("stop")) {
                 gOPLResponse = ClueLessUtils.makeGet(gameID, playerName, "gOPL");
-                if (gOPLResponse.equals("gameOver")) {
-                    ui.gameOver(gOPLResponse.toString());
-                } else if (gOPLResponse.equals("playerLost")) {
-                    ui.playerEliminated(gOPLResponse.toString());
+                JSONObject gOPLJSON = new JSONObject(gOPLResponse.toString());
+                String messageType = gOPLJSON.get("messageType").toString();
+
+                if (messageType.equals("gameOver")) {
+                    ui.gameOver(gOPLJSON.get("Winner").toString());
+                } else if (messageType.equals("playerLost")) {
+                    ui.playerEliminated(gOPLJSON.get("Loser").toString());
                 }
+            } else {
                 AutoMessageCheck.gOPLTimer.cancel();
                 AutoMessageCheck.gOPLTimer.purge();
             }
