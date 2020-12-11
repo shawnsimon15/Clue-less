@@ -1,10 +1,8 @@
 package main.java;
 
 import org.json.JSONObject;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -329,7 +327,7 @@ public class Game extends JFrame implements ActionListener {
 
         conseratoryPanel.setLayout(new GridLayout(5, 2));
         conseratoryPanel.setBackground(Color.LIGHT_GRAY);
-        conseratoryPanel.add(new JLabel("Conseratory"));
+        conseratoryPanel.add(new JLabel("Conservatory"));
         for(JPanel panel: conseratoryList){
             panel.setBackground(playerToColor.get("defaultRoom"));
             conseratoryPanel.add(panel);
@@ -340,7 +338,7 @@ public class Game extends JFrame implements ActionListener {
 
         ballRoomPanel.setLayout(new GridLayout(4, 2));
         ballRoomPanel.setBackground(Color.LIGHT_GRAY);
-        ballRoomPanel.add(new JLabel("Ball Room"));
+        ballRoomPanel.add(new JLabel("Ballroom"));
         for(JPanel panel: ballRoomList){
             panel.setBackground(playerToColor.get("defaultRoom"));
             ballRoomPanel.add(panel);
@@ -541,7 +539,7 @@ public class Game extends JFrame implements ActionListener {
         locationsPanel.add(new JCheckBox("Hall"));
         locationsPanel.add(new JCheckBox("Library"));
         locationsPanel.add(new JCheckBox("Dining Room"));
-        locationsPanel.add(new JCheckBox("Ball-room"));
+        locationsPanel.add(new JCheckBox("Ballroom"));
         notesPanel.setLayout(new GridLayout(1, 4));
         notesPanel.add(notesField);
         notesPanel.add(weaponsPanel);
@@ -591,7 +589,7 @@ public class Game extends JFrame implements ActionListener {
 
         cardsPanel.setLayout(new GridLayout(8, 1));
         cardsPanel.add(gameUUIDLable);
-        cardsPanel.add(new JLabel("Card Hand"));
+        cardsPanel.add(new JLabel("Cards in Hand"));
         for(JLabel cardLable: cardLables){
             cardsPanel.add(cardLable);
         }
@@ -898,38 +896,47 @@ public class Game extends JFrame implements ActionListener {
 
     public void gameOver(String winner){
         //JSONObject gOPLJSON = new JSONObject(message);
+        if(winner != playerName) {
 
-        String winningString = "The game is over! The winner is: " + winner;
+            String winningString = "The game is over! The winner is: " + winner;
 
-        JTextArea text = new JTextArea(winningString);
-        JOptionPane.showMessageDialog(null,text);
+            JTextArea text = new JTextArea(winningString);
+            JOptionPane.showMessageDialog(null, text);
 
-        autoMessageCheck.setStopThreads(); // End the game
-        System.exit(0);
+            autoMessageCheck.setStopThreads(); // End the game
+            System.exit(0);
+        }
     }
 
 
     public void playerEliminated(String loser) throws IOException {
 
-        // take them out of the lineup
-        int playerListSize = playerList.size();
+        if(loser != playerName) {
+            // take them out of the lineup
+            int playerListSize = playerList.size();
 
-        if ((playerListSize - 1) == 1) {
-            // No one left in game
-            // TODO: print out "NO ONE LEFT, you won!
-            System.exit(0);
-        }
-
-        for (int i = 0; i < playerListSize; ++i) {
-            if(playerList.get(i).getPlayerName().equals(loser)){
-                playerList.remove(i);
-                break;
+            if ((playerListSize - 1) == 1) {
+                // No one left in game
+                String outputString = "You are the last player, you WIN!.";
+                JTextArea text = new JTextArea(outputString);
+                JOptionPane.showMessageDialog(null, text);
+                System.exit(0);
             }
-        }
-        ClueLessUtils.deleteItem(gameActions.getGameUUID(),
-                playerName, "playerLost_");
 
-        System.out.println("HE GONE" + playerList.size());
+            String outputString = loser + " has made an incorrect accustation and is eliminated.";
+            JTextArea text = new JTextArea(outputString);
+            JOptionPane.showMessageDialog(null, text);
+            for (int i = 0; i < playerListSize; ++i) {
+                if (playerList.get(i).getPlayerName().equals(loser)) {
+                    playerList.remove(i);
+                    break;
+                }
+            }
+            ClueLessUtils.deleteItem(gameActions.getGameUUID(),
+                    playerName, "playerLost_");
+            whoseTurn--;
+        }
+
     }
 
 
@@ -980,8 +987,6 @@ public class Game extends JFrame implements ActionListener {
             locationUpdateResponse = locationUpdateJSON.get("messageType").toString();
         }
 
-
-        System.out.println("YOUR whoseTurn: " + whoseTurn);
         if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
                 newTurnName.equals(playerName)) {
 
@@ -1006,9 +1011,15 @@ public class Game extends JFrame implements ActionListener {
                     contradictResponse.equals("disproveMade")) {
 
                 /* TODO: if a disprove has been made, then we should let the player know it has happened
+
                 if (contradictResponse.equals("disproveMade")) {
+
+                    String outputString = playerWhoContradicted + " passed suggestion!";
+                    JTextArea text = new JTextArea(outputString);
+                    JOptionPane.showMessageDialog(null,text);
                     // TODO: print out msg saying suggestion has been made by someone and someone contradicted
-                }*/
+                }
+                */
 
                 ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                         playerName, "makeSus_");
@@ -1399,6 +1410,7 @@ public class Game extends JFrame implements ActionListener {
             // send msg to db ending player's turn
             ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                     playerName, "anything"); // TODO: SHAWN DON'T FORGET TO CHECK THIS
+            Thread.sleep(1000);
             System.exit(0);
 
         }
@@ -1496,6 +1508,7 @@ public class Game extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        System.out.println(e.getActionCommand());
         if(e.getActionCommand().toLowerCase().contains("move")){
             try {
                 movePlayer(e.getActionCommand().toLowerCase());
@@ -1545,6 +1558,11 @@ public class Game extends JFrame implements ActionListener {
                     }
                     movedPlayer = false;
                     // send msg to db ending player's turn
+                    System.out.println("YOU ARE HERE");
+                    System.out.println("Player name " + playerName);
+                    System.out.println("UUID " + gameActions.getGameUUID());
+                    System.out.println("Next " + playerList.get(whoseTurn).getPlayerName());
+                    System.out.println("YOU ARE HERE");
                     gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -1554,15 +1572,25 @@ public class Game extends JFrame implements ActionListener {
             case "pass suggestion":
                 p.hide();
 
-                int currentPlayer = whoseTurn;
-                if (currentPlayer == (playerList.size() - 1)) {
-                    currentPlayer = 0;
-                } else {
-                    currentPlayer++;
-                }
                 try {
+                    System.out.println("YOU ARE HEREPREE");
+                    System.out.println("Next Name" + playerList.get(whoseTurn).getPlayerName());
+                    System.out.println("Next " + whoseTurn);
+                    System.out.println("YOU ARE HEREPREE");
+                    if (whoseTurn == (playerList.size() - 1)) {
+                        whoseTurn = 0;
+                    } else {
+                        whoseTurn++;
+                    }
+                    movedPlayer = false;
+
+                    System.out.println("YOU ARE HERE");
+                    System.out.println("Player name " + playerName);
+                    System.out.println("Next Name" + playerList.get(whoseTurn).getPlayerName());
+                    System.out.println("Next " + whoseTurn);
+                    System.out.println("YOU ARE HERE");
                     ClueLessUtils.passSuggestionPost(gameActions.getGameUUID(), playerName,
-                            playerList.get(currentPlayer).getPlayerName());
+                            playerList.get(whoseTurn).getPlayerName());
                     gameActions.endTurn(playerName, playerList.get(whoseTurn).getPlayerName());
 
                 } catch (IOException ioException) {
