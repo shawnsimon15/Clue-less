@@ -1,10 +1,8 @@
 package main.java;
 
 import org.json.JSONObject;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -66,6 +64,7 @@ public class Game extends JFrame implements ActionListener {
     int whoseTurn = 0;
     boolean movedPlayer = false;
     boolean playerMadeSuggestion = false;
+    int passCounter = 0;
     //boolean justContradicted = false;
 
 
@@ -928,8 +927,6 @@ public class Game extends JFrame implements ActionListener {
         }
         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
                 playerName, "playerLost_");
-
-        System.out.println("HE GONE" + playerList.size());
     }
 
 
@@ -981,7 +978,6 @@ public class Game extends JFrame implements ActionListener {
         }
 
 
-        System.out.println("YOUR whoseTurn: " + whoseTurn);
         if (playerList.get(whoseTurn).getPlayerName().equals(playerName) &&
                 newTurnName.equals(playerName)) {
 
@@ -1002,8 +998,9 @@ public class Game extends JFrame implements ActionListener {
             }
 
             // Delete the suggestion msgs in db after everyone has contradicted
-            if (!suggestionResponse.equals("suggestionMade") ||
-                    contradictResponse.equals("disproveMade")) {
+            if ((!suggestionResponse.equals("suggestionMade") ||
+                    contradictResponse.equals("disproveMade")) &&
+                    passCounter != playerList.size() - 1) {
 
                 /* TODO: if a disprove has been made, then we should let the player know it has happened
                 if (contradictResponse.equals("disproveMade")) {
@@ -1025,6 +1022,24 @@ public class Game extends JFrame implements ActionListener {
                     button.setEnabled(true);
                 }
                 String outputString = "Your turn has begun.";
+                JTextArea text = new JTextArea(outputString);
+                JOptionPane.showMessageDialog(null,text);
+
+            } else if (passCounter == playerList.size() - 1) {
+                // You have made a suggestion but everyone passed, so your turn is over
+                passCounter = 0;
+                playerMadeSuggestion = false;
+
+                moveUp.setEnabled(false);
+                moveDown.setEnabled(false);
+                moveLeft.setEnabled(false);
+                moveRight.setEnabled(false);
+                MovePassage.setEnabled(false);
+                makeSuggestionBtn.setEnabled(false);
+                makeAccusationBtn.setEnabled(false);
+                endTurnBtn.setEnabled(true);
+
+                String outputString = "All players passed your suggestion.";
                 JTextArea text = new JTextArea(outputString);
                 JOptionPane.showMessageDialog(null,text);
 
@@ -1127,6 +1142,7 @@ public class Game extends JFrame implements ActionListener {
 
             boolean alreadyDeleted = false;
             int i = 0;
+
             while (waitingForPlayerToFinish.equals(newTurnName)) {
                 String lastPlayer = waitingForPlayerToFinish;
                 StringBuilder turnUpdateGET = ClueLessUtils.makeGet(gameActions.getGameUUID(),
@@ -1168,6 +1184,8 @@ public class Game extends JFrame implements ActionListener {
                         }
 
                     } else if (contradictResponse.equals("passMade")) {
+                        passCounter++;
+
                         playerWhoContradicted = contradictJSON.get("playerWhoPassed").toString();
                         String nextPlayer = contradictJSON.get("nextPlayer").toString();
                         ClueLessUtils.deleteItem(gameActions.getGameUUID(),
@@ -1363,7 +1381,7 @@ public class Game extends JFrame implements ActionListener {
             popPanel.add(options);
             popPanel.add(inputSuggestion);
 
-     p = pf.getPopup(this, popPanel, 400, 250);
+            p = pf.getPopup(this, popPanel, 400, 250);
             p.show();
 
         } else {
@@ -1462,7 +1480,7 @@ public class Game extends JFrame implements ActionListener {
         if(newLocation.toLowerCase().contains("hallway")){
             for(PlayerStatus player: playerList){
                 if(player.getPlayerLocation().toLowerCase().matches(newLocation.toLowerCase())){
-                    String outputString = "Two players can not enter the same hallway\nPlease select anouther move.";
+                    String outputString = "Two players can not enter the same hallway\nPlease select another move.";
                     JTextArea text = new JTextArea(outputString);
                     JOptionPane.showMessageDialog(null,text);
                     newLocation ="failmove";
